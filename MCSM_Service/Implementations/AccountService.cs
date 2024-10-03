@@ -195,7 +195,7 @@ namespace MCSM_Service.Implementations
                 var url = await _cloudStorageService.Upload(id, image.ContentType, image.OpenReadStream());
 
                 account.Profile.Avatar = url;
-                account.UpdateAt = DateTime.Now;
+                account.UpdateAt = DateTime.UtcNow.AddHours(7);
 
                 _accountRepository.Update(account);
             }
