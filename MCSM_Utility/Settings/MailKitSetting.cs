@@ -2,6 +2,8 @@
 {
     public class MailKitSetting
     {
+        public string SendUrl { get; set; } = null!;
+
         public string NameApp { get; set; } = null!;
         public string EMailAddress { get; set; } = null!;
         public bool UseSSL { get; set; }

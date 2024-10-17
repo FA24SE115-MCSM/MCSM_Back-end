@@ -20,8 +20,4 @@
     <ProjectReference Include="..\MCSM_Utility\MCSM_Utility.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\Requests\Filters\" />
-  </ItemGroup>
-
 </Project>

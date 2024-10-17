@@ -1,5 +1,7 @@
 ﻿using MCSM_API.Configurations.Middleware;
 using MCSM_Data.Models.Internal;
+using MCSM_Data.Models.Requests.Filters;
+using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Requests.Put;
 using MCSM_Data.Models.Views;
@@ -25,12 +27,12 @@ namespace MCSM_API.Controllers
 
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<AccountViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ListViewModel<AccountViewModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get all accounts.")]
-        public async Task<ActionResult<List<AccountViewModel>>> GetAccounts()
+        public async Task<ActionResult<ListViewModel<AccountViewModel>>> GetAccounts([FromQuery] AccountFilterModel filter, [FromQuery] PaginationRequestModel pagination)
         {
-            return await _accountService.GetAccounts();
+            return await _accountService.GetAccounts(filter, pagination);
         }
 
         [HttpGet]
@@ -82,7 +84,7 @@ namespace MCSM_API.Controllers
 
         [HttpPut]
         [Route("avatar")]
-        [Authorize(AccountRole.Admin, AccountRole.Monks, AccountRole.Practitioners)]
+        [Authorize(AccountRole.Admin, AccountRole.Monk, AccountRole.Nun, AccountRole.Practitioner)]
         [ProducesResponseType(typeof(AccountViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Upload avatar for account.")]
         public async Task<ActionResult<AccountViewModel>> UploadAvatar([Required] IFormFile image)

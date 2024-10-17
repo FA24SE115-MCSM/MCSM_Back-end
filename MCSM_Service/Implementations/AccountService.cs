@@ -3,11 +3,14 @@ using AutoMapper.QueryableExtensions;
 using MCSM_Data;
 using MCSM_Data.Entities;
 using MCSM_Data.Models.Internal;
+using MCSM_Data.Models.Requests.Filters;
+using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Requests.Put;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
+using MCSM_Utility.Constants;
 using MCSM_Utility.Enums;
 using MCSM_Utility.Exceptions;
 using MCSM_Utility.Helpers;
@@ -91,12 +94,41 @@ namespace MCSM_Service.Implementations
             throw new NotFoundException("Không tìm thấy account.");
         }
 
-        public async Task<List<AccountViewModel>> GetAccounts()
+        public async Task<ListViewModel<AccountViewModel>> GetAccounts(AccountFilterModel filter, PaginationRequestModel pagination)
         {
-            return await _accountRepository.GetAll()
+
+            var query = _accountRepository.GetAll();
+
+            if (!string.IsNullOrEmpty(filter.Email))
+            {
+                query = query.Where(acc => acc.Email.Contains(filter.Email));
+            }
+
+            if (!string.IsNullOrEmpty(filter.PhoneNumber))
+            {
+                query = query.Where(acc => acc.Profile!.PhoneNumber.Contains(filter.PhoneNumber));
+            }
+
+            var totalRow = await query.AsNoTracking().CountAsync();
+            var paginatedQuery = query
+                .OrderByDescending(acc => acc.CreateAt)
+                .Skip(pagination.PageNumber * pagination.PageSize)
+                .Take(pagination.PageSize);
+            var accounts = await paginatedQuery
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
-                .OrderBy(account => account.CreateAt)
+                .AsNoTracking()
                 .ToListAsync();
+
+            return new ListViewModel<AccountViewModel>
+            {
+                Pagination = new PaginationViewModel
+                {
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRow = totalRow,
+                },
+                Data = accounts
+            };
         }
 
         public async Task<AccountViewModel> GetAccount(Guid id)
@@ -109,7 +141,7 @@ namespace MCSM_Service.Implementations
         public async Task<AccountViewModel> CreateAccount(CreateAccountModel model)
         {
             await CheckUniqueAccount(model.Email, model.PhoneNumber);
-            await CheckRole(model.RoleId);
+            var gender = await CheckRoleAndGender(model.RoleId, model.Gender);
 
 
             var accountId = Guid.NewGuid();
@@ -121,7 +153,7 @@ namespace MCSM_Service.Implementations
                 LastName = model.LastName,
                 DateOfBirth = model.DateOfBirth,
                 PhoneNumber = model.PhoneNumber,
-                Gender = model.Gender,
+                Gender = gender,
             };
             _profileRepository.Add(profile);
 
@@ -171,7 +203,7 @@ namespace MCSM_Service.Implementations
             profile.LastName = model.LastName ?? profile.LastName;
             profile.DateOfBirth = model.DateOfBirth ?? profile.DateOfBirth;
             profile.Gender = model.Gender ?? profile.Gender;
-            profile.Account.UpdateAt = DateTime.Now;
+            profile.Account.UpdateAt = DateTime.UtcNow.AddHours(7);
 
             _profileRepository.Update(profile);
 
@@ -212,14 +244,14 @@ namespace MCSM_Service.Implementations
             }
 
             var account = await _accountRepository.GetMany(c => c.VerifyToken.Equals(token))
-                .FirstOrDefaultAsync() ?? throw new BadRequestException("Không tìm thấy tài khoản với token");
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy tài khoản với token");
 
             if(account.Status != AccountStatus.Pending.ToString())
             {
                 throw new BadRequestException("Tài khoản đã được xác thực");
             }
 
-            account.UpdateAt = DateTime.Now;
+            account.UpdateAt = DateTime.UtcNow.AddHours(7);
             account.Status = AccountStatus.Active.ToString();
 
 
@@ -232,10 +264,24 @@ namespace MCSM_Service.Implementations
         }
 
         //PRIVATE METHOD
-        private async Task CheckRole(Guid roleId)
+        private async Task<string> CheckRoleAndGender(Guid roleId, string gender)
         {
             var role = await _roleRepository.GetMany(role => role.Id == roleId)
                 .FirstOrDefaultAsync() ?? throw new BadRequestException("Please re-enter roleId");
+
+            var result = gender;
+
+            if(role.Name == AccountRole.Monk)
+            {
+                result = "Nam";
+            }
+
+            if(role.Name == AccountRole.Nun)
+            {
+                result = "Nữ";
+            }
+
+            return result;
         }
 
         private async Task CheckUniqueAccount(string email, string phoneNumber)

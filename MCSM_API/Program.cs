@@ -36,7 +36,8 @@ builder.Services.AddCors(options =>
                           policy.AllowAnyHeader();
                           policy.AllowAnyMethod();
                           policy.WithOrigins(
-                              "http://127.0.0.1:5173");
+                              "http://127.0.0.1:5173",
+                              "https://hammer-asia.vercel.app");
                           policy.AllowCredentials();
                       });
 });
