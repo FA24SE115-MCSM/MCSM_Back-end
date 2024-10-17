@@ -8,6 +8,7 @@ namespace MCSM_Service.Implementations
 {
     public class SendMailService : ISendMailService
     {
+        private readonly string _sendUrl;
         private readonly string _nameApp;
         private readonly string _emailAddress;
         private readonly bool _useSSL;
@@ -16,10 +17,11 @@ namespace MCSM_Service.Implementations
         private readonly bool _useStartTls;
         private readonly string _username;
         private readonly string _password;
-        private readonly static CancellationToken ct = new CancellationToken();
+        //private readonly static CancellationToken ct = new CancellationToken();
 
         public SendMailService(IOptions<AppSetting> appSettings)
         {
+            _sendUrl = appSettings.Value.MailKit.SendUrl;
             _nameApp = appSettings.Value.MailKit.NameApp;
             _emailAddress = appSettings.Value.MailKit.EMailAddress;
             _useSSL = appSettings.Value.MailKit.UseSSL;
@@ -32,7 +34,7 @@ namespace MCSM_Service.Implementations
 
         public async Task SendVerificationEmail(string userEmail, string token)
         {
-            var verificationLink = $"https://localhost:7235/api/accounts/verification/{token}";
+            var verificationLink = $"{_sendUrl}/{token}";
 
             try
             {

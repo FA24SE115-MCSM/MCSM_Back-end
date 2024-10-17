@@ -20,8 +20,9 @@ CREATE TABLE [Role](
 GO
 
 INSERT [dbo].[Role] ([Id], [Name]) VALUES (N'2cb0985f-3d9e-4d3b-8318-2a67212e782d', N'Admin')
-INSERT [dbo].[Role] ([Id], [Name]) VALUES (N'fd396f04-d521-4300-9d16-66efe124f8f6', N'Monks')
-INSERT [dbo].[Role] ([Id], [Name]) VALUES (N'12555e1b-14b2-46c9-b49b-cf1835a17204', N'Practitioners')
+INSERT [dbo].[Role] ([Id], [Name]) VALUES (N'fd396f04-d521-4300-9d16-66efe124f8f6', N'Monk')
+INSERT [dbo].[Role] ([Id], [Name]) VALUES (N'be83d816-75ec-4dfc-8da3-3be8077aad40', N'Nun')
+INSERT [dbo].[Role] ([Id], [Name]) VALUES (N'12555e1b-14b2-46c9-b49b-cf1835a17204', N'Practitioner')
 GO
 
 

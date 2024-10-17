@@ -1,4 +1,6 @@
 ﻿using MCSM_Data.Models.Internal;
+using MCSM_Data.Models.Requests.Filters;
+using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Requests.Put;
 using MCSM_Data.Models.Views;
@@ -11,7 +13,7 @@ namespace MCSM_Service.Interfaces
         Task<AuthViewModel> Authenticated(AuthRequest auth);
         Task<AuthModel> GetAuth(Guid id);
 
-        Task<List<AccountViewModel>> GetAccounts();
+        Task<ListViewModel<AccountViewModel>> GetAccounts(AccountFilterModel filter, PaginationRequestModel pagination);
         Task<AccountViewModel> GetAccount(Guid id);
         Task<AccountViewModel> CreateAccount(CreateAccountModel model);
         Task<AccountViewModel> UpdateAccount(Guid id, UpdateAccountModel model);
