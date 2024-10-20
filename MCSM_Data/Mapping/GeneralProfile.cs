@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MCSM_Data.Entities;
+﻿using MCSM_Data.Entities;
 using MCSM_Data.Models.Views;
 
 namespace MCSM_Data.Mapping
@@ -18,6 +17,11 @@ namespace MCSM_Data.Mapping
                 .ForMember(dest => dest.DateOfBirth, otp => otp.MapFrom(account => account.Profile!.DateOfBirth))
                 .ForMember(dest => dest.Gender, otp => otp.MapFrom(account => account.Profile!.Gender))
                 .ForMember(dest => dest.Avatar, otp => otp.MapFrom(account => account.Profile!.Avatar));
+
+            CreateMap<RoomType, RoomTypeViewModel>();
+            CreateMap<Room, RoomViewModel>();
+            CreateMap<Retreat, RetreatViewModel>()
+                .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(retreat => retreat.CreatedByNavigation));
         }
     }
 }

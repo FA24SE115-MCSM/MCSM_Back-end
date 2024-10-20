@@ -1,4 +1,5 @@
-﻿﻿USE master
+
+USE master
 GO
 
 -- Drop Database
@@ -171,6 +172,13 @@ CREATE TABLE RoomType(
 );
 GO
 
+
+INSERT [dbo].[RoomType] ([Id], [Name]) VALUES (N'152eafd1-d15c-4bfc-bb44-0f8c110272fd', N'Hall')
+INSERT [dbo].[RoomType] ([Id], [Name]) VALUES (N'aa4f1943-eae6-4e0b-bf33-e4af7d2dc4fc', N'Bed room')
+INSERT [dbo].[RoomType] ([Id], [Name]) VALUES (N'da70d2aa-f2ca-4aa0-aa15-215e2fb2ed44', N'Dining room')
+GO
+
+
 --Table Room
 CREATE TABLE Room(
 	Id uniqueidentifier primary key NOT NULL,
@@ -324,4 +332,5 @@ CREATE TABLE [Like](
 	PostId uniqueidentifier unique foreign key references Post(Id) NOT NULL,
 	AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
 );
+
 GO

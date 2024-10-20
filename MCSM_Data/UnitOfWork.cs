@@ -12,6 +12,9 @@ namespace MCSM_Data
         private IRoleRepository _role = null!;
         private IAccountRepository _account = null!;
         private IProfileRepository _profile = null!;
+        private IRoomTypeRepository _roomType = null!;
+        private IRoomRepository _room = null!;
+        private IRetreatRepository _retreat = null!;
 
         public UnitOfWork(McsmDbContext context)
         {
@@ -32,6 +35,22 @@ namespace MCSM_Data
         {
             get { return _profile ??= new ProfileRepository(_context); }
         }
+
+        public IRoomTypeRepository RoomType
+        {
+            get { return _roomType ??= new RoomTypeRepository(_context); }
+        }
+
+        public IRoomRepository Room
+        {
+            get { return _room ??= new RoomRepository(_context); }
+        }
+
+        public IRetreatRepository Retreat
+        {
+            get { return _retreat ??= new RetreatRepository(_context); }
+        }
+
         public async Task<int> SaveChanges()
         {
             return await _context.SaveChangesAsync();
