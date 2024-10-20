@@ -16,7 +16,9 @@ namespace MCSM_API.Configurations
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ISendMailService, SendMailService>();
-            
+            services.AddScoped<IRoomTypeService, RoomTypeService>();
+            services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<IRetreatService, RetreatService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)

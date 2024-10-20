@@ -9,6 +9,9 @@ namespace MCSM_Data
         public IRoleRepository Role { get; }
         public IAccountRepository Account { get; }
         public IProfileRepository Profile { get; }
+        public IRoomTypeRepository RoomType { get; }
+        public IRoomRepository Room { get; }
+        public IRetreatRepository Retreat { get; }
 
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

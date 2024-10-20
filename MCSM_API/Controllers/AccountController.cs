@@ -28,7 +28,6 @@ namespace MCSM_API.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(ListViewModel<AccountViewModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get all accounts.")]
         public async Task<ActionResult<ListViewModel<AccountViewModel>>> GetAccounts([FromQuery] AccountFilterModel filter, [FromQuery] PaginationRequestModel pagination)
         {
@@ -38,6 +37,7 @@ namespace MCSM_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(AccountViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get account by id.")]
         public async Task<ActionResult<AccountViewModel>> GetAccount([FromRoute] Guid id)
         {
