@@ -1,4 +1,5 @@
-﻿﻿﻿USE master
+
+USE master
 GO
 
 -- Drop Database
@@ -121,7 +122,6 @@ CREATE TABLE Retreat(
 	EndDate date NOT NULL
 );
 GO
-
 
 --Table RetreatMonk
 CREATE TABLE RetreatMonk(
@@ -332,4 +332,5 @@ CREATE TABLE [Like](
 	PostId uniqueidentifier unique foreign key references Post(Id) NOT NULL,
 	AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
 );
+
 GO
