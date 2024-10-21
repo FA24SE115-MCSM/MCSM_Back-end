@@ -64,7 +64,7 @@ GO
 --Table DeviceToken
 CREATE TABLE DeviceToken(
 	Id uniqueidentifier primary key NOT NULL,
-	AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Token varchar(max) NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 );
@@ -80,15 +80,15 @@ GO
 --Table Allergy
 CREATE TABLE Allergy(
 	Id uniqueidentifier primary key NOT NULL,
-	IngredientId uniqueidentifier unique foreign key references Ingredient(Id) NOT NULL,
-	AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
 );
 GO
 
 --Table Notification
 CREATE TABLE [Notification](
 	Id uniqueidentifier primary key NOT NULL,
-	AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Content nvarchar(max) NOT NULL,
 	[Url] nvarchar(255),
 	[Type] nvarchar(50) NOT NULL,
@@ -100,7 +100,7 @@ GO
 --Table Article
 CREATE TABLE Article(
 	Id uniqueidentifier primary key NOT NULL,
-	CreatedBy uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Banner varchar(255) NOT NULL,
 	Content nvarchar(max) NOT NULL,
 	IsActive bit NOT NULL,
@@ -113,7 +113,7 @@ GO
 --Table Retreat
 CREATE TABLE Retreat(
 	Id uniqueidentifier primary key NOT NULL,
-	CreatedBy uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	[Name] nvarchar(100) NOT NULL,
 	Capacity int NOT NULL,
 	Duration int NOT NULL,
@@ -125,24 +125,24 @@ GO
 --Table RetreatMonk
 CREATE TABLE RetreatMonk(
 	Id uniqueidentifier primary key NOT NULL,
-	MonkId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
-	RetreatId uniqueidentifier unique foreign key references Retreat(Id) NOT NULL
+	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL
 );
 GO
 
 --Table RetreatRegistration
 CREATE TABLE RetreatRegistration(
 	Id uniqueidentifier primary key NOT NULL,
-	MonkId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
-	PractitionerId uniqueidentifier unique foreign key references Account(Id) NOT NULL
+	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	PractitionerId uniqueidentifier foreign key references Account(Id) NOT NULL
 );
 GO
 
 --Table RetreatGroup
 CREATE TABLE RetreatGroup(
 	Id uniqueidentifier primary key NOT NULL,
-	RetreatId uniqueidentifier unique foreign key references Retreat(Id) NOT NULL,
-	MonkId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
+	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Name nvarchar(50) NOT NULL
 );
 GO
@@ -150,15 +150,15 @@ GO
 --Table RetreatGroupMember
 CREATE TABLE RetreatGroupMember(
 	Id uniqueidentifier primary key NOT NULL,
-	GroupId uniqueidentifier unique foreign key references RetreatGroup(Id) NOT NULL,
-	MemberId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	GroupId uniqueidentifier foreign key references RetreatGroup(Id) NOT NULL,
+	MemberId uniqueidentifier foreign key references Account(Id) NOT NULL,
 );
 GO
 
 --Table Lesson
 CREATE TABLE Lesson(
 	Id uniqueidentifier primary key NOT NULL,
-	CreatedBy uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Content nvarchar(max) NOT NULL,
 	IsActive bit NOT NULL
 );
@@ -174,7 +174,7 @@ GO
 --Table Room
 CREATE TABLE Room(
 	Id uniqueidentifier primary key NOT NULL,
-	RoomTypeId uniqueidentifier unique foreign key references RoomType(Id) NOT NULL,
+	RoomTypeId uniqueidentifier foreign key references RoomType(Id) NOT NULL,
 	[Name] nvarchar(50) NOT NULL,
 	Capacity int NOT NULL,
 	IsActive bit NOT NULL
@@ -184,18 +184,18 @@ GO
 --Table RetreatLesson
 CREATE TABLE RetreatLesson(
 	Id uniqueidentifier primary key NOT NULL,
-	RetreatId uniqueidentifier unique foreign key references Retreat(Id) NOT NULL,
-	LessonId uniqueidentifier unique foreign key references Lesson(Id) NOT NULL
+	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
+	LessonId uniqueidentifier foreign key references Lesson(Id) NOT NULL
 );
 GO
 
 --Table RetreatSchedule
 CREATE TABLE RetreatSchedule(
 	Id uniqueidentifier primary key NOT NULL,
-	RetreatId uniqueidentifier unique foreign key references Retreat(Id) NOT NULL,
-	GroupId uniqueidentifier unique foreign key references RetreatGroup(Id) NOT NULL,
-	RetreatLessonId uniqueidentifier unique foreign key references RetreatLesson(Id),
-	UsedRoomId uniqueidentifier unique foreign key references Room(Id),
+	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
+	GroupId uniqueidentifier foreign key references RetreatGroup(Id) NOT NULL,
+	RetreatLessonId uniqueidentifier foreign key references RetreatLesson(Id),
+	UsedRoomId uniqueidentifier foreign key references Room(Id),
 	LessonDate date NOT NULL,
 	LessonStart time NOT NULL,
 	LessonEnd time NOT NULL
@@ -205,8 +205,8 @@ GO
 --Table RetreatGroupMessage
 CREATE TABLE RetreatGroupMessage(
 	Id uniqueidentifier primary key NOT NULL,
-	CreatedBy uniqueidentifier unique foreign key references Account(Id) NOT NULL,
-	GroupId uniqueidentifier unique foreign key references RetreatGroup(Id) NOT NULL,
+	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	GroupId uniqueidentifier foreign key references RetreatGroup(Id) NOT NULL,
 	ReplyTo uniqueidentifier,
 	Content nvarchar(max) NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
@@ -236,10 +236,10 @@ GO
 --Table ToolHistory
 CREATE TABLE ToolHistory(
 	Id uniqueidentifier primary key NOT NULL,
-	CreatedBy uniqueidentifier unique foreign key references Account(Id) NOT NULL,
-	RetreatId uniqueidentifier unique foreign key references Retreat(Id) NOT NULL,
-	ToolId uniqueidentifier unique foreign key references Tool(Id) NOT NULL,
-	ToolOpId uniqueidentifier unique foreign key references ToolOperation(Id) NOT NULL,
+	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
+	ToolId uniqueidentifier foreign key references Tool(Id) NOT NULL,
+	ToolOpId uniqueidentifier foreign key references ToolOperation(Id) NOT NULL,
 	NumOfTool int NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 );
@@ -255,8 +255,8 @@ GO
 --Table Dish
 CREATE TABLE Dish(
 	Id uniqueidentifier primary key NOT NULL,
-	CreatedBy uniqueidentifier unique foreign key references Account(Id) NOT NULL,
-	DishTypeId uniqueidentifier unique foreign key references DishType(Id) NOT NULL,
+	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	DishTypeId uniqueidentifier foreign key references DishType(Id) NOT NULL,
 	[Name] nvarchar(50) NOT NULL,
 	IsHalal bit NOT NULL,
 	IsActive bit NOT NULL,
@@ -268,15 +268,15 @@ GO
 --Table DishIngredient
 CREATE TABLE DishIngredient(
 	Id uniqueidentifier primary key NOT NULL,
-	DishId uniqueidentifier unique foreign key references Dish(Id) NOT NULL,
-	IngredientId uniqueidentifier unique foreign key references Ingredient(Id) NOT NULL
+	DishId uniqueidentifier foreign key references Dish(Id) NOT NULL,
+	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL
 );
 GO
 
 --Table Menu
 CREATE TABLE Menu(
 	Id uniqueidentifier primary key NOT NULL,
-	CreatedBy uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	CookDate date NOT NULL,
 	IsBreakfast bit NOT NULL,
 	IsLunch bit NOT NULL,
@@ -290,15 +290,15 @@ GO
 --Table MenuDish
 CREATE TABLE MenuDish(
 	Id uniqueidentifier primary key NOT NULL,
-	MenuId uniqueidentifier unique foreign key references Menu(Id) NOT NULL,
-	DishId uniqueidentifier unique foreign key references Dish(Id) NOT NULL
+	MenuId uniqueidentifier foreign key references Menu(Id) NOT NULL,
+	DishId uniqueidentifier foreign key references Dish(Id) NOT NULL
 );
 GO
 
 --Table Post
 CREATE TABLE Post(
 	Id uniqueidentifier primary key NOT NULL,
-	CreatedBy uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Content nvarchar(MAX),
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
@@ -309,7 +309,7 @@ GO
 --Table Comment
 CREATE TABLE Comment(
 	Id uniqueidentifier primary key NOT NULL,
-	PostId uniqueidentifier unique foreign key references Post(Id) NOT NULL,
+	PostId uniqueidentifier foreign key references Post(Id) NOT NULL,
 	ReplyTo uniqueidentifier,
 	Content nvarchar(MAX),
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
@@ -321,7 +321,7 @@ GO
 --Table Like
 CREATE TABLE [Like](
 	Id uniqueidentifier primary key NOT NULL,
-	PostId uniqueidentifier unique foreign key references Post(Id) NOT NULL,
-	AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	PostId uniqueidentifier foreign key references Post(Id) NOT NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
 );
 GO
