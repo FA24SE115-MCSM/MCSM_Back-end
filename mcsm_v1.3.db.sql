@@ -66,7 +66,7 @@ CREATE TABLE DeviceToken(
 	Id uniqueidentifier primary key NOT NULL,
 	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Token varchar(max) NOT NULL,
-	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO
 
@@ -81,7 +81,7 @@ GO
 CREATE TABLE Allergy(
 	Id uniqueidentifier primary key NOT NULL,
 	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
-	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL
 );
 GO
 
@@ -136,11 +136,12 @@ GO
 CREATE TABLE RetreatRegistration(
 	Id uniqueidentifier primary key NOT NULL,
 	CreateBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	TotalCost decimal(16,2) NOT NULL,
 	IsDeleted bit NOT NULL,
-	IsPaid bit NOT NULL,
+	IsPaid bit NOT NULL
 );
 GO
 
@@ -148,7 +149,7 @@ GO
 CREATE TABLE RetreatRegistrationParticipants(
 	Id uniqueidentifier primary key NOT NULL,
 	ParticipantId uniqueidentifier foreign key references Account(Id) NOT NULL,
-	RetreatRegId uniqueidentifier foreign key references RetreatRegistration(Id) NOT NULL,
+	RetreatRegId uniqueidentifier foreign key references RetreatRegistration(Id) NOT NULL
 );
 GO
 
@@ -175,7 +176,7 @@ GO
 CREATE TABLE RetreatGroupMember(
 	Id uniqueidentifier primary key NOT NULL,
 	GroupId uniqueidentifier foreign key references RetreatGroup(Id) NOT NULL,
-	MemberId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	MemberId uniqueidentifier foreign key references Account(Id) NOT NULL
 );
 GO
 
@@ -265,7 +266,7 @@ CREATE TABLE ToolHistory(
 	ToolId uniqueidentifier foreign key references Tool(Id) NOT NULL,
 	ToolOpId uniqueidentifier foreign key references ToolOperation(Id) NOT NULL,
 	NumOfTool int NOT NULL,
-	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO
 
