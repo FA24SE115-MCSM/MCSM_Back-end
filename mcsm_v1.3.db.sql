@@ -140,6 +140,7 @@ CREATE TABLE RetreatRegistration(
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	TotalCost decimal(16,2) NOT NULL,
+	TotalParticipants int NOT NULL,
 	IsDeleted bit NOT NULL,
 	IsPaid bit NOT NULL
 );
@@ -184,8 +185,12 @@ GO
 CREATE TABLE Lesson(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	Title nvarchar(200) NOT NULL,
 	Content nvarchar(max) NOT NULL,
-	IsActive bit NOT NULL
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	IsActive bit NOT NULL,
+	IsDeleted bit NOT NULL
 );
 GO
 
