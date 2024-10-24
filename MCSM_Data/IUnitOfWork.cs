@@ -14,7 +14,11 @@ namespace MCSM_Data
         public IRetreatRepository Retreat { get; }
         public IRetreatRegistrationRepository RetreatRegistration { get; }
         public IRetreatRegistrationParticipantRepository RetreatRegistrationParticipant { get; }
-
+        public ILessonRepository Lesson { get; }
+        public IRetreatLessonRepository RetreatLesson { get; }
+        public IRetreatMonkRepository RetreatMonk { get; }
+        public IRetreatGroupRepository RetreatGroup { get; }
+        public IRetreatGroupMemberRepository RetreatGroupMember { get; }
 
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

@@ -22,11 +22,21 @@ namespace MCSM_Data.Mapping
             CreateMap<Room, RoomViewModel>();
             CreateMap<Retreat, RetreatViewModel>()
                 .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(retreat => retreat.CreatedByNavigation));
-
             CreateMap<RetreatRegistration, RetreatRegistrationViewModel>();
             CreateMap<RetreatRegistrationParticipant, RetreatRegistrationParticipantViewModel>();
-
             CreateMap<Profile, ProfileViewModel>();
+            CreateMap<Lesson, LessonViewModel>()
+                .ForMember(dest => dest.CreatorId, otp => otp.MapFrom(lesson => lesson.CreatedByNavigation.Id))
+                .ForMember(dest => dest.CreatorFirstName, otp => otp.MapFrom(lesson => lesson.CreatedByNavigation.Profile.FirstName))
+                .ForMember(dest => dest.CreatorLastName, otp => otp.MapFrom(lesson => lesson.CreatedByNavigation.Profile.LastName));
+            CreateMap<RetreatLesson, RetreatLessonViewModel>()
+                .ForMember(dest => dest.LessonTitle, otp => otp.MapFrom(retreatLesson => retreatLesson.Lesson.Title))
+                .ForMember(dest => dest.AuthorId, otp => otp.MapFrom(retreatLesson => retreatLesson.Lesson.CreatedByNavigation.Id))
+                .ForMember(dest => dest.AuthorFirstName, otp => otp.MapFrom(retreatLesson => retreatLesson.Lesson.CreatedByNavigation.Profile!.FirstName))
+                .ForMember(dest => dest.AuthorLastName, otp => otp.MapFrom(retreatLesson => retreatLesson.Lesson.CreatedByNavigation.Profile!.LastName));
+            CreateMap<RetreatMonk, RetreatMonkViewModel>()
+                .ForMember(dest => dest.MonkFirstName, otp => otp.MapFrom(retreatMonk => retreatMonk.Monk.Profile!.FirstName))
+                .ForMember(dest => dest.MonkLastName, otp => otp.MapFrom(retreatMonk => retreatMonk.Monk.Profile!.LastName));
         }
     }
 }

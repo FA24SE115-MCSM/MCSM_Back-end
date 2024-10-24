@@ -17,6 +17,11 @@ namespace MCSM_Data
         private IRetreatRepository _retreat = null!;
         private IRetreatRegistrationRepository _retreatRegistration = null!;
         private IRetreatRegistrationParticipantRepository _retreatRegistrationParticipant = null!;
+        private ILessonRepository _lesson = null!;
+        private IRetreatLessonRepository _retreatLesson = null!;
+        private IRetreatMonkRepository _retreatMonk = null!;
+        private IRetreatGroupRepository _retreatGroup = null!;
+        private IRetreatGroupMemberRepository _retreatGroupMember = null!;
 
         public UnitOfWork(McsmDbContext context)
         {
@@ -61,6 +66,31 @@ namespace MCSM_Data
         public IRetreatRegistrationParticipantRepository RetreatRegistrationParticipant
         {
             get { return _retreatRegistrationParticipant ??= new RetreatRegistrationParticipantRepository(_context); }
+        }
+			
+        public ILessonRepository Lesson
+        {
+            get { return _lesson ??= new LessonRepository(_context); }
+        }
+
+        public IRetreatLessonRepository RetreatLesson
+        {
+            get { return _retreatLesson ??= new RetreatLessonRepository(_context); }
+        }
+
+        public IRetreatMonkRepository RetreatMonk
+        {
+            get { return _retreatMonk ??= new RetreatMonkRepository(_context); }
+        }
+
+        public IRetreatGroupRepository RetreatGroup
+        {
+            get { return _retreatGroup ??= new RetreatGroupRepository(_context); }
+        }
+
+        public IRetreatGroupMemberRepository RetreatGroupMember
+        {
+            get { return _retreatGroupMember ??= new RetreatGroupMemberRepository(_context); }
         }
 
         public async Task<int> SaveChanges()
