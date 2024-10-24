@@ -13,7 +13,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace MCSM_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/retreat-registration")]
     [ApiController]
     public class RetreatRegistrationController : ControllerBase
     {

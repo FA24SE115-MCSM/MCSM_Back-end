@@ -19,6 +19,13 @@ namespace MCSM_API.Configurations
             services.AddScoped<IRoomTypeService, RoomTypeService>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IRetreatService, RetreatService>();
+            services.AddScoped<ILessonService, LessonService>();
+            services.AddScoped<IRetreatLessonService, RetreatLessonService>();
+            services.AddScoped<IRetreatMonkService, RetreatMonkService>();
+            services.AddScoped<IRetreatRegistrationService, RetreatRegistrationService>();
+            services.AddScoped<IRetreatRegistrationParticipantService, RetreatRegistrationParticipantService>();
+            services.AddScoped<IRetreatRegistrationParticipantService, RetreatRegistrationParticipantService>();
+            services.AddScoped<IRetreatRegistrationService, RetreatRegistrationService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)

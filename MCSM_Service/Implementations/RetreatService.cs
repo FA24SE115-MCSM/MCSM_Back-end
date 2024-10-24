@@ -77,7 +77,8 @@ namespace MCSM_Service.Implementations
                 Capacity = model.Capacity,
                 Duration = model.Duration,
                 StartDate = model.StartDate,
-                EndDate = endDate
+                EndDate = endDate,
+                Status = "Inactive"
             };
             _retreatRepository.Add(retreat);
 
