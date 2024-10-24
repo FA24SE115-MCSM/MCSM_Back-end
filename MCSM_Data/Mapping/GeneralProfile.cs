@@ -24,7 +24,6 @@ namespace MCSM_Data.Mapping
                 .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(retreat => retreat.CreatedByNavigation));
             CreateMap<RetreatRegistration, RetreatRegistrationViewModel>();
             CreateMap<RetreatRegistrationParticipant, RetreatRegistrationParticipantViewModel>();
-            CreateMap<Profile, ProfileViewModel>();
             CreateMap<Lesson, LessonViewModel>()
                 .ForMember(dest => dest.CreatorId, otp => otp.MapFrom(lesson => lesson.CreatedByNavigation.Id))
                 .ForMember(dest => dest.CreatorFirstName, otp => otp.MapFrom(lesson => lesson.CreatedByNavigation.Profile.FirstName))
