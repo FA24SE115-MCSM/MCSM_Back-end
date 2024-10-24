@@ -22,6 +22,11 @@ namespace MCSM_Data.Mapping
             CreateMap<Room, RoomViewModel>();
             CreateMap<Retreat, RetreatViewModel>()
                 .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(retreat => retreat.CreatedByNavigation));
+
+            CreateMap<RetreatRegistration, RetreatRegistrationViewModel>();
+            CreateMap<RetreatRegistrationParticipant, RetreatRegistrationParticipantViewModel>();
+
+            CreateMap<Profile, ProfileViewModel>();
         }
     }
 }

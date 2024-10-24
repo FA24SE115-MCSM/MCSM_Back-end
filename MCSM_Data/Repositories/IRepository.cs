@@ -6,6 +6,8 @@ namespace MCSM_Data.Repositories
     {
         IQueryable<T> GetAll();
 
+        T GetById(Guid id);
+
         IQueryable<T> GetMany(Expression<Func<T, bool>> predicate);
 
         IQueryable<T> SkipAndTake(int skip, int take);

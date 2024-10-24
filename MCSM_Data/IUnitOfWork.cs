@@ -12,6 +12,9 @@ namespace MCSM_Data
         public IRoomTypeRepository RoomType { get; }
         public IRoomRepository Room { get; }
         public IRetreatRepository Retreat { get; }
+        public IRetreatRegistrationRepository RetreatRegistration { get; }
+        public IRetreatRegistrationParticipantRepository RetreatRegistrationParticipant { get; }
+
 
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

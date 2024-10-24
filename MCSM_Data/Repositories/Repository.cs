@@ -28,6 +28,11 @@ namespace MCSM_Data.Repositories
             return _entities;
         }
 
+        public T GetById(Guid id)
+        {
+            return _entities.Find(id);
+        }
+
         public IQueryable<T> GetMany(Expression<Func<T, bool>> predicate)
         {
             return _entities.Where(predicate);

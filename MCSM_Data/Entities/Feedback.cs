@@ -8,33 +8,34 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MCSM_Data.Entities;
 
-[Table("Article")]
-public partial class Article
+[Table("Feedback")]
+public partial class Feedback
 {
     [Key]
     public Guid Id { get; set; }
 
     public Guid CreatedBy { get; set; }
 
-    [Required]
-    [StringLength(255)]
-    [Unicode(false)]
-    public string Banner { get; set; }
+    public Guid RetreatId { get; set; }
 
     [Required]
     public string Content { get; set; }
 
-    public bool IsActive { get; set; }
-
-    public bool IsDeleted { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime UpdateAt { get; set; }
+    public int Rating { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreateAt { get; set; }
 
+    [Column(TypeName = "datetime")]
+    public DateTime UpdateAt { get; set; }
+
+    public bool IsDeleted { get; set; }
+
     [ForeignKey("CreatedBy")]
-    [InverseProperty("Articles")]
+    [InverseProperty("Feedbacks")]
     public virtual Account CreatedByNavigation { get; set; }
+
+    [ForeignKey("RetreatId")]
+    [InverseProperty("Feedbacks")]
+    public virtual Retreat Retreat { get; set; }
 }

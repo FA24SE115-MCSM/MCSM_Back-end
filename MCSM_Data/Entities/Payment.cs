@@ -8,22 +8,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MCSM_Data.Entities;
 
-[Table("DeviceToken")]
-public partial class DeviceToken
+[Table("Payment")]
+public partial class Payment
 {
     [Key]
     public Guid Id { get; set; }
 
-    public Guid AccountId { get; set; }
-
-    [Required]
-    [Unicode(false)]
-    public string Token { get; set; }
+    public Guid RetreatRegId { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreateAt { get; set; }
 
-    [ForeignKey("AccountId")]
-    [InverseProperty("DeviceTokens")]
-    public virtual Account Account { get; set; }
+    public Guid PaypalOrderId { get; set; }
+
+    [Required]
+    [StringLength(255)]
+    public string Status { get; set; }
+
+    [ForeignKey("RetreatRegId")]
+    [InverseProperty("Payments")]
+    public virtual RetreatRegistration RetreatReg { get; set; }
 }
