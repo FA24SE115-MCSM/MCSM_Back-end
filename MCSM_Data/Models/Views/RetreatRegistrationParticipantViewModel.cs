@@ -8,7 +8,7 @@ namespace MCSM_Data.Models.Views
 
         public Guid RetreatId { get; set; }
 
-        public Guid PractitionerId { get; set; }
+        public string PractitionerMail { get; set; }
 
         public virtual RetreatViewModel Retreat { get; set; } = null!;
 

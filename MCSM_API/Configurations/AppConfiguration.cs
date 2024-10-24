@@ -24,6 +24,8 @@ namespace MCSM_API.Configurations
             services.AddScoped<IRetreatMonkService, RetreatMonkService>();
             services.AddScoped<IRetreatRegistrationService, RetreatRegistrationService>();
             services.AddScoped<IRetreatRegistrationParticipantService, RetreatRegistrationParticipantService>();
+            services.AddScoped<IRetreatRegistrationParticipantService, RetreatRegistrationParticipantService>();
+            services.AddScoped<IRetreatRegistrationService, RetreatRegistrationService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)

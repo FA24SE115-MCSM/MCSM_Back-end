@@ -24,12 +24,14 @@ namespace MCSM_Service.Implementations
         private readonly IRetreatRegistrationParticipantRepository _retreatRegistrationParticipantRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IRetreatRegistrationRepository _retreatRegistrationRepository;
+        private readonly IAccountRepository _accountRepository;
 
         public RetreatRegistrationParticipantService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
             _retreatRegistrationParticipantRepository = unitOfWork.RetreatRegistrationParticipant;
             _profileRepository = unitOfWork.Profile;
             _retreatRegistrationRepository = unitOfWork.RetreatRegistration;
+            _accountRepository = unitOfWork.Account;
         }
 
         public async Task<ListViewModel<RetreatRegistrationParticipantViewModel>> GetRetreatRegistrationParticipants(RetreatRegistrationParticipantFilterModel filter,  PaginationRequestModel pagination)
@@ -105,12 +107,13 @@ namespace MCSM_Service.Implementations
 
         public async Task<RetreatRegistrationParticipantViewModel> CreateRetreatRegistrationParticipants(CreateRetreatRegistrationParticipantModel model)
         {
-            // Assume that model.ParticipantIds is a List<Guid> containing the IDs of participants to be added.
             var participantsToAdd = new List<RetreatRegistrationParticipant>();
             int addedParticipantsCount = 0;
 
-            foreach (var participantId in model.participantId)
+            foreach (var participantEmail in model.participantEmail)
             {
+                Guid participantId = _accountRepository.GetMany(a => a.Email == participantEmail).First().Id;
+
                 bool isAlreadyRegistered = await CheckAlreadyRegistered(model.retreatRegId, participantId);
 
                 if (isAlreadyRegistered)
@@ -165,5 +168,24 @@ namespace MCSM_Service.Implementations
             // If a record is found, it means the participant is already registered.
             return Task.FromResult(check != null);
         }
+
+        //public Task<bool> CheckAlreadyRegistered(Guid retreatId, string participantEmail)
+        //{
+        //    var check = _retreatRegistrationRepository.GetMany(r => r.RetreatId == retreatId)
+        //        .Join(_retreatRegistrationParticipantRepository.GetAll(),
+        //        rr => rr.Id,
+        //        rrp => rrp.RetreatRegId,
+        //        (rr, rrp) => new { rr, rrp }
+        //        )
+        //        .Join(_accountRepository.GetAll(),
+        //        combined => combined.rrp.ParticipantId,
+        //        a => a.Id,
+        //        (combined, a) => new { combined.rrp, combined.rr, a })
+        //        .Where(e => e.a.Email == participantEmail)
+        //        .AsNoTracking()
+        //        .FirstOrDefaultAsync();
+
+        //    return Task.FromResult(check != null);
+        //}
     }
 }
