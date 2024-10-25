@@ -28,7 +28,7 @@ namespace MCSM_Service.Implementations
             _settings = settings.Value;
         }
 
-        public async Task<string> Upload(Guid id, string contentType, Stream stream)
+        public async Task<string> UploadImage(Guid id, string contentType, Stream stream)
         {
             try
             {
@@ -50,8 +50,7 @@ namespace MCSM_Service.Implementations
             }
         }
 
-        // Delete an object, IsSuccess if deleted successfully or not found
-        public async Task<string> Delete(Guid id)
+        public async Task<string> DeleteImage(Guid id)
         {
             try
             {

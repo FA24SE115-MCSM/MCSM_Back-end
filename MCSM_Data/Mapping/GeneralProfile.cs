@@ -36,6 +36,8 @@ namespace MCSM_Data.Mapping
             CreateMap<RetreatMonk, RetreatMonkViewModel>()
                 .ForMember(dest => dest.MonkFirstName, otp => otp.MapFrom(retreatMonk => retreatMonk.Monk.Profile!.FirstName))
                 .ForMember(dest => dest.MonkLastName, otp => otp.MapFrom(retreatMonk => retreatMonk.Monk.Profile!.LastName));
+            CreateMap<Tool, ToolViewModel>();
+            CreateMap<ToolHistory, ToolHistoryViewModel>();
         }
     }
 }

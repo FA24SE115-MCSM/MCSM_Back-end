@@ -62,7 +62,7 @@ namespace MCSM_API.Controllers
 
         //// DELETE api/<RetreatRegistrationController>/5
         //[HttpDelete("{id}")]
-        //public void Delete(int id)
+        //public void DeleteImage(int id)
         //{
         //}
     }
