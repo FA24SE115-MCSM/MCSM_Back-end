@@ -3,19 +3,13 @@ using System.Collections.Generic;
 
 namespace MCSM_Data.Entities;
 
-public partial class Comment
+public partial class PostImage
 {
     public Guid Id { get; set; }
 
     public Guid PostId { get; set; }
 
-    public Guid? ReplyTo { get; set; }
-
-    public string? Content { get; set; }
-
-    public DateTime? UpdateAt { get; set; }
-
-    public bool IsDeleted { get; set; }
+    public string Url { get; set; } = null!;
 
     public DateTime CreateAt { get; set; }
 

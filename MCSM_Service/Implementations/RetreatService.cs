@@ -9,6 +9,7 @@ using MCSM_Data.Models.Requests.Put;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
+using MCSM_Utility.Enums;
 using MCSM_Utility.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,7 +34,10 @@ namespace MCSM_Service.Implementations
                 query = query.Where(r => r.Name.Contains(filter.Name));
             }
 
-
+            if (filter.Status.HasValue)
+            {
+                query = query.Where(r => r.Status == filter.Status.Value.ToString());
+            }
 
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
@@ -62,7 +66,7 @@ namespace MCSM_Service.Implementations
         {
             return await _retreatRepository.GetMany(r => r.Id == id)
                 .ProjectTo<RetreatViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy retreat");
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat not found");
         }
 
         public async Task<RetreatViewModel> CreateRetreat(Guid accountId, CreateRetreatModel model)
@@ -74,11 +78,12 @@ namespace MCSM_Service.Implementations
                 Id = retreatId,
                 CreatedBy = accountId,
                 Name = model.Name,
+                Cost = model.Cost,
                 Capacity = model.Capacity,
                 Duration = model.Duration,
                 StartDate = model.StartDate,
                 EndDate = endDate,
-                Status = "Inactive"
+                Status = GetRetreatStatus(model.Status),
             };
             _retreatRepository.Add(retreat);
 
@@ -87,25 +92,34 @@ namespace MCSM_Service.Implementations
             return result > 0 ? await GetRetreat(retreatId) : null!;
         }
 
+        
+
         public async Task<RetreatViewModel> UpdateRetreat(Guid id, UpdateRetreatModel model)
         {
             var existRetreat = await _retreatRepository.GetMany(r => r.Id == id)
-                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy retreat");
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat not found");
 
             existRetreat.Name = model.Name ?? existRetreat.Name;
+            existRetreat.Cost = model.Cost ?? existRetreat.Cost;
             existRetreat.Capacity = model.Capacity ?? existRetreat.Capacity;
-            existRetreat.StartDate = model.StartDate ?? existRetreat.StartDate;
+
 
             if (model.Duration.HasValue)
             {
+                existRetreat.Duration = model.Duration.Value;
                 existRetreat.EndDate = existRetreat.StartDate.AddDays(model.Duration.Value);
             }
 
             if(model.StartDate.HasValue)
             {
+                existRetreat.StartDate = model.StartDate.Value;
                 existRetreat.EndDate = GetEndDate(existRetreat.StartDate, existRetreat.Duration);
             }
-            
+
+            if (!string.IsNullOrEmpty(model.Status))
+            {
+                existRetreat.Status = GetRetreatStatus(model.Status);
+            }
 
             _retreatRepository.Update(existRetreat);
 
@@ -118,16 +132,25 @@ namespace MCSM_Service.Implementations
         {
             if (startDate < DateOnly.FromDateTime(DateTime.UtcNow.AddHours(7)))
             {
-                throw new BadRequestException($"Ngày bắt đầu ({startDate}) không được nhỏ hơn ngày hiện tại. Vui lòng nhập lại.");
+                throw new BadRequestException($"The start date ({startDate}) cannot be less than the current date. Please re-enter.");
             }
 
             if(duration <= 0)
             {
-                throw new BadRequestException($"Vui lòng nhập lại duration");
+                throw new BadRequestException($"Please re-enter duration");
             }
 
             return startDate.AddDays(duration);
         }
 
+        private string GetRetreatStatus(string status)
+        {
+            if (status != RetreatStatus.Active.ToString() && status != RetreatStatus.InActive.ToString())
+            {
+                throw new BadRequestException("Invalid status. Please provide either 'Active' or 'InActive'.");
+            }
+
+            return status;
+        }
     }
 }
