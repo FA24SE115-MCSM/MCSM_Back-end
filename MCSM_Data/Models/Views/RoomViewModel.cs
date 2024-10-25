@@ -9,6 +9,7 @@
         public int Capacity { get; set; }
 
         public bool IsActive { get; set; }
+        public DateTime CreateAt { get; set; }
 
         //public virtual RetreatSchedule? RetreatSchedule { get; set; }
 

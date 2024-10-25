@@ -41,11 +41,11 @@ namespace MCSM_Service.Implementations
 
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
+                .OrderBy(r => r.Name)
                 .Skip(pagination.PageNumber * pagination.PageSize)
                 .Take(pagination.PageSize);
 
             var retreats = await paginatedQuery
-                .OrderBy(r => r.Name)
                 .ProjectTo<RetreatViewModel>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();

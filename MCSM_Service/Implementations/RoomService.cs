@@ -40,10 +40,10 @@ namespace MCSM_Service.Implementations
 
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
+                .OrderByDescending(r => r.CreateAt)
                 .Skip(pagination.PageNumber * pagination.PageSize)
                 .Take(pagination.PageSize);
             var rooms = await paginatedQuery
-                .OrderByDescending(r => r.CreateAt)
                 .ProjectTo<RoomViewModel>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();

@@ -22,6 +22,8 @@ namespace MCSM_Data
         private IRetreatMonkRepository _retreatMonk = null!;
         private IRetreatGroupRepository _retreatGroup = null!;
         private IRetreatGroupMemberRepository _retreatGroupMember = null!;
+        private IToolRepository _tool = null!;
+        private IToolHistoryRepository _toolHistory = null!;
 
         public UnitOfWork(McsmDbContext context)
         {
@@ -93,6 +95,14 @@ namespace MCSM_Data
             get { return _retreatGroupMember ??= new RetreatGroupMemberRepository(_context); }
         }
 
+        public IToolRepository Tool
+        {
+            get { return _tool ??= new ToolRepository(_context); }
+        }
+        public IToolHistoryRepository ToolHistory
+        {
+            get { return _toolHistory ??= new ToolHistoryRepository(_context); }
+        }
         public async Task<int> SaveChanges()
         {
             return await _context.SaveChangesAsync();
