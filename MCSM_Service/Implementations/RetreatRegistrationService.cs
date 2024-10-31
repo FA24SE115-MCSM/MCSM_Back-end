@@ -23,12 +23,14 @@ namespace MCSM_Service.Implementations
         private readonly IRetreatRegistrationRepository _retreatRegistrationRepository;
         private readonly IRetreatRepository _retreatRepository;
         private readonly IProfileRepository _profileRepository;
+        private readonly IAccountRepository _accountRepository;
 
         public RetreatRegistrationService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
             _retreatRegistrationRepository = unitOfWork.RetreatRegistration;
             _retreatRepository = unitOfWork.Retreat;
             _profileRepository = unitOfWork.Profile;
+            _accountRepository = unitOfWork.Account;
         }
 
         public async Task<ListViewModel<RetreatRegistrationViewModel>> GetRetreatRegistrations(RetreatRegistrationFilterModel filter, PaginationRequestModel pagination)
@@ -94,7 +96,8 @@ namespace MCSM_Service.Implementations
             var retreatRegistration = new RetreatRegistration
             {
                 Id = retreatRegistrationId,
-                CreateBy = model.CreateBy,
+                //CreateBy = model.CreateBy,
+                CreateBy = _accountRepository.GetMany(r => r.Email.Equals(model.CreateBy)).First().Id,
                 RetreatId = _retreatRepository.GetById(model.RetreatId).Id,
                 CreateAt = DateTime.UtcNow,
                 TotalCost = model.TotalCost

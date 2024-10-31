@@ -12,7 +12,10 @@ namespace MCSM_Data.Models.Requests.Post
 {
     public class CreateRetreatRegistrationModel
     {
-        public Guid CreateBy {  get; set; }
+        //public Guid CreateBy {  get; set; }
+
+        //public Guid RetreatId { get; set; }
+        public string CreateBy { get; set; }
 
         public Guid RetreatId { get; set; }
 
