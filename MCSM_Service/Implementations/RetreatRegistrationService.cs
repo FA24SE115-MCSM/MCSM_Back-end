@@ -33,26 +33,27 @@ namespace MCSM_Service.Implementations
 
         public async Task<ListViewModel<RetreatRegistrationViewModel>> GetRetreatRegistrations(RetreatRegistrationFilterModel filter, PaginationRequestModel pagination)
         {
-            var query = _retreatRegistrationRepository.GetAll().
-                Join(_retreatRepository.GetAll(),
-                rr => rr.RetreatId,
-                r => r.Id,
-                (rr, r) => new {rr, r}
-                )
-                .Join(_profileRepository.GetAll(),
-                combined => combined.rr.RetreatId,
-                pro => pro.AccountId,
-                (combined, pro) => new {combined.rr, combined.r, pro }
-                );
+            //var query = _retreatRegistrationRepository.GetAll().
+            //    Join(_retreatRepository.GetAll(),
+            //    rr => rr.RetreatId,
+            //    r => r.Id,
+            //    (rr, r) => new {rr, r}
+            //    )
+            //    .Join(_profileRepository.GetAll(),
+            //    combined => combined.rr.RetreatId,
+            //    pro => pro.AccountId,
+            //    (combined, pro) => new {combined.rr, combined.r, pro }
+            //    );
+            var query = _retreatRegistrationRepository.GetAll();
 
-            if (!string.IsNullOrEmpty(filter.Name))
+            if (!string.IsNullOrEmpty(filter.Email))
             {
-                query = query.Where(q => (q.pro.FirstName + " " + q.pro.LastName).Contains(filter.Name));
+                query = query.Where(q => q.CreateByNavigation.Email.Contains(filter.Email));
             }
 
             if (!string.IsNullOrEmpty(filter.RetreatName))
             {
-                query = query.Where(q => q.r.Name.Contains(filter.RetreatName));
+                query = query.Where(q => q.Retreat.Name.Contains(filter.RetreatName));
             }
 
             var totalRow = await query.AsNoTracking().CountAsync();
@@ -61,7 +62,7 @@ namespace MCSM_Service.Implementations
                 .Take(pagination.PageSize);
 
             var retreats = await paginatedQuery
-                .OrderBy(q => q.r.Name)
+                .OrderBy(q => q.Retreat.Name)
                 .ProjectTo<RetreatRegistrationViewModel>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
@@ -105,7 +106,7 @@ namespace MCSM_Service.Implementations
             return result > 0 ? await GetRetreatRegistration(retreatRegistrationId) : null!;
         }
 
-        public async Task CheckCapacity (Guid retreatId)
+        public Task CheckCapacity (Guid retreatId)
         {
             var limit = _retreatRepository.GetById(retreatId).Capacity;
             var flag = _retreatRegistrationRepository.GetMany(r => r.Id == retreatId).Sum(r => r.TotalParticipants);
@@ -113,8 +114,8 @@ namespace MCSM_Service.Implementations
             {
                 throw new Exception("Đã hết chỗ đăng kí.");
             }
-        }
 
-        
+            return Task.CompletedTask;
+        }
     }
 }

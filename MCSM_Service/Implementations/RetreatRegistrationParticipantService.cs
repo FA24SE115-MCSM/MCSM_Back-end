@@ -36,28 +36,31 @@ namespace MCSM_Service.Implementations
 
         public async Task<ListViewModel<RetreatRegistrationParticipantViewModel>> GetRetreatRegistrationParticipants(RetreatRegistrationParticipantFilterModel filter,  PaginationRequestModel pagination)
         {
-            var query = _retreatRegistrationParticipantRepository.GetAll()
-                .Join(
-                _profileRepository.GetAll(),
-                rrp => rrp.ParticipantId,
-                pro => pro.AccountId,
-                (rrp, pro) => new {rrp, pro}
-                );
+            //var query = _retreatRegistrationParticipantRepository.GetAll()
+            //    .Join(
+            //    _profileRepository.GetAll(),
+            //    rrp => rrp.ParticipantId,
+            //    pro => pro.AccountId,
+            //    (rrp, pro) => new {rrp, pro}
+            //    )
+            //    .Join(_accountRepository.GetAll(),
+            //    combined => combined.pro.AccountId,
+            //    a => a.Id,
+            //    (combined, a) => new { combined.rrp, combined.pro, a });
+            var query = _retreatRegistrationParticipantRepository.GetAll().Include(r => r.Participant);
 
-            if (!string.IsNullOrEmpty(filter.Name))
+            if (!string.IsNullOrEmpty(filter.Email))
             {
-                query = query.Where(r => (r.pro.FirstName + " " + r.pro.LastName).Contains(filter.Name));
+                query = (Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<RetreatRegistrationParticipant, Account>)query.Where(r => r.Participant.Email.Contains(filter.Email));
             }
-
-
 
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
+                 .OrderBy(r => (r.Participant.Email))
                 .Skip(pagination.PageNumber * pagination.PageSize)
                 .Take(pagination.PageSize);
 
             var retreatRegistrations = await paginatedQuery
-                .OrderBy(r => (r.pro.FirstName + " " + r.pro.LastName))
                 .ProjectTo<RetreatRegistrationParticipantViewModel>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
