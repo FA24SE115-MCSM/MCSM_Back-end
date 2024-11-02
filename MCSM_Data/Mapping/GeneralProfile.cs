@@ -25,14 +25,18 @@ namespace MCSM_Data.Mapping
 
             CreateMap<RetreatRegistration, RetreatRegistrationViewModel>()
                 .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(retreatReg => retreatReg.Retreat.Name));
-                //.ForMember(dest => dest.CreateBy, otp => otp.MapFrom(retreatReg => retreatReg.CreateByNavigation))
-                //.ForMember(dest => dest.RetreatId, otp => otp.MapFrom(retreatReg => retreatReg.RetreatId))
-                //.ForMember(dest => dest.CreateAt, otp => otp.MapFrom(retreatReg => retreatReg.CreateAt))
-                //.ForMember(dest => dest.UpdateAt, otp => otp.MapFrom(retreatReg => retreatReg.UpdateAt))
-                //.ForMember(dest => dest.TotalCost, otp => otp.MapFrom(retreatReg => retreatReg.TotalCost))
-                //.ForMember(dest => dest.TotalParticipants, otp => otp.MapFrom(retreatReg => retreatReg.TotalParticipants))
-                //.ForMember(dest => dest.IsDeleted, otp => otp.MapFrom(retreatReg => retreatReg.IsDeleted))
-                //.ForMember(dest => dest.IsPaid, otp => otp.MapFrom(retreatReg => retreatReg.IsPaid));
+            CreateMap<RetreatRegistration, ActiveRetreatRegistrationViewModel>()
+                .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(activeRetreat => activeRetreat.Retreat.Name))
+                .ForMember(dest => dest.RetreatStatus, otp => otp.MapFrom(activeRetreat => activeRetreat.Retreat.Status))
+                .ForMember(dest => dest.ParticipantEmail, otp => otp.MapFrom(activeRetreat => activeRetreat.CreateByNavigation.Email));
+            //.ForMember(dest => dest.CreateBy, otp => otp.MapFrom(retreatReg => retreatReg.CreateByNavigation))
+            //.ForMember(dest => dest.RetreatId, otp => otp.MapFrom(retreatReg => retreatReg.RetreatId))
+            //.ForMember(dest => dest.CreateAt, otp => otp.MapFrom(retreatReg => retreatReg.CreateAt))
+            //.ForMember(dest => dest.UpdateAt, otp => otp.MapFrom(retreatReg => retreatReg.UpdateAt))
+            //.ForMember(dest => dest.TotalCost, otp => otp.MapFrom(retreatReg => retreatReg.TotalCost))
+            //.ForMember(dest => dest.TotalParticipants, otp => otp.MapFrom(retreatReg => retreatReg.TotalParticipants))
+            //.ForMember(dest => dest.IsDeleted, otp => otp.MapFrom(retreatReg => retreatReg.IsDeleted))
+            //.ForMember(dest => dest.IsPaid, otp => otp.MapFrom(retreatReg => retreatReg.IsPaid));
             CreateMap<RetreatRegistrationParticipant, RetreatRegistrationParticipantViewModel>()
                 .ForMember(dest => dest.RetreatRegId, otp => otp.MapFrom(retreatPar => retreatPar.RetreatReg.Id))
                 .ForMember(dest => dest.PractitionerMail, otp => otp.MapFrom(retreatPar => retreatPar.Participant.Email));

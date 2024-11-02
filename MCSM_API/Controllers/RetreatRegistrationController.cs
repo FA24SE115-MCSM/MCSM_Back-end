@@ -32,7 +32,7 @@ namespace MCSM_API.Controllers
             return await _retreatRegistrationService.GetRetreatRegistrations(filter, pagination);
         }
 
-        // GET api/<RetreatRegistrationController>/5
+        // GET api/<RetreatRegistrationController>/
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(RetreatRegistrationViewModel), StatusCodes.Status200OK)]
@@ -41,6 +41,17 @@ namespace MCSM_API.Controllers
         public async Task<ActionResult<RetreatRegistrationViewModel>> GetRetreatRegistration([FromRoute] Guid id)
         {
             return await _retreatRegistrationService.GetRetreatRegistration(id);
+        }
+
+        // GET api/<RetreatRegistrationController>/
+        [HttpGet]
+        [Route("{id}/active")]
+        [ProducesResponseType(typeof(ListViewModel<ActiveRetreatRegistrationViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Get active retreat registration for user.")]
+        public async Task<ActionResult<ListViewModel<ActiveRetreatRegistrationViewModel>>> GetActiveRetreatRegistrationForUser([FromRoute] Guid id, [FromQuery] PaginationRequestModel pagination)
+        {
+            return await _retreatRegistrationService.GetActiveRetreatRegistrationForUser(id, pagination);
         }
 
         // POST api/<RetreatRegistrationController>

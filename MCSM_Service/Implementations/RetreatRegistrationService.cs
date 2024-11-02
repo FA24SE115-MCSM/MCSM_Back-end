@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace MCSM_Service.Implementations
 {
@@ -107,6 +108,33 @@ namespace MCSM_Service.Implementations
             var result = await _unitOfWork.SaveChanges();
 
             return result > 0 ? await GetRetreatRegistration(retreatRegistrationId) : null!;
+        }
+
+        public async Task<ListViewModel<ActiveRetreatRegistrationViewModel>> GetActiveRetreatRegistrationForUser(Guid id, PaginationRequestModel pagination)
+        {
+            //var query = _retreatRegistrationRepository.GetMany(r => r.CreateByNavigation.Id == id && r.Retreat.Status == "Active").ProjectTo<ActiveRetreatRegistrationViewModel>(_mapper.ConfigurationProvider);
+            var query = _retreatRegistrationRepository.GetMany(r => r.RetreatRegistrationParticipants.Any(p => p.ParticipantId == id) && r.Retreat.Status == "Active").OrderBy(q => q.Retreat.Name);
+            var totalRow = await query.AsNoTracking().CountAsync();
+
+            var paginatedQuery = query
+                .Skip(pagination.PageNumber * pagination.PageSize)
+                .Take(pagination.PageSize);
+
+            var retreatRegistrations = await paginatedQuery
+                .ProjectTo<ActiveRetreatRegistrationViewModel>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return new ListViewModel<ActiveRetreatRegistrationViewModel>
+            {
+                Pagination = new PaginationViewModel
+                {
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRow = totalRow,
+                },
+                Data = retreatRegistrations
+            };
         }
 
         public Task CheckCapacity (Guid retreatId)
