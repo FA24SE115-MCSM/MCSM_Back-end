@@ -268,6 +268,32 @@ namespace MCSM_Service.Implementations
             }
         }
 
+        public async Task ResetPassword(ResetPasswordModel model)
+        {
+            var account = await _accountRepository.GetMany(acc => acc.Email == model.Email)
+                .Include(acc => acc.Profile)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("No account found with email");
+
+            var newPassword = PasswordGenerator.GenerateRandomPassword();
+
+            account.HashPassword = PasswordHasher.HashPassword(newPassword);
+            account.UpdateAt = DateTime.UtcNow.AddHours(7);
+
+            _accountRepository.Update(account);
+
+            string fullName = (account.Profile?.FirstName ?? string.Empty) + " " + (account.Profile?.LastName ?? string.Empty);
+
+            await _sendMailService.SendNewPasswordEmail(account.Email, fullName, newPassword);
+
+            var result = await _unitOfWork.SaveChanges();
+
+            if (result <= 0)
+            {
+                throw new Exception("Unable to authenticate account, please try again later.");
+            }
+
+        }
+
         //PRIVATE METHOD
         private async Task<string> CheckRoleAndGender(Guid roleId, string gender)
         {
