@@ -12,23 +12,30 @@ namespace MCSM_Data.Models.Views
     public class RetreatRegistrationViewModel
     {
         public Guid Id { get; set; }
-
         public Guid CreateBy { get; set; }
+        public Guid RetreatId { get; set; }
+        public string? RetreatName { get; set; }
         public DateTime CreateAt { get; set; }
         public DateTime UpdateAt { get; set; }
-
         public decimal TotalCost { get; set; }
-
+        public int TotalParticipants { get; set; }
         public bool IsDeleted { get; set; }
-
         public bool IsPaid { get; set; }
+    }
 
-        public virtual Account CreateByNavigation { get; set; }
-
-        //public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
-
-        public virtual RetreatRegistrationParticipantViewModel RetreatRegistrationParticipant { get; set; } = null!;
-
-
+    public class ActiveRetreatRegistrationViewModel
+    {
+        public Guid Id { get; set; }
+        public Guid CreateBy { get; set; }
+        public Guid RetreatId { get; set; }
+        public string? ParticipantEmail { get; set; }
+        public string? RetreatName { get; set; }
+        public string? RetreatStatus { get; set; }
+        public DateTime CreateAt { get; set; }
+        public DateTime UpdateAt { get; set; }
+        public decimal TotalCost { get; set; }
+        public int TotalParticipants { get; set; }
+        public bool IsDeleted { get; set; }
+        public bool IsPaid { get; set; }
     }
 }

@@ -9,6 +9,7 @@ using MCSM_Service.Interfaces;
 using MCSM_Utility.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 
@@ -92,6 +93,21 @@ namespace MCSM_API.Controllers
             var auth = (AuthModel?)HttpContext.Items["User"];
             var account = await _accountService.UploadAvatar(auth!.Id, image);
             return CreatedAtAction(nameof(GetAccount), new { id = account.Id }, account);
+        }
+
+        [HttpPut]
+        [Route("reset-password")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [SwaggerOperation(Summary = "Reset password.")]
+        public async Task<ActionResult<AccountViewModel>> ResetPassword([FromBody] ResetPasswordModel model)
+        {
+            await _accountService.ResetPassword(model);
+            return Ok(new
+            {
+                status = StatusCodes.Status200OK,
+                message = "Password has been reset and sent to your email!"
+            });
         }
     }
 }

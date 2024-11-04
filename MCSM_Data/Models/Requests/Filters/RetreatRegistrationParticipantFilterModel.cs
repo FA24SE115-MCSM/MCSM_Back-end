@@ -10,7 +10,7 @@ namespace MCSM_Data.Models.Requests.Filters
     public class RetreatRegistrationParticipantFilterModel
     {
         
-        public string? Name { get; set; }
+        public string? Email { get; set; }
         
     }
 }

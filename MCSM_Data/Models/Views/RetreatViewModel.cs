@@ -5,6 +5,7 @@
         public Guid Id { get; set; }
 
         public string Name { get; set; } = null!;
+        public decimal Cost { get; set; }
 
         public int Capacity { get; set; }
 
@@ -13,6 +14,7 @@
         public DateOnly StartDate { get; set; }
 
         public DateOnly EndDate { get; set; }
+        public string Status { get; set; } = null!;
 
         public virtual AccountViewModel CreatedBy { get; set; } = null!;
 

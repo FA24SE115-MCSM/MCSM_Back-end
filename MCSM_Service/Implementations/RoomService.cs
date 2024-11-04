@@ -40,6 +40,7 @@ namespace MCSM_Service.Implementations
 
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
+                .OrderByDescending(r => r.CreateAt)
                 .Skip(pagination.PageNumber * pagination.PageSize)
                 .Take(pagination.PageSize);
             var rooms = await paginatedQuery
@@ -63,7 +64,7 @@ namespace MCSM_Service.Implementations
         {
             return await _roomRepository.GetMany(r => r.Id == id)
                 .ProjectTo<RoomViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy room");
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Room not found");
         }
 
         public async Task<RoomViewModel> CreateRoom(CreateRoomModel model)
@@ -88,7 +89,7 @@ namespace MCSM_Service.Implementations
 
         public async Task<RoomViewModel> UpdateRoom(Guid id, UpdateRoomModel model)
         {
-            var existRoom = await _roomRepository.GetMany(r => r.Id == id).FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy room");
+            var existRoom = await _roomRepository.GetMany(r => r.Id == id).FirstOrDefaultAsync() ?? throw new NotFoundException("Room not found");
 
             existRoom.Name = model.Name ?? existRoom.Name;
             existRoom.Capacity = model.Capacity ?? existRoom.Capacity;
@@ -102,7 +103,7 @@ namespace MCSM_Service.Implementations
 
         private async Task CheckRoomType(Guid roomTypeId)
         {
-            var flag = await _roomTypeRepository.GetMany(r => r.Id == roomTypeId).FirstOrDefaultAsync() ?? throw new BadRequestException("Vui lòng nhập lại room type");
+            var flag = await _roomTypeRepository.GetMany(r => r.Id == roomTypeId).FirstOrDefaultAsync() ?? throw new BadRequestException("Please re-enter room type");
         }
     }
 }

@@ -14,6 +14,7 @@ namespace MCSM_Service.Interfaces
     {
         Task<ListViewModel<RetreatRegistrationParticipantViewModel>> GetRetreatRegistrationParticipants(RetreatRegistrationParticipantFilterModel filter,  PaginationRequestModel pagination);
         Task<RetreatRegistrationParticipantViewModel> GetRetreatRegistrationParticipant(Guid id);
-        Task<RetreatRegistrationParticipantViewModel> CreateRetreatRegistrationParticipants(CreateRetreatRegistrationParticipantModel model);
+        Task<ListViewModel<RetreatRegistrationParticipantViewModel>> CreateRetreatRegistrationParticipants(CreateRetreatRegistrationParticipantModel model);
+        Task<ListViewModel<RetreatRegistrationParticipantViewModel>> GetRetreatRegistratingParticipants(List<Guid> id);
     }
 }

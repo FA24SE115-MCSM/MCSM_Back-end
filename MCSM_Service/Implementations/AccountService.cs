@@ -58,7 +58,7 @@ namespace MCSM_Service.Implementations
             {
                 if (!account.Status.Equals(AccountStatus.Active.ToString()))
                 {
-                    throw new BadRequestException("Tài khoản của bạn đã bị khóa hoặc chưa kích hoạt vui lòng liên hệ admin để mở khóa.");
+                    throw new BadRequestException("Your account has been locked or not activated, please contact admin to unlock it.");
                 }
 
                 var accessToken = GenerateJwtToken(new AuthModel
@@ -74,7 +74,7 @@ namespace MCSM_Service.Implementations
                     Account = _mapper.Map<AccountViewModel>(account),
                 };
             }
-            throw new NotFoundException("Sai tài khoản hoặc mật khẩu.");
+            throw new NotFoundException("Wrong email or password.");
         }
 
         public async Task<AuthModel> GetAuth(Guid id)
@@ -91,7 +91,7 @@ namespace MCSM_Service.Implementations
                     Status = auth.Status
                 };
             }
-            throw new NotFoundException("Không tìm thấy account.");
+            throw new NotFoundException("Account not found");
         }
 
         public async Task<ListViewModel<AccountViewModel>> GetAccounts(AccountFilterModel filter, PaginationRequestModel pagination)
@@ -214,17 +214,22 @@ namespace MCSM_Service.Implementations
 
         public async Task<AccountViewModel> UploadAvatar(Guid id, IFormFile image)
         {
+            if (!image.ContentType.StartsWith("image/"))
+            {
+                throw new BadRequestException("The file is not an image. Please re-enter");
+            }
+
             var account = await _accountRepository.GetMany(account => account.Id == id).Include(account => account.Profile).FirstOrDefaultAsync();
             if (account != null)
             {
                 //xóa hình cũ trong firebase
                 if (!string.IsNullOrEmpty(account.Profile!.Avatar))
                 {
-                    await _cloudStorageService.Delete(id);
+                    await _cloudStorageService.DeleteImage(id);
                 }
 
                 //upload hình mới
-                var url = await _cloudStorageService.Upload(id, image.ContentType, image.OpenReadStream());
+                var url = await _cloudStorageService.UploadImage(id, image.ContentType, image.OpenReadStream());
 
                 account.Profile.Avatar = url;
                 account.UpdateAt = DateTime.UtcNow.AddHours(7);
@@ -240,15 +245,15 @@ namespace MCSM_Service.Implementations
         {
             if (string.IsNullOrWhiteSpace(token))
             {
-                throw new BadRequestException("Token không hợp lệ.");
+                throw new BadRequestException("Invalid token");
             }
 
             var account = await _accountRepository.GetMany(c => c.VerifyToken.Equals(token))
-                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy tài khoản với token");
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("No account found with token");
 
             if(account.Status != AccountStatus.Pending.ToString())
             {
-                throw new BadRequestException("Tài khoản đã được xác thực");
+                throw new BadRequestException("Account has been verified");
             }
 
             account.UpdateAt = DateTime.UtcNow.AddHours(7);
@@ -259,8 +264,34 @@ namespace MCSM_Service.Implementations
 
             if (result <= 0)
             {
-                throw new Exception("Không thể xác thực tài khoản, hãy thử lại sau.");
+                throw new Exception("Unable to authenticate account, please try again later.");
             }
+        }
+
+        public async Task ResetPassword(ResetPasswordModel model)
+        {
+            var account = await _accountRepository.GetMany(acc => acc.Email == model.Email)
+                .Include(acc => acc.Profile)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("No account found with email");
+
+            var newPassword = PasswordGenerator.GenerateRandomPassword();
+
+            account.HashPassword = PasswordHasher.HashPassword(newPassword);
+            account.UpdateAt = DateTime.UtcNow.AddHours(7);
+
+            _accountRepository.Update(account);
+
+            string fullName = (account.Profile?.FirstName ?? string.Empty) + " " + (account.Profile?.LastName ?? string.Empty);
+
+            await _sendMailService.SendNewPasswordEmail(account.Email, fullName, newPassword);
+
+            var result = await _unitOfWork.SaveChanges();
+
+            if (result <= 0)
+            {
+                throw new Exception("Unable to authenticate account, please try again later.");
+            }
+
         }
 
         //PRIVATE METHOD
@@ -273,12 +304,12 @@ namespace MCSM_Service.Implementations
 
             if(role.Name == AccountRole.Monk)
             {
-                result = "Nam";
+                result = "Male";
             }
 
             if(role.Name == AccountRole.Nun)
             {
-                result = "Nữ";
+                result = "Female";
             }
 
             return result;
@@ -296,12 +327,12 @@ namespace MCSM_Service.Implementations
                 
                 if (existingAccount.Email == email)
                 {
-                    throw new BadRequestException("Email đã được sử dụng");
+                    throw new BadRequestException("Email is already in use");
                 }
 
                 if (existingAccount.Profile?.PhoneNumber == phoneNumber)
                 {
-                    throw new BadRequestException("Số điện thoại đã được sử dụng");
+                    throw new BadRequestException("The phone number is already in use");
                 }
             }
         }
