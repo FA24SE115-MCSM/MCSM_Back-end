@@ -9,7 +9,6 @@ namespace MCSM_Data.Models.Requests.Post
     public class CreateRetreatRegistrationParticipantModel
     {
         public Guid retreatRegId { get; set; }
-        public required List<string> participantEmail {  get; set; }
-        
+        public List<string> participantEmail { get; set; }
     }
 }
