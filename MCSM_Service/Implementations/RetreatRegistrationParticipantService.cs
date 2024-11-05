@@ -16,6 +16,7 @@ using MCSM_Utility.Exceptions;
 using MCSM_Data.Entities;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Requests.Filters;
+using Org.BouncyCastle.Crypto;
 
 namespace MCSM_Service.Implementations
 {
@@ -34,19 +35,8 @@ namespace MCSM_Service.Implementations
             _accountRepository = unitOfWork.Account;
         }
 
-        public async Task<ListViewModel<RetreatRegistrationParticipantViewModel>> GetRetreatRegistrationParticipants(RetreatRegistrationParticipantFilterModel filter,  PaginationRequestModel pagination)
+        public async Task<ListViewModel<RetreatRegistrationParticipantViewModel>> GetRetreatRegistrationParticipants(RetreatRegistrationParticipantFilterModel filter, PaginationRequestModel pagination)
         {
-            //var query = _retreatRegistrationParticipantRepository.GetAll()
-            //    .Join(
-            //    _profileRepository.GetAll(),
-            //    rrp => rrp.ParticipantId,
-            //    pro => pro.AccountId,
-            //    (rrp, pro) => new {rrp, pro}
-            //    )
-            //    .Join(_accountRepository.GetAll(),
-            //    combined => combined.pro.AccountId,
-            //    a => a.Id,
-            //    (combined, a) => new { combined.rrp, combined.pro, a });
             var query = _retreatRegistrationParticipantRepository.GetAll().Include(r => r.Participant);
 
             if (!string.IsNullOrEmpty(filter.Email))
@@ -84,40 +74,30 @@ namespace MCSM_Service.Implementations
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy người đăng kí");
         }
 
-        //public async Task<RetreatRegistrationParticipantViewModel> CreateRetreatRegistrationParticipant(CreateRetreatRegistrationParticipantModel model)
-        //{
-        //    bool isAlreadyRegistered = await CheckAlreadyRegistered(model.retreatRegId, model.participantId);
+        public async Task<ListViewModel<RetreatRegistrationParticipantViewModel>> GetRetreatRegistratingParticipants(List<Guid> id)
+        {
+            var participants = await _retreatRegistrationParticipantRepository.GetMany(r => id.Contains(r.Id)).ProjectTo<RetreatRegistrationParticipantViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+            if (participants == null || participants.Count == 0)
+            {
+                throw new NotFoundException("Không tìm thấy người đăng kí");
+            }
+            return new ListViewModel<RetreatRegistrationParticipantViewModel>
+            {
+                Data = participants
+            };
+        }
 
-        //    if (isAlreadyRegistered)
-        //    {
-        //        throw new BadRequestException("Participant is already registered for this retreat.");
-        //    }
-
-        //    var id = Guid.NewGuid();
-        //    var participant = new RetreatRegistrationParticipant
-        //    {
-        //        Id = id,
-        //        RetreatRegId = model.retreatRegId,
-        //        ParticipantId = model.participantId
-        //    };
-
-        //    _retreatRegistrationParticipantRepository.Add(participant);
-
-        //    var result = await _unitOfWork.SaveChanges();
-
-        //    return result > 0 ? await GetRetreatRegistrationParticipant(id) : null!;
-        //}
-
-        public async Task<RetreatRegistrationParticipantViewModel> CreateRetreatRegistrationParticipants(CreateRetreatRegistrationParticipantModel model)
+        public async Task<ListViewModel<RetreatRegistrationParticipantViewModel>> CreateRetreatRegistrationParticipants(CreateRetreatRegistrationParticipantModel model)
         {
             var participantsToAdd = new List<RetreatRegistrationParticipant>();
-            int addedParticipantsCount = 0;
+            var addedParticipantId = new List<Guid>();
+            Guid retreatId = _retreatRegistrationRepository.GetMany(rr => rr.Id == model.retreatRegId).First().RetreatId;
 
-            foreach (var participantEmail in model.participantEmail)
+            foreach (string participantEmail in model.participantEmail)
             {
                 Guid participantId = _accountRepository.GetMany(a => a.Email == participantEmail).First().Id;
 
-                bool isAlreadyRegistered = await CheckAlreadyRegistered(model.retreatRegId, participantId);
+                bool isAlreadyRegistered = await CheckAlreadyRegistered(retreatId, participantId);
 
                 if (isAlreadyRegistered)
                 {
@@ -132,7 +112,7 @@ namespace MCSM_Service.Implementations
                 };
 
                 participantsToAdd.Add(participant);
-                addedParticipantsCount++;
+                addedParticipantId.Add(participant.Id);
             }
 
             if (participantsToAdd.Any())
@@ -147,19 +127,18 @@ namespace MCSM_Service.Implementations
                         .GetMany(r => r.Id == model.retreatRegId)
                         .FirstOrDefaultAsync() ?? throw new BadRequestException("Retreat registration not found.");
 
-                    retreatRegistration.TotalParticipants += addedParticipantsCount;
+                    retreatRegistration.TotalParticipants += participantsToAdd.Count;
 
                     await _unitOfWork.SaveChanges();
                 }
             }
 
-            return await GetRetreatRegistrationParticipant(model.retreatRegId);
+            return await GetRetreatRegistratingParticipants(addedParticipantId);
         }
 
-
-        public Task<bool> CheckAlreadyRegistered(Guid retreatId, Guid participantId)
+        public async Task<bool> CheckAlreadyRegistered(Guid retreatId, Guid participantId)
         {
-            var check = _retreatRegistrationRepository.GetMany(r => r.RetreatId == retreatId)
+            var check = await _retreatRegistrationRepository.GetMany(r => r.RetreatId == retreatId)
                 .Join(_retreatRegistrationParticipantRepository.GetAll(),
                 rr => rr.Id,
                 rrp => rrp.RetreatRegId,
@@ -169,26 +148,8 @@ namespace MCSM_Service.Implementations
                 .FirstOrDefaultAsync();
 
             // If a record is found, it means the participant is already registered.
-            return Task.FromResult(check != null);
+            return check != null;
         }
 
-        //public Task<bool> CheckAlreadyRegistered(Guid retreatId, string participantEmail)
-        //{
-        //    var check = _retreatRegistrationRepository.GetMany(r => r.RetreatId == retreatId)
-        //        .Join(_retreatRegistrationParticipantRepository.GetAll(),
-        //        rr => rr.Id,
-        //        rrp => rrp.RetreatRegId,
-        //        (rr, rrp) => new { rr, rrp }
-        //        )
-        //        .Join(_accountRepository.GetAll(),
-        //        combined => combined.rrp.ParticipantId,
-        //        a => a.Id,
-        //        (combined, a) => new { combined.rrp, combined.rr, a })
-        //        .Where(e => e.a.Email == participantEmail)
-        //        .AsNoTracking()
-        //        .FirstOrDefaultAsync();
-
-        //    return Task.FromResult(check != null);
-        //}
     }
 }

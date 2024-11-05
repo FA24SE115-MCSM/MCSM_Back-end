@@ -51,7 +51,8 @@ namespace MCSM_API.Controllers
         public async Task<ActionResult<RetreatRegistrationParticipantViewModel>> CreateRetreatRegistrationParticipants([FromBody] CreateRetreatRegistrationParticipantModel model)
         {
             var retreat = await _retreatRegistrationParticipantService.CreateRetreatRegistrationParticipants(model);
-            return CreatedAtAction(nameof(GetRetreatRegistrationParticipant), new { id = retreat.Id }, retreat);
+            //return CreatedAtAction(nameof(GetRetreatRegistrationParticipant), new { id = retreat.Id }, retreat);
+            return Ok(retreat);
         }
 
     }
