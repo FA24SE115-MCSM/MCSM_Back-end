@@ -24,6 +24,10 @@ namespace MCSM_Data
         private IRetreatGroupMemberRepository _retreatGroupMember = null!;
         private IToolRepository _tool = null!;
         private IToolHistoryRepository _toolHistory = null!;
+        private IDeviceTokenRepository _deviceToken = null!;
+        private INotificationRepository _notification = null!;
+        private IRetreatFileRepository _retreatFile = null!;
+        private IRetreatLearningOutcomeRepository _retreatLearningOutcome = null!;
 
         public UnitOfWork(McsmDbContext context)
         {
@@ -102,6 +106,25 @@ namespace MCSM_Data
         public IToolHistoryRepository ToolHistory
         {
             get { return _toolHistory ??= new ToolHistoryRepository(_context); }
+        }
+
+        public IDeviceTokenRepository DeviceToken
+        {
+            get { return _deviceToken ??= new DeviceTokenRepository(_context); }
+        }
+        public INotificationRepository Notification
+        {
+            get { return _notification ??= new NotificationRepository(_context); }
+        }
+
+        public IRetreatFileRepository RetreatFile
+        {
+            get { return _retreatFile ??= new RetreatFileRepository(_context); }
+        }
+
+        public IRetreatLearningOutcomeRepository RetreatLearningOutcome
+        {
+            get { return _retreatLearningOutcome ??= new RetreatLearningOutcomeRepository(_context); }
         }
         public async Task<int> SaveChanges()
         {

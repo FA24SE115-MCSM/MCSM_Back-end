@@ -21,7 +21,7 @@ public partial class Post
 
     public virtual Account CreatedByNavigation { get; set; } = null!;
 
-    public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
-
     public virtual ICollection<PostImage> PostImages { get; set; } = new List<PostImage>();
+
+    public virtual ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
 }

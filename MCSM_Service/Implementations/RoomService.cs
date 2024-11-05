@@ -9,6 +9,7 @@ using MCSM_Data.Models.Requests.Put;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
+using MCSM_Utility.Enums;
 using MCSM_Utility.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,9 +34,9 @@ namespace MCSM_Service.Implementations
                 query = query.Where(r => r.Name.Contains(filter.Name));
             }
 
-            if (filter.IsActive.HasValue)
+            if (filter.Status.HasValue)
             {
-                query = query.Where(r => r.IsActive == filter.IsActive.Value);
+                query = query.Where(r => r.Status == filter.Status.Value.ToString());
             }
 
             var totalRow = await query.AsNoTracking().CountAsync();
@@ -78,7 +79,7 @@ namespace MCSM_Service.Implementations
                 RoomTypeId = model.RoomTypeId,
                 Name = model.Name,
                 Capacity = model.Capacity,
-                IsActive = model.IsActive,
+                Status = RoomStatus.Active.ToString()
             };
             _roomRepository.Add(room);
 
@@ -93,7 +94,11 @@ namespace MCSM_Service.Implementations
 
             existRoom.Name = model.Name ?? existRoom.Name;
             existRoom.Capacity = model.Capacity ?? existRoom.Capacity;
-            existRoom.IsActive = model.IsActive ?? existRoom.IsActive;
+
+            if (!string.IsNullOrWhiteSpace(model.Status))
+            {
+                existRoom.Status = GetRoomStatus(model.Status);
+            }
 
             _roomRepository.Update(existRoom);
             var result = await _unitOfWork.SaveChanges();
@@ -104,6 +109,16 @@ namespace MCSM_Service.Implementations
         private async Task CheckRoomType(Guid roomTypeId)
         {
             var flag = await _roomTypeRepository.GetMany(r => r.Id == roomTypeId).FirstOrDefaultAsync() ?? throw new BadRequestException("Please re-enter room type");
+        }
+
+        private string GetRoomStatus(string status)
+        {
+            if (status != RoomStatus.Active.ToString() && status != RoomStatus.InActive.ToString())
+            {
+                throw new BadRequestException("Invalid status. Please provide either 'Active' or 'InActive'.");
+            }
+
+            return status;
         }
     }
 }

@@ -21,6 +21,10 @@ namespace MCSM_Data
         public IRetreatGroupMemberRepository RetreatGroupMember { get; }
         public IToolRepository Tool { get; }
         public IToolHistoryRepository ToolHistory { get; }
+        public IDeviceTokenRepository DeviceToken { get; }
+        public INotificationRepository Notification { get; }
+        public IRetreatFileRepository RetreatFile { get; }
+        public IRetreatLearningOutcomeRepository RetreatLearningOutcome { get; }
 
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();
