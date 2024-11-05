@@ -48,7 +48,7 @@ namespace MCSM_API.Controllers
         [ProducesResponseType(typeof(RetreatViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Create retreat.")]
-        public async Task<ActionResult<RetreatViewModel>> CreateRetreat([FromBody] CreateRetreatModel model)
+        public async Task<ActionResult<RetreatViewModel>> CreateRetreat([FromForm] CreateRetreatModel model)
         {
             var auth = (AuthModel?)HttpContext.Items["User"];
             var retreat = await _retreatService.CreateRetreat(auth!.Id, model);
@@ -63,7 +63,7 @@ namespace MCSM_API.Controllers
         [ProducesResponseType(typeof(RetreatViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update retreat.")]
-        public async Task<ActionResult<RetreatViewModel>> UpdateAccount([FromRoute] Guid id, [FromBody] UpdateRetreatModel model)
+        public async Task<ActionResult<RetreatViewModel>> UpdateAccount([FromRoute] Guid id, [FromForm] UpdateRetreatModel model)
         {
             var retreat = await _retreatService.UpdateRetreat(id, model);
             return CreatedAtAction(nameof(GetRetreat), new { id = retreat.Id }, retreat);

@@ -1,5 +1,6 @@
 ﻿using MCSM_Data.Entities;
 using MCSM_Data.Models.Views;
+using MCSM_Utility.Constants;
 
 namespace MCSM_Data.Mapping
 {
@@ -21,7 +22,9 @@ namespace MCSM_Data.Mapping
             CreateMap<RoomType, RoomTypeViewModel>();
             CreateMap<Room, RoomViewModel>();
             CreateMap<Retreat, RetreatViewModel>()
-                .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(retreat => retreat.CreatedByNavigation));
+                .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(retreat => retreat.CreatedByNavigation))
+                .ForMember(dest => dest.RetreatImages, otp => otp.MapFrom(retreat => retreat.RetreatFiles.Where(file => file.Type == RetreatFileType.Image)))
+                .ForMember(dest => dest.RetreatDocuments, otp => otp.MapFrom(retreat => retreat.RetreatFiles.Where(file => file.Type == RetreatFileType.Document)));
 
             CreateMap<RetreatRegistration, RetreatRegistrationViewModel>()
                 .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(retreatReg => retreatReg.Retreat.Name));
@@ -50,11 +53,22 @@ namespace MCSM_Data.Mapping
                 .ForMember(dest => dest.AuthorId, otp => otp.MapFrom(retreatLesson => retreatLesson.Lesson.CreatedByNavigation.Id))
                 .ForMember(dest => dest.AuthorFirstName, otp => otp.MapFrom(retreatLesson => retreatLesson.Lesson.CreatedByNavigation.Profile!.FirstName))
                 .ForMember(dest => dest.AuthorLastName, otp => otp.MapFrom(retreatLesson => retreatLesson.Lesson.CreatedByNavigation.Profile!.LastName));
-            CreateMap<RetreatMonk, RetreatMonkViewModel>()
-                .ForMember(dest => dest.MonkFirstName, otp => otp.MapFrom(retreatMonk => retreatMonk.Monk.Profile!.FirstName))
-                .ForMember(dest => dest.MonkLastName, otp => otp.MapFrom(retreatMonk => retreatMonk.Monk.Profile!.LastName));
+            CreateMap<RetreatMonk, RetreatMonkViewModel>();
             CreateMap<Tool, ToolViewModel>();
-            CreateMap<ToolHistory, ToolHistoryViewModel>();
+            CreateMap<ToolHistory, ToolHistoryViewModel>()
+                .ForMember(dest => dest.Borrower, otp => otp.MapFrom(toolHistory => toolHistory.CreatedByNavigation));
+            CreateMap<Notification, NotificationViewModel>()
+                .ForMember(notificationVM => notificationVM.Data, config => config.MapFrom(notification => new NotificationDataViewModel
+                {
+                    CreateAt = notification.CreateAt,
+                    IsRead = notification.IsRead,
+                    Link = notification.Link,
+                    Type = notification.Type
+                }));
+
+            CreateMap<RetreatFile, RetreatImageViewModel>();
+            CreateMap<RetreatFile, RetreatDocumentViewModel>();
+            CreateMap<RetreatLearningOutcome, RetreatLearningOutcomeViewModel>();
         }
     }
 }

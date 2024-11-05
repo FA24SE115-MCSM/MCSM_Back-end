@@ -9,6 +9,7 @@ using MCSM_Data.Models.Requests.Put;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
+using MCSM_Utility.Enums;
 using MCSM_Utility.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -84,7 +85,7 @@ namespace MCSM_Service.Implementations
                 Name = model.Name,
                 Image = imageUrl,
                 TotalTool = model.TotalTool,
-                Status = model.Status.ToString()
+                Status = ToolStatus.Active.ToString()
             };
             _toolRepository.Add(tool);
 

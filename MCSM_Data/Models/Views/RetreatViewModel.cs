@@ -1,4 +1,6 @@
-﻿namespace MCSM_Data.Models.Views
+﻿using MCSM_Data.Entities;
+
+namespace MCSM_Data.Models.Views
 {
     public class RetreatViewModel
     {
@@ -11,18 +13,21 @@
 
         public int Duration { get; set; }
 
+        
         public DateOnly StartDate { get; set; }
-
         public DateOnly EndDate { get; set; }
         public string Status { get; set; } = null!;
+        public string? Description { get; set; }
 
         public virtual AccountViewModel CreatedBy { get; set; } = null!;
-
+        public virtual ICollection<RetreatImageViewModel> RetreatImages { get; set; } = new List<RetreatImageViewModel>();
+        public virtual ICollection<RetreatImageViewModel> RetreatDocuments { get; set; } = new List<RetreatImageViewModel>();
+        public virtual ICollection<RetreatLearningOutcomeViewModel> RetreatLearningOutcomes { get; set; } = new List<RetreatLearningOutcomeViewModel>();
         //public virtual RetreatGroup? RetreatGroup { get; set; }
 
         //public virtual RetreatLesson? RetreatLesson { get; set; }
 
-        //public virtual RetreatMonk? RetreatMonk { get; set; }
+        public virtual ICollection<RetreatMonkViewModel> RetreatMonks { get; set; } = new List<RetreatMonkViewModel>();
 
         //public virtual RetreatSchedule? RetreatSchedule { get; set; }
 

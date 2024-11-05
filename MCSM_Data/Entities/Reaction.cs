@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MCSM_Data.Entities;
 
-public partial class Like
+public partial class Reaction
 {
     public Guid Id { get; set; }
 

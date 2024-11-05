@@ -9,11 +9,13 @@ public partial class Notification
 
     public Guid AccountId { get; set; }
 
-    public string Content { get; set; } = null!;
+    public string Title { get; set; } = null!;
 
-    public string? Url { get; set; }
+    public string Body { get; set; } = null!;
 
-    public string Type { get; set; } = null!;
+    public string? Link { get; set; }
+
+    public string? Type { get; set; }
 
     public bool IsRead { get; set; }
 

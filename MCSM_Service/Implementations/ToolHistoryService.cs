@@ -71,7 +71,7 @@ namespace MCSM_Service.Implementations
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Tool history not found");
         }
 
-        public async Task<ToolHistoryViewModel> CreateToolHistory(Guid accountId, CreateToolHistoryModel model)
+        public async Task<ToolHistoryViewModel> CreateToolHistory(CreateToolHistoryModel model)
         {
             await CheckTool(model.ToolId);
             await CheckRetreat(model.RetreatId);
@@ -80,7 +80,7 @@ namespace MCSM_Service.Implementations
             var toolHistory = new ToolHistory
             {
                 Id = toolHistoryId,
-                CreatedBy = accountId,
+                CreatedBy = model.BorrowerId,
                 RetreatId = model.RetreatId,
                 ToolId = model.ToolId,
                 NumOfTool = model.NumOfTool

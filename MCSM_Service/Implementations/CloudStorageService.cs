@@ -69,6 +69,49 @@ namespace MCSM_Service.Implementations
         }
 
 
+        public async Task<string> UploadDocument(Guid id, string contentType, Stream stream)
+        {
+            try
+            {
+                await Storage.UploadObjectAsync(
+                    _settings.StorageBucket,
+                    $"{_settings.DocumentFolder}/{id}",
+                    contentType,
+                    stream,
+                    null,
+                    CancellationToken.None);
+                var baseURL = "https://firebasestorage.googleapis.com/v0/b";
+                var filePath = $"{_settings.DocumentFolder}%2F{id}";
+                var url = $"{baseURL}/{_settings.StorageBucket}/o/{filePath}?alt=media";
+                return url;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<string> DeleteDocument(Guid id)
+        {
+            try
+            {
+                await Storage.DeleteObjectAsync(
+                    _settings.StorageBucket,
+                    $"{_settings.DocumentFolder}/{id}",
+                    null,
+                    CancellationToken.None
+                    );
+                return "Delete success";
+            }
+            catch (GoogleApiException ex)
+            {
+                return ex.HttpStatusCode.ToString();
+            }
+        }
+
+
+
+
         // Object url
         public string GetMediaLink(Guid id)
         {
