@@ -199,6 +199,11 @@ namespace MCSM_Service.Implementations
                 profile.Account.Status = model.Status;
             }
 
+            if(model.Avatar != null)
+            {
+                await UploadAvatar(profile, model.Avatar);
+            }
+
             profile.FirstName = model.FirstName ?? profile.FirstName;
             profile.LastName = model.LastName ?? profile.LastName;
             profile.DateOfBirth = model.DateOfBirth ?? profile.DateOfBirth;
@@ -212,32 +217,22 @@ namespace MCSM_Service.Implementations
             return result > 0 ? await GetAccount(id) : null!;
         }
 
-        public async Task<AccountViewModel> UploadAvatar(Guid id, IFormFile image)
+        public async Task UploadAvatar(MCSM_Data.Entities.Profile profile, IFormFile image)
         {
             if (!image.ContentType.StartsWith("image/"))
             {
                 throw new BadRequestException("The file is not an image. Please re-enter");
             }
 
-            var account = await _accountRepository.GetMany(account => account.Id == id).Include(account => account.Profile).FirstOrDefaultAsync();
-            if (account != null)
+            if(profile.Avatar != null)
             {
-                //xóa hình cũ trong firebase
-                if (!string.IsNullOrEmpty(account.Profile!.Avatar))
-                {
-                    await _cloudStorageService.DeleteImage(id);
-                }
-
-                //upload hình mới
-                var url = await _cloudStorageService.UploadImage(id, image.ContentType, image.OpenReadStream());
-
-                account.Profile.Avatar = url;
-                account.UpdateAt = DateTime.UtcNow.AddHours(7);
-
-                _accountRepository.Update(account);
+                await _cloudStorageService.DeleteImage(profile.AccountId);
             }
-            var result = await _unitOfWork.SaveChanges();
-            return result > 0 ? await GetAccount(id) : null!;
+            
+            var url = await _cloudStorageService.UploadImage(profile.AccountId, image.ContentType, image.OpenReadStream());
+
+            profile.Avatar = url;
+
         }
 
 
