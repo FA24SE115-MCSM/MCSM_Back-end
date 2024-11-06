@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace MCSM_Data.Models.Requests.Put
+﻿namespace MCSM_Data.Models.Requests.Put
 {
     public class UpdateAccountModel
     {
@@ -14,8 +12,6 @@ namespace MCSM_Data.Models.Requests.Put
         public string? Gender { get; set; }
 
         public string? Status { get; set; } 
-
-        public IFormFile? Avatar { get; set; }
 
     }
 }

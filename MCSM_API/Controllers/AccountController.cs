@@ -77,12 +77,23 @@ namespace MCSM_API.Controllers
         [ProducesResponseType(typeof(AccountViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update account.")]
-        public async Task<ActionResult<AccountViewModel>> UpdateAccount([FromRoute] Guid id, [FromForm] UpdateAccountModel model)
+        public async Task<ActionResult<AccountViewModel>> UpdateAccount([FromRoute] Guid id, [FromBody] UpdateAccountModel model)
         {
             var account = await _accountService.UpdateAccount(id, model);
             return CreatedAtAction(nameof(GetAccount), new { id = account.Id }, account);
         }
 
+        [HttpPut]
+        [Route("avatar")]
+        [Authorize(AccountRole.Admin, AccountRole.Monk, AccountRole.Nun, AccountRole.Practitioner)]
+        [ProducesResponseType(typeof(AccountViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Upload avatar for account.")]
+        public async Task<ActionResult<AccountViewModel>> UploadAvatar([Required] IFormFile image)
+        {
+            var auth = (AuthModel?)HttpContext.Items["User"];
+            var account = await _accountService.UploadAvatar(auth!.Id, image);
+            return CreatedAtAction(nameof(GetAccount), new { id = account.Id }, account);
+        }
 
         [HttpPut]
         [Route("reset-password")]
