@@ -15,5 +15,7 @@ public partial class RetreatFile
 
     public DateTime CreateAt { get; set; }
 
+    public string? FileName { get; set; }
+
     public virtual Retreat Retreat { get; set; } = null!;
 }
