@@ -2,11 +2,13 @@
 {
     public class RetreatDocumentViewModel
     {
-        public Guid Id { get; set; }
-        public string? FileName { get; set; }
+        public class RetreatImageViewModel
+        {
+            public Guid Id { get; set; }
 
-        public string Url { get; set; } = null!;
+            public string Url { get; set; } = null!;
 
-        public DateTime CreateAt { get; set; }
+            public DateTime CreateAt { get; set; }
+        }
     }
 }

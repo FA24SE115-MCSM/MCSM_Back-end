@@ -21,7 +21,7 @@ namespace MCSM_Data.Models.Views
 
         public virtual AccountViewModel CreatedBy { get; set; } = null!;
         public virtual ICollection<RetreatImageViewModel> RetreatImages { get; set; } = new List<RetreatImageViewModel>();
-        public virtual ICollection<RetreatDocumentViewModel> RetreatDocuments { get; set; } = new List<RetreatDocumentViewModel>();
+        public virtual ICollection<RetreatImageViewModel> RetreatDocuments { get; set; } = new List<RetreatImageViewModel>();
         public virtual ICollection<RetreatLearningOutcomeViewModel> RetreatLearningOutcomes { get; set; } = new List<RetreatLearningOutcomeViewModel>();
         //public virtual RetreatGroup? RetreatGroup { get; set; }
 

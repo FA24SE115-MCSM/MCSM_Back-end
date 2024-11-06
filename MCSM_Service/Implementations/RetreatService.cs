@@ -21,14 +21,14 @@ namespace MCSM_Service.Implementations
     {
         private readonly IRetreatRepository _retreatRepository;
         private readonly IAccountRepository _accountRepository;
-        private readonly IRetreatFileRepository _retreatFileRepository;
+        private readonly IRetreatFileRepository _retreatImageRepository;
         private readonly IRetreatLearningOutcomeRepository _retreatLearningOutcomeRepository;
         private readonly ICloudStorageService _cloudStorageService;
         public RetreatService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService) : base(unitOfWork, mapper)
         {
             _retreatRepository = unitOfWork.Retreat;
             _accountRepository = unitOfWork.Account;
-            _retreatFileRepository = unitOfWork.RetreatFile;
+            _retreatImageRepository = unitOfWork.RetreatFile;
             _retreatLearningOutcomeRepository = unitOfWork.RetreatLearningOutcome;
             _cloudStorageService = cloudStorageService;
         }
@@ -201,12 +201,12 @@ namespace MCSM_Service.Implementations
             
             if (isUpdate)
             {
-                var listImage = await _retreatFileRepository.GetMany(rt => rt.RetreatId == retreatId && rt.Type == RetreatFileType.Image).ToListAsync();
+                var listImage = await _retreatImageRepository.GetMany(rt => rt.RetreatId == retreatId && rt.Type == RetreatFileType.Image).ToListAsync();
                 foreach (var image in listImage)
                 {
                     await _cloudStorageService.DeleteImage(image.Id);
                 }
-                _retreatFileRepository.RemoveRange(listImage);
+                _retreatImageRepository.RemoveRange(listImage);
             }
 
             foreach (var image in images)
@@ -220,7 +220,7 @@ namespace MCSM_Service.Implementations
                     Type = RetreatFileType.Image,
                     Url = url
                 };
-                _retreatFileRepository.Add(retreatImage);
+                _retreatImageRepository.Add(retreatImage);
             }
         }
 
@@ -229,12 +229,12 @@ namespace MCSM_Service.Implementations
 
             if (isUpdate)
             {
-                var listImage = await _retreatFileRepository.GetMany(rt => rt.RetreatId == retreatId && rt.Type == RetreatFileType.Document).ToListAsync();
+                var listImage = await _retreatImageRepository.GetMany(rt => rt.RetreatId == retreatId && rt.Type == RetreatFileType.Document).ToListAsync();
                 foreach (var image in listImage)
                 {
                     await _cloudStorageService.DeleteDocument(image.Id);
                 }
-                _retreatFileRepository.RemoveRange(listImage);
+                _retreatImageRepository.RemoveRange(listImage);
             }
 
             foreach (var document in documents)
@@ -245,11 +245,10 @@ namespace MCSM_Service.Implementations
                 {
                     Id = retreatDocumentId,
                     RetreatId = retreatId,
-                    FileName = document.FileName,
                     Type = RetreatFileType.Document,
                     Url = url
                 };
-                _retreatFileRepository.Add(retreatImage);
+                _retreatImageRepository.Add(retreatImage);
             }
         }
 
