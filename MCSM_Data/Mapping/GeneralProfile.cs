@@ -26,8 +26,7 @@ namespace MCSM_Data.Mapping
                 .ForMember(dest => dest.RetreatImages, otp => otp.MapFrom(retreat => retreat.RetreatFiles.Where(file => file.Type == RetreatFileType.Image)))
                 .ForMember(dest => dest.RetreatDocuments, otp => otp.MapFrom(retreat => retreat.RetreatFiles.Where(file => file.Type == RetreatFileType.Document)));
 
-            CreateMap<RetreatRegistration, RetreatRegistrationViewModel>()
-                .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(retreatReg => retreatReg.Retreat.Name));
+            CreateMap<RetreatRegistration, RetreatRegistrationViewModel>();
             CreateMap<RetreatRegistration, ActiveRetreatRegistrationViewModel>()
                 .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(activeRetreat => activeRetreat.Retreat.Name))
                 .ForMember(dest => dest.RetreatStatus, otp => otp.MapFrom(activeRetreat => activeRetreat.Retreat.Status))
@@ -40,9 +39,7 @@ namespace MCSM_Data.Mapping
             //.ForMember(dest => dest.TotalParticipants, otp => otp.MapFrom(retreatReg => retreatReg.TotalParticipants))
             //.ForMember(dest => dest.IsDeleted, otp => otp.MapFrom(retreatReg => retreatReg.IsDeleted))
             //.ForMember(dest => dest.IsPaid, otp => otp.MapFrom(retreatReg => retreatReg.IsPaid));
-            CreateMap<RetreatRegistrationParticipant, RetreatRegistrationParticipantViewModel>()
-                .ForMember(dest => dest.RetreatRegId, otp => otp.MapFrom(retreatPar => retreatPar.RetreatReg.Id))
-                .ForMember(dest => dest.PractitionerMail, otp => otp.MapFrom(retreatPar => retreatPar.Participant.Email));
+            CreateMap<RetreatRegistrationParticipant, RetreatRegistrationParticipantViewModel>();
 
             CreateMap<Lesson, LessonViewModel>()
                 .ForMember(dest => dest.CreatorId, otp => otp.MapFrom(lesson => lesson.CreatedByNavigation.Id))
@@ -69,6 +66,7 @@ namespace MCSM_Data.Mapping
             CreateMap<RetreatFile, RetreatImageViewModel>();
             CreateMap<RetreatFile, RetreatDocumentViewModel>();
             CreateMap<RetreatLearningOutcome, RetreatLearningOutcomeViewModel>();
+            CreateMap<Payment, PaymentViewModel>();
         }
     }
 }
