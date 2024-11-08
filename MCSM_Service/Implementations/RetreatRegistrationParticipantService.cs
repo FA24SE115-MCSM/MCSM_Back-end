@@ -133,7 +133,7 @@ namespace MCSM_Service.Implementations
                         };
                         _retreatRegistrationParticipantRepository.Add(newParticipant);
                     }
-                    retreatReg.TotalParticipants = paticipants.Count();
+                    retreatReg.TotalParticipants += paticipants.Count();
                     retreatReg.TotalCost = retreatReg.TotalParticipants * retreatReg.Retreat.Cost;
                     _retreatRegistrationRepository.Update(retreatReg);
                     result = await _unitOfWork.SaveChanges();
