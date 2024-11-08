@@ -36,36 +36,25 @@ namespace MCSM_Service.Implementations
 
         public async Task<ListViewModel<RetreatRegistrationViewModel>> GetRetreatRegistrations(RetreatRegistrationFilterModel filter, PaginationRequestModel pagination)
         {
-            //var query = _retreatRegistrationRepository.GetAll().
-            //    Join(_retreatRepository.GetAll(),
-            //    rr => rr.RetreatId,
-            //    r => r.Id,
-            //    (rr, r) => new {rr, r}
-            //    )
-            //    .Join(_profileRepository.GetAll(),
-            //    combined => combined.rr.RetreatId,
-            //    pro => pro.AccountId,
-            //    (combined, pro) => new {combined.rr, combined.r, pro }
-            //    );
             var query = _retreatRegistrationRepository.GetAll();
 
-            if (!string.IsNullOrEmpty(filter.Email))
+            if (filter.ParticipantId.HasValue)
             {
-                query = query.Where(q => q.CreateByNavigation.Email.Contains(filter.Email));
+                query = query.Where(rg => rg.RetreatRegistrationParticipants.Any(rgp => rgp.ParticipantId == filter.ParticipantId.Value));
             }
 
             if (!string.IsNullOrEmpty(filter.RetreatName))
             {
-                query = query.Where(q => q.Retreat.Name.Contains(filter.RetreatName));
+                query = query.Where(rg => rg.Retreat.Name.Contains(filter.RetreatName));
             }
 
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
+                .OrderByDescending(rg => rg.CreateAt)
                 .Skip(pagination.PageNumber * pagination.PageSize)
                 .Take(pagination.PageSize);
 
-            var retreats = await paginatedQuery
-                .OrderBy(q => q.Retreat.Name)
+            var retreatRegistrations = await paginatedQuery
                 .ProjectTo<RetreatRegistrationViewModel>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
@@ -78,7 +67,7 @@ namespace MCSM_Service.Implementations
                     PageSize = pagination.PageSize,
                     TotalRow = totalRow,
                 },
-                Data = retreats
+                Data = retreatRegistrations
             };
         }
 

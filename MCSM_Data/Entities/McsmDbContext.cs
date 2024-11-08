@@ -87,8 +87,7 @@ public partial class McsmDbContext : DbContext
 
     public virtual DbSet<ToolHistory> ToolHistories { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    { }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){ }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -388,20 +387,23 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Payment__3214EC07EDA13F01");
+            entity.HasKey(e => e.Id).HasName("PK__Payment__3214EC0719618521");
 
             entity.ToTable("Payment");
 
-            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Id).HasMaxLength(255);
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
                 .HasColumnType("datetime");
-            entity.Property(e => e.Status).HasMaxLength(255);
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.PaymentMethod).HasMaxLength(100);
+            entity.Property(e => e.PaypalOrderId).HasMaxLength(255);
+            entity.Property(e => e.Status).HasMaxLength(100);
 
             entity.HasOne(d => d.RetreatReg).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.RetreatRegId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Payment__Retreat__6FB49575");
+                .HasConstraintName("FK__Payment__Retreat__589C25F3");
         });
 
         modelBuilder.Entity<Post>(entity =>

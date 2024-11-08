@@ -25,6 +25,7 @@ namespace MCSM_Data
         public INotificationRepository Notification { get; }
         public IRetreatFileRepository RetreatFile { get; }
         public IRetreatLearningOutcomeRepository RetreatLearningOutcome { get; }
+        public IPaymentRepository Payment { get; }
 
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

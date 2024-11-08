@@ -11,5 +11,6 @@
 
 
         public MailKitSetting MailKit { get; set; } = null!;
+        public PayPalSetting PayPal { get; set; } = null!;
     }
 }

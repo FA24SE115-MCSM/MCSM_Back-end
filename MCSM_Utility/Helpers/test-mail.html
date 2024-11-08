@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #929292;
             padding: 20px;
             margin: 0;
         }
@@ -16,45 +16,58 @@
             margin: auto;
             background: white;
             padding: 20px;
-            border: .5px solid;
+            border: 0.5px solid #ddd;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         h1 {
             color: black; 
+            text-align: center;
         }
         p {
             font-size: 16px;
             line-height: 1.5;
             color: #555;
         }
-        a {
+        a.button {
             display: block;
             width: fit-content;
             margin: 20px auto;
             padding: 10px 15px;
-            background-color: #28a745; 
-            color: black; 
+            background-color: #28a745;
+            color: white;
             text-decoration: none;
             border-radius: 5px;
-            font-weight: bold; 
+            font-weight: bold;
+            text-align: center;
         }
-        a:hover {
-            background-color: #218838; 
+        a.button:hover {
+            background-color: #218838;
         }
         .header {
             text-align: center;
-            background-color: #007BFF; 
+            background-color: #007BFF;
             color: white;
             padding: 10px 0;
             border-radius: 8px 8px 0 0;
         }
         .logo {
-            width: 100px; 
-            height: 100px; 
-            border-radius: 50%; 
-            display: block; 
-            margin: 10px auto; 
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            margin: 10px auto;
+        }
+        .account-box {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            margin-top: 15px;
+            list-style: none;
         }
     </style>
 </head>
@@ -63,13 +76,18 @@
         <div class="header">
             <h1>Email Verification</h1>
         </div>
-        <img class="logo" src="https://firebasestorage.googleapis.com/v0/b/mcsm-fa24se115.appspot.com/o/images%2Fe0142447-aabc-48d7-82f9-0b0fdb043489?alt=media" alt="Logo" />
-        <p>Hi there!</p>
-        <p>Please verify your email address by clicking the button below:</p>
-        <a href="{verificationLink}">Verify Email</a>
+        <img class="logo" src="{logoSendMail}" alt="Logo">
+        <p>Hi there! Thank you for registering for the retreat at <strong>{_nameApp}</strong></p>
+        <p>Here are your account details:</p>
+        <ul style="padding: 10px; background-color: #e9ecef;">
+            <li><strong>Email:</strong> {userEmail}</li>
+            <li><strong>Password:</strong> {password}</li>
+        </ul>
+        <p>Please verify your email address to complete your account setup by clicking the button below:</p>
+        <a href="{verificationLink}" class="button">Verify Email</a>
         <p>If you did not create an account, you can safely ignore this email.</p>
         <p>Thank you!</p>
-        <p>Best regards,<br>Plum Village Thailand</p>
+        <p>Best regards,<br>{_nameApp}</p>
     </div>
 </body>
 </html>

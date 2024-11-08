@@ -20,5 +20,6 @@ namespace MCSM_Service.Interfaces
         Task<AccountViewModel> UploadAvatar(Guid id, IFormFile image);
         Task VerifyAccount(string token);
         Task ResetPassword(ResetPasswordModel model);
+        Task<List<Guid>> CreateNewAccountForRetreatRegistration(List<CreateAccountModel> listModel);
     }
 }
