@@ -68,5 +68,17 @@ namespace MCSM_API.Controllers
             var retreat = await _retreatService.UpdateRetreat(id, model);
             return CreatedAtAction(nameof(GetRetreat), new { id = retreat.Id }, retreat);
         }
+
+        //-------------------------
+
+        [HttpGet]
+        [Route("{retreatId}/progress")]
+        [ProducesResponseType(typeof(ProgressTrackingViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Get current retreat progress.")]
+        public async Task<ProgressTrackingViewModel> GetTrackingProgressOfRetreat([FromRoute] Guid retreatId)
+        {
+            return await _retreatService.GetTrackingProgressOfRetreat(retreatId);
+        }
     }
 }

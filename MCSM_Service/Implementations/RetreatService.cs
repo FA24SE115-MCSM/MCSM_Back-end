@@ -297,5 +297,24 @@ namespace MCSM_Service.Implementations
                 }
             }
         }
+
+        //-------------------------------------
+        public async Task<ProgressTrackingViewModel> GetTrackingProgressOfRetreat(Guid retreatId)
+        {
+            var db = _retreatRepository.GetAll();
+            var query = db.Where(r => r.Id == retreatId);
+            var result = await query.ProjectTo<ProgressTrackingViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy thông tin");
+
+            var startDate = query.Select(r => r.StartDate).FirstOrDefault();
+            var currentDay = Math.Max((DateTime.UtcNow.Date - startDate.ToDateTime(TimeOnly.MinValue)).Days + 1, 0);
+            result.CurrentDay = currentDay;
+
+            result.CurrentProgress = result.Duration > 0
+                ? Math.Max(Math.Min((int)((double)currentDay / result.Duration * 100), 100), 0)
+                : 0;
+
+            return result;
+        }
     }
 }

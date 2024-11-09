@@ -41,6 +41,17 @@ namespace MCSM_Data.Mapping
             //.ForMember(dest => dest.IsPaid, otp => otp.MapFrom(retreatReg => retreatReg.IsPaid));
             CreateMap<RetreatRegistrationParticipant, RetreatRegistrationParticipantViewModel>();
 
+            CreateMap<RetreatSchedule, RetreatScheduleViewModel>()
+                .ForMember(dest => dest.GroupName, otp => otp.MapFrom(retreatSched => retreatSched.Group.Name))
+                .ForMember(dest => dest.LessionTitle, otp => otp.MapFrom(retreatSched => retreatSched.RetreatLesson.Lesson.Title))
+                .ForMember(dest => dest.RoomName, otp => otp.MapFrom(retreatSched => retreatSched.UsedRoom.Name))
+                .ForMember(dest => dest.UsedRoom, otp => otp.MapFrom(retreatSched => retreatSched.UsedRoom));
+            CreateMap<Room, RetreatScheduleViewModel>().ForMember(dest => dest.RoomName, otp => otp.MapFrom(room => room.Name));
+
+            CreateMap<Retreat, ProgressTrackingViewModel>()
+                .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(progress => progress.Name))
+                .ForMember(dest => dest.RetreatId, otp => otp.MapFrom(progress => progress.Id));
+
             CreateMap<Lesson, LessonViewModel>()
                 .ForMember(dest => dest.CreatorId, otp => otp.MapFrom(lesson => lesson.CreatedByNavigation.Id))
                 .ForMember(dest => dest.CreatorFirstName, otp => otp.MapFrom(lesson => lesson.CreatedByNavigation.Profile.FirstName))
