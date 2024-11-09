@@ -19,9 +19,9 @@ namespace MCSM_Data.Models.Requests.Post
 
         public Guid RetreatId { get; set; }
 
-        public decimal TotalCost { get; set; }
+        //public decimal TotalCost { get; set; }
 
-        public int? TotalParticipants { get; set; }
+        //public int? TotalParticipants { get; set; }
 
         [DefaultValue(false)]
         public bool? IsDeleted { get; set; }

@@ -9,7 +9,9 @@ using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
 using MCSM_Utility.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -101,7 +103,7 @@ namespace MCSM_Service.Implementations
                 CreateBy = _accountRepository.GetMany(r => r.Email.Equals(model.CreateBy)).First().Id,
                 RetreatId = _retreatRepository.GetById(model.RetreatId).Id,
                 CreateAt = DateTime.UtcNow,
-                TotalCost = model.TotalCost
+                //TotalCost = model.TotalCost
             };
             _retreatRegistrationRepository.Add(retreatRegistration);
 

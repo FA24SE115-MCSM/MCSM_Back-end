@@ -28,6 +28,10 @@ namespace MCSM_API.Configurations
             services.AddScoped<IRetreatRegistrationService, RetreatRegistrationService>();
             services.AddScoped<IToolService, ToolService>();
             services.AddScoped<IToolHistoryService, ToolHistoryService>();
+            services.AddScoped<IDeviceTokenService, DeviceTokenService>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IRetreatScheduleService, RetreatScheduleService>();
+            //services.AddScoped<IRetreatGroupMemberService, RetreatGroupMemberService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)

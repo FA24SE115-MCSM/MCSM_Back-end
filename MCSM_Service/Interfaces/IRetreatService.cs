@@ -12,5 +12,7 @@ namespace MCSM_Service.Interfaces
         Task<RetreatViewModel> GetRetreat(Guid id);
         Task<RetreatViewModel> CreateRetreat(Guid accountId, CreateRetreatModel model);
         Task<RetreatViewModel> UpdateRetreat(Guid id, UpdateRetreatModel model);
+        //----------------------------------------
+        Task<ProgressTrackingViewModel> GetTrackingProgressOfRetreat(Guid retreatId);
     }
 }

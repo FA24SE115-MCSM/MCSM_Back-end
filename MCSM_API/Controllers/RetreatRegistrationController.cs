@@ -1,8 +1,10 @@
-﻿using MCSM_Data.Models.Internal;
+﻿using MCSM_Data.Entities;
+using MCSM_Data.Models.Internal;
 using MCSM_Data.Models.Requests.Filters;
 using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Views;
+using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Implementations;
 using MCSM_Service.Interfaces;
 using MCSM_Utility.Constants;
@@ -23,6 +25,7 @@ namespace MCSM_API.Controllers
         {
             _retreatRegistrationService = retreatRegistrationService;
         }
+
         // GET: api/<RetreatRegistrationController>
         [HttpGet]
         [ProducesResponseType(typeof(ListViewModel<RetreatRegistrationViewModel>), StatusCodes.Status200OK)]
