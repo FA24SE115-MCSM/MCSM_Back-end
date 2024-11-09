@@ -310,9 +310,13 @@ namespace MCSM_Service.Implementations
             var currentDay = Math.Max((DateTime.UtcNow.Date - startDate.ToDateTime(TimeOnly.MinValue)).Days + 1, 0);
             result.CurrentDay = currentDay;
 
-            result.CurrentProgress = result.Duration > 0
-                ? Math.Max(Math.Min((int)((double)currentDay / result.Duration * 100), 100), 0)
-                : 0;
+            //result.CurrentProgress = result.Duration > 0
+            //    ? Math.Max(Math.Min((int)((double)currentDay / result.Duration * 100), 100), 0)
+            //    : 0;
+            decimal currentProgressValue = result.Duration > 0
+        ? Math.Max(Math.Min((int)((double)currentDay / result.Duration * 100), 100), 0)
+        : 0;
+            result.CurrentProgress = $"{currentProgressValue}%";
 
             return result;
         }
