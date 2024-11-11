@@ -31,7 +31,6 @@ namespace MCSM_API.Configurations
             services.AddScoped<IDeviceTokenService, DeviceTokenService>();
             services.AddScoped<INotificationService, NotificationService>();
 
-            services.AddHttpClient<PaymentService>();
             services.AddScoped<IPaymentService, PaymentService>();
         }
 
