@@ -15,6 +15,8 @@ public partial class Retreat
 
     public int Capacity { get; set; }
 
+    public int RemainingSlots { get; set; }
+
     public int Duration { get; set; }
 
     public string? Description { get; set; }

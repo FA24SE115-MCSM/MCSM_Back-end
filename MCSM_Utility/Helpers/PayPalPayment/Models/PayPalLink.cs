@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MCSM_Utility.Helpers.PayPalPayment
+namespace MCSM_Utility.Helpers.PayPalPayment.Models
 {
     public class PayPalLink
     {

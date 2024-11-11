@@ -99,6 +99,7 @@ namespace MCSM_Service.Implementations
                         Name = model.Name,
                         Cost = model.Cost,
                         Capacity = model.Capacity,
+                        RemainingSlots = model.Capacity,
                         Duration = model.Duration,
                         Description = model.Description,
                         StartDate = model.StartDate,

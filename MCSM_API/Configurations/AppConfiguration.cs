@@ -31,8 +31,8 @@ namespace MCSM_API.Configurations
             services.AddScoped<IDeviceTokenService, DeviceTokenService>();
             services.AddScoped<INotificationService, NotificationService>();
 
-            services.AddHttpClient<PayPalService>();
-            services.AddScoped<IPayPalService, PayPalService>();
+            services.AddHttpClient<PaymentService>();
+            services.AddScoped<IPaymentService, PaymentService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)
