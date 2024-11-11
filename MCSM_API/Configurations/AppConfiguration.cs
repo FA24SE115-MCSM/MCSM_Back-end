@@ -32,8 +32,7 @@ namespace MCSM_API.Configurations
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IRetreatScheduleService, RetreatScheduleService>();
 
-            services.AddHttpClient<PayPalService>();
-            services.AddScoped<IPayPalService, PayPalService>();
+            services.AddScoped<IPaymentService, PaymentService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)

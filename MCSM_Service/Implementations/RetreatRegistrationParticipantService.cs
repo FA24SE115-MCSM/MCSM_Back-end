@@ -96,13 +96,22 @@ namespace MCSM_Service.Implementations
         {
             var result = 0;
             var newAccounts = new List<CreateAccountModel>();
-            var paticipants = new List<Guid>();
+            var participants = new List<Guid>();
             var retreatReg = await _retreatRegistrationRepository.GetMany(r => r.Id == model.RetreatRegId).Include(r => r.Retreat).FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat Registration not found");
+            if (retreatReg.IsPaid)
+            {
+                throw new ConflictException("Retreat Registration already paid");
+            }
+            if (retreatReg.IsDeleted)
+            {
+                throw new ConflictException("Retreat Registration is delete");
+            }
             using (var transaction = _unitOfWork.Transaction())
             {
                 try
                 {
                     var listAccounts = await GetAccountFromFile(model.File);
+                    
                     foreach (var account in listAccounts)
                     {
                         var acc = await _accountRepository.GetMany(acc => acc.Email == account.Email).Include(acc => acc.Role).FirstOrDefaultAsync();
@@ -117,13 +126,17 @@ namespace MCSM_Service.Implementations
                         {
                             continue;
                         }
-                        paticipants.Add(acc.Id);
+                        participants.Add(acc.Id);
 
                     }
 
+                    var numOfParticipants = newAccounts.Count + participants.Count;
+                    if (numOfParticipants > retreatReg.Retreat.RemainingSlots)
+                        throw new ConflictException("The number of registrants exceeded the remaining capacity of the retreat");
+
                     var listNewAccountId = await _accountService.CreateNewAccountForRetreatRegistration(newAccounts);
-                    paticipants.AddRange(listNewAccountId);
-                    foreach(var accountId in paticipants)
+                    participants.AddRange(listNewAccountId);
+                    foreach (var accountId in participants)
                     {
                         var newParticipant = new RetreatRegistrationParticipant
                         {
@@ -133,7 +146,8 @@ namespace MCSM_Service.Implementations
                         };
                         _retreatRegistrationParticipantRepository.Add(newParticipant);
                     }
-                    retreatReg.TotalParticipants += paticipants.Count();
+                    retreatReg.TotalParticipants += participants.Count;
+                    retreatReg.Retreat.RemainingSlots -= participants.Count;
                     retreatReg.TotalCost = retreatReg.TotalParticipants * retreatReg.Retreat.Cost;
                     _retreatRegistrationRepository.Update(retreatReg);
                     result = await _unitOfWork.SaveChanges();

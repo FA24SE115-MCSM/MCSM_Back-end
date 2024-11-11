@@ -10,7 +10,7 @@ namespace MCSM_Data.Models.Views
         public decimal Cost { get; set; }
 
         public int Capacity { get; set; }
-
+        public int RemainingSlots { get; set; }
         public int Duration { get; set; }
 
         

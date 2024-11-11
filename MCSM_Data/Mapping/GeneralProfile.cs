@@ -77,7 +77,8 @@ namespace MCSM_Data.Mapping
             CreateMap<RetreatFile, RetreatImageViewModel>();
             CreateMap<RetreatFile, RetreatDocumentViewModel>();
             CreateMap<RetreatLearningOutcome, RetreatLearningOutcomeViewModel>();
-            CreateMap<Payment, PaymentViewModel>();
+            CreateMap<Payment, PaymentViewModel>()
+                .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(payment => payment.RetreatReg.Retreat.Name));
         }
     }
 }

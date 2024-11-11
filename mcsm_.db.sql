@@ -1,5 +1,4 @@
-
-USE master
+﻿﻿﻿USE master
 GO
 
 -- Drop Database
@@ -41,11 +40,19 @@ CREATE TABLE Account(
 	RoleId uniqueidentifier foreign key references [Role](Id) NOT NULL,
 	Email varchar(50) unique NOT NULL,
 	HashPassword varchar(255) NOT NULL,
-	[Level] int,
 	VerifyToken varchar(max) NOT NULL,
 	[Status] nvarchar(100) NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
-	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
+	UpdateAt datetime
+);
+GO
+
+CREATE TABLE [Level](
+    AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
+	RoleType nvarchar(50) NOT NULL,
+    RankLevel int NOT NULL, 
+    RankName nvarchar(50),
+	primary key(AccountId)
 );
 GO
 
@@ -67,7 +74,7 @@ CREATE TABLE DeviceToken(
 	Id uniqueidentifier primary key NOT NULL,
 	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Token varchar(max) NOT NULL,
-	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO
 
@@ -82,7 +89,7 @@ GO
 CREATE TABLE Allergy(
 	Id uniqueidentifier primary key NOT NULL,
 	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
-	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL
 );
 GO
 
@@ -90,9 +97,10 @@ GO
 CREATE TABLE [Notification](
 	Id uniqueidentifier primary key NOT NULL,
 	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
-	Content nvarchar(max) NOT NULL,
-	[Url] nvarchar(255),
-	[Type] nvarchar(50) NOT NULL,
+	Title nvarchar(255) NOT NULL,
+	Body nvarchar(max) NOT NULL,
+	[Link] nvarchar(255) NULL,
+	[Type] nvarchar(50) NULL,
 	IsRead bit NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
@@ -116,26 +124,83 @@ CREATE TABLE Retreat(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	[Name] nvarchar(100) NOT NULL,
+	Cost decimal(16,2) NOT NULL,
 	Capacity int NOT NULL,
+	RemainingSlots int NOT NULL,
 	Duration int NOT NULL,
+	[Description] nvarchar(max) NULL,
 	StartDate date NOT NULL,
-	EndDate date NOT NULL
+	EndDate date NOT NULL,
+	[Status] nvarchar(100) NOT NULL,
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO
 
---Table RetreatMonk
+
+CREATE TABLE RetreatLearningOutcome (
+    Id uniqueidentifier PRIMARY KEY NOT NULL,
+    RetreatId uniqueidentifier FOREIGN KEY REFERENCES Retreat(Id) NOT NULL,
+    Title nvarchar(255) NOT NULL,
+    SubTitle nvarchar(255) NULL,
+	[Description] nvarchar(max) NULL,
+    CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
+);
+GO
+
+CREATE TABLE RetreatFile (
+    Id uniqueidentifier PRIMARY KEY NOT NULL,
+    RetreatId uniqueidentifier FOREIGN KEY REFERENCES Retreat(Id) NOT NULL,
+	[FileName] nvarchar(255),
+    [Url] nvarchar(max) NOT NULL,
+    Type nvarchar(50) NOT NULL,
+    CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
+);
+GO
+
+
+
 CREATE TABLE RetreatMonk(
 	Id uniqueidentifier primary key NOT NULL,
 	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
-	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL
+	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
 );
 GO
 
---Table RetreatRegistration
+
 CREATE TABLE RetreatRegistration(
 	Id uniqueidentifier primary key NOT NULL,
-	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
-	PractitionerId uniqueidentifier foreign key references Account(Id) NOT NULL
+	CreateBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	TotalCost decimal(16,2) NOT NULL,
+	TotalParticipants int NOT NULL,
+	IsDeleted bit NOT NULL,
+	IsPaid bit NOT NULL
+);
+GO
+
+--Table RetreatRegistrationParticipants
+CREATE TABLE RetreatRegistrationParticipants(
+	Id uniqueidentifier primary key NOT NULL,
+	ParticipantId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	RetreatRegId uniqueidentifier foreign key references RetreatRegistration(Id) NOT NULL,
+);
+GO
+
+DROP TABLE IF EXISTS Payment
+GO
+--Table Payment
+CREATE TABLE Payment(
+	Id nvarchar(255) primary key NOT NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	RetreatRegId uniqueidentifier foreign key references RetreatRegistration(Id) NOT NULL,
+	PaypalOrderId nvarchar(255) NOT NULL,
+	PaymentMethod nvarchar(100) NOT NULL,
+	Amount decimal(16,2) NOT NULL,
+	[Description] nvarchar(255) NULL,
+	[Status] nvarchar(100) NOT NULL,
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 );
 GO
 
@@ -152,7 +217,7 @@ GO
 CREATE TABLE RetreatGroupMember(
 	Id uniqueidentifier primary key NOT NULL,
 	GroupId uniqueidentifier foreign key references RetreatGroup(Id) NOT NULL,
-	MemberId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	MemberId uniqueidentifier foreign key references Account(Id) NOT NULL
 );
 GO
 
@@ -160,8 +225,12 @@ GO
 CREATE TABLE Lesson(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	Title nvarchar(200) NOT NULL,
 	Content nvarchar(max) NOT NULL,
-	IsActive bit NOT NULL
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	IsActive bit NOT NULL,
+	IsDeleted bit NOT NULL
 );
 GO
 
@@ -173,19 +242,14 @@ CREATE TABLE RoomType(
 GO
 
 
-INSERT [dbo].[RoomType] ([Id], [Name]) VALUES (N'152eafd1-d15c-4bfc-bb44-0f8c110272fd', N'Hall')
-INSERT [dbo].[RoomType] ([Id], [Name]) VALUES (N'aa4f1943-eae6-4e0b-bf33-e4af7d2dc4fc', N'Bed room')
-INSERT [dbo].[RoomType] ([Id], [Name]) VALUES (N'da70d2aa-f2ca-4aa0-aa15-215e2fb2ed44', N'Dining room')
-GO
-
-
 --Table Room
 CREATE TABLE Room(
 	Id uniqueidentifier primary key NOT NULL,
 	RoomTypeId uniqueidentifier foreign key references RoomType(Id) NOT NULL,
 	[Name] nvarchar(50) NOT NULL,
 	Capacity int NOT NULL,
-	IsActive bit NOT NULL
+	[Status] nvarchar(20) NOT NULL,
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO
 
@@ -206,7 +270,8 @@ CREATE TABLE RetreatSchedule(
 	UsedRoomId uniqueidentifier foreign key references Room(Id),
 	LessonDate date NOT NULL,
 	LessonStart time NOT NULL,
-	LessonEnd time NOT NULL
+	LessonEnd time NOT NULL,
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO
 
@@ -227,19 +292,13 @@ GO
 CREATE TABLE Tool(
 	Id uniqueidentifier primary key NOT NULL,
 	[Name] nvarchar(50) NOT NULL,
+	[Image] nvarchar(max) NOT NULL,
 	TotalTool int NOT NULL,
-	AvailableTool int NOT NULL,
-	IsActive bit NOT NULL
+	[Status] nvarchar(20) NOT NULL,
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 );
 GO
 
---Table ToolOperation
-CREATE TABLE ToolOperation(
-	Id uniqueidentifier primary key NOT NULL,
-	[Name] nvarchar(50) NOT NULL,
-	IsIncrement bit NOT NULL
-);
-GO
 
 --Table ToolHistory
 CREATE TABLE ToolHistory(
@@ -247,9 +306,8 @@ CREATE TABLE ToolHistory(
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
 	ToolId uniqueidentifier foreign key references Tool(Id) NOT NULL,
-	ToolOpId uniqueidentifier foreign key references ToolOperation(Id) NOT NULL,
 	NumOfTool int NOT NULL,
-	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO
 
@@ -308,9 +366,18 @@ CREATE TABLE Post(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Content nvarchar(MAX),
-	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
-	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
-	IsDeleted bit NOT NULL
+	[Status] nvarchar(20) NOT NULL,
+	UpdateAt datetime,
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
+);
+GO
+
+--Table post image
+CREATE TABLE PostImage(
+	Id uniqueidentifier primary key NOT NULL,
+	PostId uniqueidentifier foreign key references Post(Id) NOT NULL,
+	[Url] nvarchar(max) NOT NULL,
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO
 
@@ -318,19 +385,33 @@ GO
 CREATE TABLE Comment(
 	Id uniqueidentifier primary key NOT NULL,
 	PostId uniqueidentifier foreign key references Post(Id) NOT NULL,
-	ReplyTo uniqueidentifier,
+	ReplyTo uniqueidentifier NULL,
 	Content nvarchar(MAX),
+	UpdateAt datetime,
+	IsDeleted bit NOT NULL DEFAULT 0, 
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+);
+GO
+
+
+--Table Reaction
+CREATE TABLE Reaction(
+	Id uniqueidentifier primary key NOT NULL,
+	PostId uniqueidentifier foreign key references Post(Id) NOT NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
+);
+GO
+
+--Table Feedback
+CREATE TABLE Feedback(
+	Id uniqueidentifier primary key NOT NULL,
+	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
+	Content nvarchar(max) NOT NULL,
+	Rating int NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	IsDeleted bit NOT NULL
 );
-GO
-
---Table Like
-CREATE TABLE [Like](
-	Id uniqueidentifier primary key NOT NULL,
-	PostId uniqueidentifier foreign key references Post(Id) NOT NULL,
-	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
-);
-
 GO
