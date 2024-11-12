@@ -11,7 +11,7 @@ namespace MCSM_Data.Models.Requests.Post
         public Guid RetreatId { get; set; }
         public Guid GroupId { get; set; }
         public Guid RetreatLessionId { get; set; }
-        public string RoomName { get; set; }
+        public string? RoomName { get; set; }
         public DateOnly LessionDate { get; set; }
         public TimeOnly LessionStart { get; set; }
         public TimeOnly LessonEnd { get; set; }

@@ -321,5 +321,35 @@ namespace MCSM_Service.Implementations
 
             return result;
         }
+
+        public async Task<ListViewModel<RetreatViewModel>> GetRetreatsOfAccount(Guid profileId, RetreatFilterModel filter, PaginationRequestModel pagination)
+        {
+            var query = _retreatRepository.GetAll()
+                .Include(r => r.RetreatGroups)
+                .ThenInclude(rg => rg.RetreatGroupMembers)
+                .Where(r => r.RetreatGroups
+                .Any(rg => rg.RetreatGroupMembers
+                .Any(rgm => rgm.MemberId == profileId)) && r.Status != "Cancelled");
+            var totalRow = await query.AsNoTracking().CountAsync();
+            var paginatedQuery = query
+                .OrderByDescending(x => x.EndDate)
+                .Skip(pagination.PageNumber * pagination.PageSize)
+                .Take(pagination.PageSize);
+
+            var retreats = await paginatedQuery
+                .ProjectTo<RetreatViewModel>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+            return new ListViewModel<RetreatViewModel>
+            {
+                Pagination = new PaginationViewModel
+                {
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRow = totalRow,
+                },
+                Data = retreats
+            };
+        }
     }
 }

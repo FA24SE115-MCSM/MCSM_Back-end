@@ -1,6 +1,8 @@
 ﻿using MCSM_Data;
 using MCSM_Data.Entities;
+using MCSM_Data.Models.Internal;
 using MCSM_Data.Models.Requests.Filters;
+using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
@@ -89,5 +91,16 @@ namespace MCSM_API.Controllers
             return Ok();
         }
 
+        //------------------------------------------------------------
+
+        [HttpGet]
+        [Route("{profileId}/payment")]
+        [ProducesResponseType(typeof(PaymentViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Get payment history of an account.")]
+        public async Task<ListViewModel<PaymentViewModel>> ViewCustomerPaymentHistory([FromRoute] Guid profileId, [FromQuery] PaginationRequestModel pagination)
+        {
+            return await _payPalService.ViewCustomerPaymentHistory(profileId, pagination);
+        }
     }
 }

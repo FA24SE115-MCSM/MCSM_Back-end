@@ -80,5 +80,15 @@ namespace MCSM_API.Controllers
         {
             return await _retreatService.GetTrackingProgressOfRetreat(retreatId);
         }
+
+        [HttpGet]
+        [Route("{profileId}/retreats")]
+        [ProducesResponseType(typeof(ProgressTrackingViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Get retreat history of an account.")]
+        public async Task<ListViewModel<RetreatViewModel>> GetRetreatsOfAccount([FromRoute] Guid profileId, [FromQuery] RetreatFilterModel filter, [FromQuery] PaginationRequestModel pagination)
+        {
+            return await _retreatService.GetRetreatsOfAccount(profileId, filter, pagination);
+        }
     }
 }

@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using MCSM_Data;
 using MCSM_Data.Entities;
 using MCSM_Data.Models.Requests.Filters;
+using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
@@ -149,6 +150,35 @@ namespace MCSM_Service.Implementations
             string hashString = positiveHash.ToString("X8");
             string id = "PAY" + hashString;
             return id;
+        }
+
+        //-----------------------------------------------------
+
+        public async Task<ListViewModel<PaymentViewModel>> ViewCustomerPaymentHistory(Guid customerId, PaginationRequestModel pagination)
+        {
+            var query = _paymentRepository.GetAll().Where(p => p.RetreatReg.CreateBy == customerId && p.Status != "Cancelled");
+
+            var totalRow = await query.AsNoTracking().CountAsync();
+            var paginatedQuery = query
+                .OrderByDescending(p => p.CreateAt)
+                .Skip(pagination.PageNumber * pagination.PageSize)
+                .Take(pagination.PageSize);
+
+            var payments = await paginatedQuery.
+                ProjectTo<PaymentViewModel>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return new ListViewModel<PaymentViewModel>
+            {
+                Pagination = new PaginationViewModel
+                {
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRow = totalRow,
+                },
+                Data = payments
+            };
         }
     }
 }
