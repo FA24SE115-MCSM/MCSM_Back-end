@@ -1,4 +1,5 @@
-﻿using MCSM_Data;
+﻿using MCSM_API.Configurations.Middleware;
+using MCSM_Data;
 using MCSM_Data.Entities;
 using MCSM_Data.Models.Internal;
 using MCSM_Data.Models.Requests.Filters;
@@ -8,6 +9,7 @@ using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Implementations;
 using MCSM_Service.Interfaces;
+using MCSM_Utility.Constants;
 using MCSM_Utility.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -33,6 +35,7 @@ namespace MCSM_API.Controllers
         }
 
         [HttpGet]
+        [Authorize(AccountRole.Admin)]
         [ProducesResponseType(typeof(List<PaymentViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all payments.")]
         public async Task<ActionResult<List<PaymentViewModel>>> GetRoles([FromQuery] PaymentFilterModel filter)

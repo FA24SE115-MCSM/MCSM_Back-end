@@ -325,11 +325,11 @@ namespace MCSM_Service.Implementations
         public async Task<ListViewModel<RetreatViewModel>> GetRetreatsOfAccount(Guid profileId, RetreatFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _retreatRepository.GetAll()
-                .Include(r => r.RetreatGroups)
-                .ThenInclude(rg => rg.RetreatGroupMembers)
-                .Where(r => r.RetreatGroups
-                .Any(rg => rg.RetreatGroupMembers
-                .Any(rgm => rgm.MemberId == profileId)) && r.Status != "Cancelled");
+                .Include(r => r.RetreatRegistrations)
+                .ThenInclude(rr => rr.RetreatRegistrationParticipants)
+                .Where(r => r.RetreatRegistrations
+                .Any(rg => rg.RetreatRegistrationParticipants
+                .Any(rgm => rgm.ParticipantId == profileId)) && r.Status != "Cancelled");
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
                 .OrderByDescending(x => x.EndDate)
