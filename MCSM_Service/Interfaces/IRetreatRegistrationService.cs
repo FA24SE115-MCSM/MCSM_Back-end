@@ -2,11 +2,6 @@
 using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Views;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MCSM_Service.Interfaces
 {
@@ -16,5 +11,6 @@ namespace MCSM_Service.Interfaces
         Task<RetreatRegistrationViewModel> GetRetreatRegistration(Guid id);
         Task<RetreatRegistrationViewModel> CreateRetreatRegistration(CreateRetreatRegistrationModel model);
         Task<ListViewModel<ActiveRetreatRegistrationViewModel>> GetActiveRetreatRegistrationForUser(Guid id, PaginationRequestModel pagination);
+        Task<RetreatRegistrationViewModel> CreateRetreatRegistrationForAccount(CreateRetreatRegistrationAccountModel model, Guid accountId);
     }
 }

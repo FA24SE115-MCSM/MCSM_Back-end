@@ -1,4 +1,5 @@
-﻿using MCSM_Data.Models.Internal;
+﻿using MCSM_API.Configurations.Middleware;
+using MCSM_Data.Models.Internal;
 using MCSM_Data.Models.Requests.Filters;
 using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
@@ -76,5 +77,19 @@ namespace MCSM_API.Controllers
         //public void DeleteImage(int id)
         //{
         //}
+
+
+        [HttpPost]
+        [Route("account")]
+        [Authorize(AccountRole.Practitioner)]
+        [ProducesResponseType(typeof(RetreatRegistrationViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Registration retreat for account.")]
+        public async Task<ActionResult<RetreatRegistrationViewModel>> CreateRetreatRegistrationForAccount([FromBody] CreateRetreatRegistrationAccountModel model)
+        {
+            var auth = (AuthModel?)HttpContext.Items["User"];
+            var retreatRegistration = await _retreatRegistrationService.CreateRetreatRegistrationForAccount(model, auth!.Id);
+            return CreatedAtAction(nameof(GetRetreatRegistration), new { id = retreatRegistration.Id }, retreatRegistration);
+        }
     }
 }
