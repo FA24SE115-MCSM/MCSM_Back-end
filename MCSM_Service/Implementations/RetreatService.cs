@@ -129,8 +129,18 @@ namespace MCSM_Service.Implementations
 
             existRetreat.Name = model.Name ?? existRetreat.Name;
             existRetreat.Cost = model.Cost ?? existRetreat.Cost;
-            existRetreat.Capacity = model.Capacity ?? existRetreat.Capacity;
             existRetreat.Description = model.Description ?? existRetreat.Description;
+
+            if (model.Capacity.HasValue)
+            {
+                var numOfRegistrants = existRetreat.Capacity - existRetreat.RemainingSlots;
+                if (model.Capacity < numOfRegistrants)
+                {
+                    throw new ConflictException($"The registration limit has been exceeded. The maximum capacity is {model.Capacity}, but there are currently {numOfRegistrants} registrants.");
+                }
+                existRetreat.Capacity = model.Capacity.Value;
+                existRetreat.RemainingSlots = model.Capacity.Value - numOfRegistrants;
+            }
 
             if (model.Duration.HasValue)
             {

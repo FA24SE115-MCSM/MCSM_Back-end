@@ -93,5 +93,14 @@ namespace MCSM_Data.Repositories
             return _entities.Any(predicate);
         }
 
+        public Task<bool> ContainsAsync(Expression<Func<T, bool>> predicate)
+        {
+            return _entities.AnyAsync(predicate);
+        }
+
+        public Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
+        {
+            return _entities.AnyAsync(predicate);
+        }
     }
 }

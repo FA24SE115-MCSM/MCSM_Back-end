@@ -178,11 +178,11 @@ namespace MCSM_Service.Implementations
         public async Task<List<Guid>> CreateNewAccountForRetreatRegistration(List<CreateAccountModel> listModel)
         {
             var result = new List<Guid>();
-
+            var participantId = await _roleRepository.GetMany(role => role.Name == AccountRole.Practitioner).Select(role => role.Id).FirstOrDefaultAsync();
             foreach (var model in listModel)
             {
                 await CheckUniquePhone(model.PhoneNumber);
-                model.RoleId = Guid.Parse("12555e1b-14b2-46c9-b49b-cf1835a17204");
+                model.RoleId = participantId;
                 var gender = await CheckRoleAndGender(model.RoleId, model.Gender);
                 var accountId = Guid.NewGuid();
                 model.Password = PasswordGenerator.GenerateRandomPassword();

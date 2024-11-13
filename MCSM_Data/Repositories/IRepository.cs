@@ -33,5 +33,8 @@ namespace MCSM_Data.Repositories
         bool Contains(Expression<Func<T, bool>> predicate);
 
         bool Any(Expression<Func<T, bool>> predicate);
+        Task<bool> ContainsAsync(Expression<Func<T, bool>> predicate);
+
+        Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
     }
 }

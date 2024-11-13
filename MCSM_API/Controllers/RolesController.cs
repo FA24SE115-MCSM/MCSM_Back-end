@@ -15,9 +15,9 @@ namespace MCSM_API.Controllers
         {
             _roleService = roleService;
         }
+        
 
         [HttpGet]
-        //[Authorize(AccountRole.Monks, AccountRole.Practitioners)]
         [ProducesResponseType(typeof(List<RoleViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all roles.")]
         public async Task<ActionResult<List<RoleViewModel>>> GetRoles()

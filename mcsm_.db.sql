@@ -1,13 +1,8 @@
-﻿﻿﻿USE master
-GO
-
--- Drop Database
-ALTER DATABASE MCSM_DB SET SINGLE_USER WITH ROLLBACK IMMEDIATE
-GO
-
+﻿
 USE master
 GO
-DROP DATABASE MCSM_DB
+DROP DATABASE IF EXISTS MCSM_DB
+GO
 
 --Create DB
 CREATE DATABASE MCSM_DB
@@ -16,10 +11,8 @@ GO
 USE MCSM_DB
 GO
 
---Drop All Tables
-EXEC sp_MSforeachtable @command1 = "DROP TABLE ?"
-
-
+DROP TABLE IF EXISTS [Role]
+GO
 --Table Role
 CREATE TABLE [Role](
 	Id uniqueidentifier primary key NOT NULL,
@@ -33,7 +26,8 @@ INSERT [dbo].[Role] ([Id], [Name]) VALUES (N'be83d816-75ec-4dfc-8da3-3be8077aad4
 INSERT [dbo].[Role] ([Id], [Name]) VALUES (N'12555e1b-14b2-46c9-b49b-cf1835a17204', N'Practitioner')
 GO
 
-
+DROP TABLE IF EXISTS Account
+GO
 --Table Account
 CREATE TABLE Account(
 	Id uniqueidentifier primary key NOT NULL,
@@ -47,6 +41,8 @@ CREATE TABLE Account(
 );
 GO
 
+DROP TABLE IF EXISTS [Level]
+GO
 CREATE TABLE [Level](
     AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
 	RoleType nvarchar(50) NOT NULL,
@@ -56,6 +52,8 @@ CREATE TABLE [Level](
 );
 GO
 
+DROP TABLE IF EXISTS [Profile]
+GO
 --Table Profile
 CREATE TABLE [Profile](
 	AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
@@ -69,6 +67,8 @@ CREATE TABLE [Profile](
 );
 GO
 
+DROP TABLE IF EXISTS DeviceToken
+GO
 --Table DeviceToken
 CREATE TABLE DeviceToken(
 	Id uniqueidentifier primary key NOT NULL,
@@ -78,6 +78,8 @@ CREATE TABLE DeviceToken(
 );
 GO
 
+DROP TABLE IF EXISTS Ingredient
+GO
 --Table Ingredient
 CREATE TABLE Ingredient(
 	Id uniqueidentifier primary key NOT NULL,
@@ -85,6 +87,8 @@ CREATE TABLE Ingredient(
 );
 GO
 
+DROP TABLE IF EXISTS Allergy
+GO
 --Table Allergy
 CREATE TABLE Allergy(
 	Id uniqueidentifier primary key NOT NULL,
@@ -93,6 +97,8 @@ CREATE TABLE Allergy(
 );
 GO
 
+DROP TABLE IF EXISTS [Notification]
+GO
 --Table Notification
 CREATE TABLE [Notification](
 	Id uniqueidentifier primary key NOT NULL,
@@ -106,6 +112,8 @@ CREATE TABLE [Notification](
 );
 GO
 
+DROP TABLE IF EXISTS Article
+GO
 --Table Article
 CREATE TABLE Article(
 	Id uniqueidentifier primary key NOT NULL,
@@ -119,6 +127,8 @@ CREATE TABLE Article(
 );
 GO
 
+DROP TABLE IF EXISTS Retreat
+GO
 --Table Retreat
 CREATE TABLE Retreat(
 	Id uniqueidentifier primary key NOT NULL,
@@ -136,7 +146,8 @@ CREATE TABLE Retreat(
 );
 GO
 
-
+DROP TABLE IF EXISTS RetreatLearningOutcome
+GO
 CREATE TABLE RetreatLearningOutcome (
     Id uniqueidentifier PRIMARY KEY NOT NULL,
     RetreatId uniqueidentifier FOREIGN KEY REFERENCES Retreat(Id) NOT NULL,
@@ -147,6 +158,8 @@ CREATE TABLE RetreatLearningOutcome (
 );
 GO
 
+DROP TABLE IF EXISTS RetreatFile
+GO
 CREATE TABLE RetreatFile (
     Id uniqueidentifier PRIMARY KEY NOT NULL,
     RetreatId uniqueidentifier FOREIGN KEY REFERENCES Retreat(Id) NOT NULL,
@@ -158,7 +171,8 @@ CREATE TABLE RetreatFile (
 GO
 
 
-
+DROP TABLE IF EXISTS RetreatMonk
+GO
 CREATE TABLE RetreatMonk(
 	Id uniqueidentifier primary key NOT NULL,
 	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
@@ -166,7 +180,8 @@ CREATE TABLE RetreatMonk(
 );
 GO
 
-
+DROP TABLE IF EXISTS RetreatRegistration
+GO
 CREATE TABLE RetreatRegistration(
 	Id uniqueidentifier primary key NOT NULL,
 	CreateBy uniqueidentifier foreign key references Account(Id) NOT NULL,
@@ -180,6 +195,8 @@ CREATE TABLE RetreatRegistration(
 );
 GO
 
+DROP TABLE IF EXISTS RetreatRegistrationParticipants
+GO
 --Table RetreatRegistrationParticipants
 CREATE TABLE RetreatRegistrationParticipants(
 	Id uniqueidentifier primary key NOT NULL,
@@ -204,15 +221,20 @@ CREATE TABLE Payment(
 );
 GO
 
+DROP TABLE IF EXISTS RetreatGroup
+GO
 --Table RetreatGroup
 CREATE TABLE RetreatGroup(
 	Id uniqueidentifier primary key NOT NULL,
 	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
 	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	RoomId uniqueidentifier unique foreign key references Room(Id) NOT NULL,
 	Name nvarchar(50) NOT NULL
 );
 GO
 
+DROP TABLE IF EXISTS RetreatGroupMember
+GO
 --Table RetreatGroupMember
 CREATE TABLE RetreatGroupMember(
 	Id uniqueidentifier primary key NOT NULL,
@@ -221,6 +243,8 @@ CREATE TABLE RetreatGroupMember(
 );
 GO
 
+DROP TABLE IF EXISTS Lesson
+GO
 --Table Lesson
 CREATE TABLE Lesson(
 	Id uniqueidentifier primary key NOT NULL,
@@ -234,6 +258,8 @@ CREATE TABLE Lesson(
 );
 GO
 
+DROP TABLE IF EXISTS RoomType
+GO
 --Table RoomType
 CREATE TABLE RoomType(
 	Id uniqueidentifier primary key NOT NULL,
@@ -242,6 +268,8 @@ CREATE TABLE RoomType(
 GO
 
 
+DROP TABLE IF EXISTS Room
+GO
 --Table Room
 CREATE TABLE Room(
 	Id uniqueidentifier primary key NOT NULL,
@@ -253,6 +281,8 @@ CREATE TABLE Room(
 );
 GO
 
+DROP TABLE IF EXISTS RetreatLesson
+GO
 --Table RetreatLesson
 CREATE TABLE RetreatLesson(
 	Id uniqueidentifier primary key NOT NULL,
@@ -261,6 +291,8 @@ CREATE TABLE RetreatLesson(
 );
 GO
 
+DROP TABLE IF EXISTS RetreatSchedule
+GO
 --Table RetreatSchedule
 CREATE TABLE RetreatSchedule(
 	Id uniqueidentifier primary key NOT NULL,
@@ -275,6 +307,8 @@ CREATE TABLE RetreatSchedule(
 );
 GO
 
+DROP TABLE IF EXISTS RetreatGroupMessage
+GO
 --Table RetreatGroupMessage
 CREATE TABLE RetreatGroupMessage(
 	Id uniqueidentifier primary key NOT NULL,
@@ -288,6 +322,8 @@ CREATE TABLE RetreatGroupMessage(
 );
 GO
 
+DROP TABLE IF EXISTS Tool
+GO
 --Table Tool
 CREATE TABLE Tool(
 	Id uniqueidentifier primary key NOT NULL,
@@ -300,6 +336,8 @@ CREATE TABLE Tool(
 GO
 
 
+DROP TABLE IF EXISTS ToolHistory
+GO
 --Table ToolHistory
 CREATE TABLE ToolHistory(
 	Id uniqueidentifier primary key NOT NULL,
@@ -311,6 +349,8 @@ CREATE TABLE ToolHistory(
 );
 GO
 
+DROP TABLE IF EXISTS DishType
+GO
 --Table DishType
 CREATE TABLE DishType(
 	Id uniqueidentifier primary key NOT NULL,
@@ -318,6 +358,8 @@ CREATE TABLE DishType(
 );
 GO
 
+DROP TABLE IF EXISTS Dish
+GO
 --Table Dish
 CREATE TABLE Dish(
 	Id uniqueidentifier primary key NOT NULL,
@@ -331,6 +373,8 @@ CREATE TABLE Dish(
 );
 GO
 
+DROP TABLE IF EXISTS DishIngredient
+GO
 --Table DishIngredient
 CREATE TABLE DishIngredient(
 	Id uniqueidentifier primary key NOT NULL,
@@ -339,6 +383,8 @@ CREATE TABLE DishIngredient(
 );
 GO
 
+DROP TABLE IF EXISTS Menu
+GO
 --Table Menu
 CREATE TABLE Menu(
 	Id uniqueidentifier primary key NOT NULL,
@@ -353,6 +399,8 @@ CREATE TABLE Menu(
 );
 GO
 
+DROP TABLE IF EXISTS MenuDish
+GO
 --Table MenuDish
 CREATE TABLE MenuDish(
 	Id uniqueidentifier primary key NOT NULL,
@@ -361,6 +409,8 @@ CREATE TABLE MenuDish(
 );
 GO
 
+DROP TABLE IF EXISTS Post
+GO
 --Table Post
 CREATE TABLE Post(
 	Id uniqueidentifier primary key NOT NULL,
@@ -372,6 +422,8 @@ CREATE TABLE Post(
 );
 GO
 
+DROP TABLE IF EXISTS PostImage
+GO
 --Table post image
 CREATE TABLE PostImage(
 	Id uniqueidentifier primary key NOT NULL,
@@ -381,6 +433,8 @@ CREATE TABLE PostImage(
 );
 GO
 
+DROP TABLE IF EXISTS Comment
+GO
 --Table Comment
 CREATE TABLE Comment(
 	Id uniqueidentifier primary key NOT NULL,
@@ -393,7 +447,8 @@ CREATE TABLE Comment(
 );
 GO
 
-
+DROP TABLE IF EXISTS Reaction
+GO
 --Table Reaction
 CREATE TABLE Reaction(
 	Id uniqueidentifier primary key NOT NULL,
@@ -403,6 +458,8 @@ CREATE TABLE Reaction(
 );
 GO
 
+DROP TABLE IF EXISTS Feedback
+GO
 --Table Feedback
 CREATE TABLE Feedback(
 	Id uniqueidentifier primary key NOT NULL,
