@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -724,10 +724,12 @@ public partial class McsmDbContext : DbContext
                 .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
                 .HasColumnType("datetime");
 
+
             entity.HasOne(d => d.Group).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.GroupId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__RetreatSc__Group__76969D2E");
+
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.RetreatId)
