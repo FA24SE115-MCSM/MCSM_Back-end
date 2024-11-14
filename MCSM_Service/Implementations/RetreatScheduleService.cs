@@ -73,30 +73,46 @@ namespace MCSM_Service.Implementations
         public async Task<RetreatScheduleViewModel> CreateRetreatSchedule(CreateRetreatScheduleModel model)
         {
             var scheduleId = Guid.NewGuid();
+
+            if (!TimeOnly.TryParse(model.LessonStart, out var parsedLessonStart) ||
+                !TimeOnly.TryParse(model.LessonEnd, out var parsedLessonEnd))
+            {
+                throw new BadRequestException("Invalid time format for LessonStart or LessonEnd.");
+            }
+
             var schedule = new RetreatSchedule
             {
                 Id = scheduleId,
                 RetreatId = model.RetreatId,
-                GroupId = model.GroupId,
+                //GroupId = model.GroupId,
                 RetreatLessonId = model.RetreatLessionId,
                 //add room type condition?
-                UsedRoomId = _roomRepository.GetMany(rs => rs.Name == model.RoomName).First().Id,
-                LessonDate = model.LessionDate,
-                LessonStart = model.LessionStart,
-                LessonEnd = model.LessonEnd,
+                //UsedRoomId = _roomRepository.GetMany(rs => rs.Name == model.RoomName).First().Id,
+                UsedRoomId = _roomRepository.GetMany(r => r.Id == model.UsedRoomId).First().Id,
+                LessonDate = model.LessonDate,
+                //LessonStart = model.LessonStart,
+                //LessonEnd = model.LessonEnd,
+                LessonStart = parsedLessonStart,
+                LessonEnd = parsedLessonEnd,
                 CreateAt = DateTime.UtcNow
             };
 
-            var validateMatching = await ValidateGroupAndRetreatIdMatch(schedule.RetreatId, schedule.GroupId);
-            if (validateMatching!)
-            {
-                throw new BadRequestException($"Group ID {schedule.GroupId} does not belong to retreat ID {schedule.RetreatId}.");
-            }
+            //var validateMatching = await ValidateGroupAndRetreatIdMatch(schedule.RetreatId, schedule.GroupId);
+            //if (validateMatching!)
+            //{
+            //    throw new BadRequestException($"Group ID {schedule.GroupId} does not belong to retreat ID {schedule.RetreatId}.");
+            //}
 
-            var validateSchedule = await CheckOverlapSchedule(schedule.RetreatId, schedule.LessonDate, schedule.LessonStart, schedule.LessonEnd);
+            var validateSchedule = await CheckOverlapScheduleRetreat(schedule.RetreatId, schedule.LessonDate, schedule.LessonStart, schedule.LessonEnd);
             if (validateSchedule) 
             {
-                throw new BadRequestException("The new schedule overlaps with an existing schedule for the same group.");
+                throw new BadRequestException("The new schedule overlaps with an existing schedule for the same retreat.");
+            }
+
+            var validateScheduleRoom = await CheckOverlapScheduleRoom((Guid)schedule.UsedRoomId, schedule.LessonDate, schedule.LessonStart, schedule.LessonEnd);
+            if (validateScheduleRoom)
+            {
+                throw new BadRequestException("Room is already in use at this period.");
             }
 
             var validateRoom = await ValidateRoomType((Guid)schedule.UsedRoomId);
@@ -117,11 +133,18 @@ namespace MCSM_Service.Implementations
         {
             var existSchedule = await _retreatScheduleRepository.GetMany(rs => rs.Id == id).FirstOrDefaultAsync() ?? throw new NotFoundException("Schedule not found");
 
+            if (!TimeOnly.TryParse(model.LessonStart, out var parsedLessonStart) ||
+                !TimeOnly.TryParse(model.LessonEnd, out var parsedLessonEnd))
+            {
+                throw new BadRequestException("Invalid time format for LessonStart or LessonEnd.");
+            }
             existSchedule.RetreatLessonId = model.RetreatLessonId;
             existSchedule.UsedRoomId = model.UsedRoomId;
             existSchedule.LessonDate = model.LessonDate;
-            existSchedule.LessonStart = model.LessonStart;
-            existSchedule.LessonEnd = model.LessonEnd;
+            //existSchedule.LessonStart = model.LessonStart;
+            //existSchedule.LessonEnd = model.LessonEnd;
+            existSchedule.LessonStart = parsedLessonStart;
+            existSchedule.LessonEnd = parsedLessonEnd;
 
             _retreatScheduleRepository.Update(existSchedule);
 
@@ -139,17 +162,27 @@ namespace MCSM_Service.Implementations
             await _unitOfWork.SaveChanges();
         }
 
-        public async Task<bool> ValidateGroupAndRetreatIdMatch(Guid retreatId, Guid groupId)
-        {
-            var check = await _retreatGroupRepository.GetMany(g => g.Id == groupId && g.RetreatId == retreatId)
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
-            return check != null;
-        }
+        //public async Task<bool> ValidateGroupAndRetreatIdMatch(Guid retreatId, Guid groupId)
+        //{
+        //    var check = await _retreatGroupRepository.GetMany(g => g.Id == groupId && g.RetreatId == retreatId)
+        //        .AsNoTracking()
+        //        .FirstOrDefaultAsync();
+        //    return check != null;
+        //}
 
-        public async Task<bool> CheckOverlapSchedule(Guid retreatId, DateOnly lessonDate, TimeOnly lessonStart, TimeOnly lessonEnd)
+        public async Task<bool> CheckOverlapScheduleRetreat(Guid retreatId, DateOnly lessonDate, TimeOnly lessonStart, TimeOnly lessonEnd)
         {
             var schedule = await _retreatScheduleRepository.GetMany(rs => rs.RetreatId == retreatId && rs.LessonDate.Equals(lessonDate) 
+            && ((lessonStart >= rs.LessonStart && lessonStart < rs.LessonEnd) || (lessonEnd > rs.LessonStart && lessonEnd <= rs.LessonEnd) || (lessonStart <= rs.LessonStart && lessonEnd >= rs.LessonEnd)))
+            .AsNoTracking()
+            .AnyAsync();
+
+            return schedule;
+        }
+
+        public async Task<bool> CheckOverlapScheduleRoom(Guid roomId, DateOnly lessonDate, TimeOnly lessonStart, TimeOnly lessonEnd)
+        {
+            var schedule = await _retreatScheduleRepository.GetMany(rs => rs.UsedRoomId == roomId && rs.LessonDate.Equals(lessonDate)
             && ((lessonStart >= rs.LessonStart && lessonStart < rs.LessonEnd) || (lessonEnd > rs.LessonStart && lessonEnd <= rs.LessonEnd) || (lessonStart <= rs.LessonStart && lessonEnd >= rs.LessonEnd)))
             .AsNoTracking()
             .AnyAsync();

@@ -13,8 +13,12 @@ namespace MCSM_Data.Models.Requests.Put
 
         public DateOnly LessonDate { get; set; }
 
-        public TimeOnly LessonStart { get; set; }
+        //public TimeOnly LessonStart { get; set; }
 
-        public TimeOnly LessonEnd { get; set; }
+        //public TimeOnly LessonEnd { get; set; }
+
+        public string LessonStart { get; set; }
+
+        public string LessonEnd { get; set; }
     }
 }

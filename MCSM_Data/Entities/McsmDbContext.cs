@@ -711,10 +711,10 @@ public partial class McsmDbContext : DbContext
                 .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
                 .HasColumnType("datetime");
 
-            entity.HasOne(d => d.Group).WithMany(p => p.RetreatSchedules)
-                .HasForeignKey(d => d.GroupId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatSc__Group__3E723F9C");
+            //entity.HasOne(d => d.Group).WithMany(p => p.RetreatSchedules)
+            //    .HasForeignKey(d => d.GroupId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK__RetreatSc__Group__3E723F9C");
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.RetreatId)

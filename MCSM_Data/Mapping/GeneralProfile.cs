@@ -42,9 +42,9 @@ namespace MCSM_Data.Mapping
             CreateMap<RetreatRegistrationParticipant, RetreatRegistrationParticipantViewModel>();
 
             CreateMap<RetreatSchedule, RetreatScheduleViewModel>()
-                .ForMember(dest => dest.GroupName, otp => otp.MapFrom(retreatSched => retreatSched.Group.Name))
-                .ForMember(dest => dest.LessionTitle, otp => otp.MapFrom(retreatSched => retreatSched.RetreatLesson.Lesson.Title))
-                .ForMember(dest => dest.RoomName, otp => otp.MapFrom(retreatSched => retreatSched.UsedRoom.Name))
+                //.ForMember(dest => dest.GroupName, otp => otp.MapFrom(retreatSched => retreatSched.Group.Name))
+                .ForMember(dest => dest.LessonTitle, otp => otp.MapFrom(retreatSched => retreatSched.RetreatLesson.Lesson.Title))
+                //.ForMember(dest => dest.RoomName, otp => otp.MapFrom(retreatSched => retreatSched.UsedRoom.Name))
                 .ForMember(dest => dest.UsedRoom, otp => otp.MapFrom(retreatSched => retreatSched.UsedRoom));
             CreateMap<Room, RetreatScheduleViewModel>().ForMember(dest => dest.RoomName, otp => otp.MapFrom(room => room.Name));
 
