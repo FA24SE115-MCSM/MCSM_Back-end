@@ -78,24 +78,6 @@ CREATE TABLE DeviceToken(
 );
 GO
 
-DROP TABLE IF EXISTS Ingredient
-GO
---Table Ingredient
-CREATE TABLE Ingredient(
-	Id uniqueidentifier primary key NOT NULL,
-	Name nvarchar(50) NOT NULL
-);
-GO
-
-DROP TABLE IF EXISTS Allergy
-GO
---Table Allergy
-CREATE TABLE Allergy(
-	Id uniqueidentifier primary key NOT NULL,
-	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
-	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL
-);
-GO
 
 DROP TABLE IF EXISTS [Notification]
 GO
@@ -212,7 +194,7 @@ CREATE TABLE Payment(
 	Id nvarchar(255) primary key NOT NULL,
 	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
 	RetreatRegId uniqueidentifier foreign key references RetreatRegistration(Id) NOT NULL,
-	PaypalOrderId nvarchar(255) NOT NULL,
+	PaypalPaymentId nvarchar(255) NOT NULL,
 	PaymentMethod nvarchar(100) NOT NULL,
 	Amount decimal(16,2) NOT NULL,
 	[Description] nvarchar(255) NULL,
@@ -221,27 +203,7 @@ CREATE TABLE Payment(
 );
 GO
 
-DROP TABLE IF EXISTS RetreatGroup
-GO
---Table RetreatGroup
-CREATE TABLE RetreatGroup(
-	Id uniqueidentifier primary key NOT NULL,
-	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
-	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
-	RoomId uniqueidentifier unique foreign key references Room(Id) NOT NULL,
-	Name nvarchar(50) NOT NULL
-);
-GO
 
-DROP TABLE IF EXISTS RetreatGroupMember
-GO
---Table RetreatGroupMember
-CREATE TABLE RetreatGroupMember(
-	Id uniqueidentifier primary key NOT NULL,
-	GroupId uniqueidentifier foreign key references RetreatGroup(Id) NOT NULL,
-	MemberId uniqueidentifier foreign key references Account(Id) NOT NULL
-);
-GO
 
 DROP TABLE IF EXISTS Lesson
 GO
@@ -278,6 +240,28 @@ CREATE TABLE Room(
 	Capacity int NOT NULL,
 	[Status] nvarchar(20) NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
+);
+GO
+
+DROP TABLE IF EXISTS RetreatGroup
+GO
+--Table RetreatGroup
+CREATE TABLE RetreatGroup(
+	Id uniqueidentifier primary key NOT NULL,
+	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
+	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	RoomId uniqueidentifier unique foreign key references Room(Id) NOT NULL,
+	Name nvarchar(50) NOT NULL
+);
+GO
+
+DROP TABLE IF EXISTS RetreatGroupMember
+GO
+--Table RetreatGroupMember
+CREATE TABLE RetreatGroupMember(
+	Id uniqueidentifier primary key NOT NULL,
+	GroupId uniqueidentifier foreign key references RetreatGroup(Id) NOT NULL,
+	MemberId uniqueidentifier foreign key references Account(Id) NOT NULL
 );
 GO
 
@@ -349,6 +333,27 @@ CREATE TABLE ToolHistory(
 );
 GO
 
+------
+DROP TABLE IF EXISTS Ingredient
+GO
+--Table Ingredient
+CREATE TABLE Ingredient(
+	Id uniqueidentifier primary key NOT NULL,
+	Name nvarchar(50) NOT NULL
+);
+GO
+
+
+DROP TABLE IF EXISTS Allergy
+GO
+--Table Allergy
+CREATE TABLE Allergy(
+	Id uniqueidentifier primary key NOT NULL,
+	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL
+);
+GO
+
 DROP TABLE IF EXISTS DishType
 GO
 --Table DishType
@@ -365,11 +370,12 @@ CREATE TABLE Dish(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	DishTypeId uniqueidentifier foreign key references DishType(Id) NOT NULL,
+	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
 	[Name] nvarchar(50) NOT NULL,
-	IsHalal bit NOT NULL,
-	IsActive bit NOT NULL,
+	[Note] nvarchar(max) NULL,
+	[Status] nvarchar(20) NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
-	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
+	UpdateAt datetime
 );
 GO
 
@@ -389,13 +395,11 @@ GO
 CREATE TABLE Menu(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	DishId uniqueidentifier foreign key references Dish(Id) NOT NULL,
 	CookDate date NOT NULL,
-	IsBreakfast bit NOT NULL,
-	IsLunch bit NOT NULL,
-	IsDinner bit NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
-	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
-	IsActive bit NOT NULL
+	UpdateAt datetime NULL,
+	[Status] nvarchar(20) NOT NULL,
 );
 GO
 
@@ -465,10 +469,14 @@ CREATE TABLE Feedback(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
-	Content nvarchar(max) NOT NULL,
-	Rating int NOT NULL,
+	RetreatRating int NOT NULL,
+	MonkRating int NOT NULL,
+	RoomRating int NOT NULL,
+	FoodRating int NOT NULL,
+	YourExperience nvarchar(max),
+	Suggestion nvarchar(max),
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
-	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	UpdateAt datetime NULL,
 	IsDeleted bit NOT NULL
 );
 GO

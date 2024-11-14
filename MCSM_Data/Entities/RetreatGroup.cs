@@ -11,6 +11,8 @@ public partial class RetreatGroup
 
     public Guid MonkId { get; set; }
 
+    public Guid RoomId { get; set; }
+
     public string Name { get; set; } = null!;
 
     public virtual Account Monk { get; set; } = null!;
@@ -22,4 +24,6 @@ public partial class RetreatGroup
     public virtual ICollection<RetreatGroupMessage> RetreatGroupMessages { get; set; } = new List<RetreatGroupMessage>();
 
     public virtual ICollection<RetreatSchedule> RetreatSchedules { get; set; } = new List<RetreatSchedule>();
+
+    public virtual Room Room { get; set; } = null!;
 }

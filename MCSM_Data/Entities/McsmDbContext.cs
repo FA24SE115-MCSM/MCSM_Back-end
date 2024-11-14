@@ -94,11 +94,11 @@ public partial class McsmDbContext : DbContext
     {
         modelBuilder.Entity<Account>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Account__3214EC073010B20F");
+            entity.HasKey(e => e.Id).HasName("PK__Account__3214EC07504288FE");
 
             entity.ToTable("Account");
 
-            entity.HasIndex(e => e.Email, "UQ__Account__A9D10534C8278C0C").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__Account__A9D1053498B3B0BA").IsUnique();
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateAt)
@@ -117,12 +117,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Role).WithMany(p => p.Accounts)
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Account__RoleId__6A85CC04");
+                .HasConstraintName("FK__Account__RoleId__276EDEB3");
         });
 
         modelBuilder.Entity<Allergy>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Allergy__3214EC07C812681A");
+            entity.HasKey(e => e.Id).HasName("PK__Allergy__3214EC07852C515B");
 
             entity.ToTable("Allergy");
 
@@ -131,17 +131,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Account).WithMany(p => p.Allergies)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Allergy__Account__7D98A078");
+                .HasConstraintName("FK__Allergy__Account__0D7A0286");
 
             entity.HasOne(d => d.Ingredient).WithMany(p => p.Allergies)
                 .HasForeignKey(d => d.IngredientId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Allergy__Ingredi__7CA47C3F");
+                .HasConstraintName("FK__Allergy__Ingredi__0C85DE4D");
         });
 
         modelBuilder.Entity<Article>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Article__3214EC07A89B097C");
+            entity.HasKey(e => e.Id).HasName("PK__Article__3214EC073F8F3B26");
 
             entity.ToTable("Article");
 
@@ -159,12 +159,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Articles)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Article__Created__04459E07");
+                .HasConstraintName("FK__Article__Created__3B75D760");
         });
 
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC07B596ED4D");
+            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC07D5283FE1");
 
             entity.ToTable("Comment");
 
@@ -177,12 +177,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Post).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.PostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Comment__PostId__6E2152BE");
+                .HasConstraintName("FK__Comment__PostId__2BFE89A6");
         });
 
         modelBuilder.Entity<DeviceToken>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DeviceTo__3214EC0735609043");
+            entity.HasKey(e => e.Id).HasName("PK__DeviceTo__3214EC071D4D8961");
 
             entity.ToTable("DeviceToken");
 
@@ -195,12 +195,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Account).WithMany(p => p.DeviceTokens)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DeviceTok__Accou__76EBA2E9");
+                .HasConstraintName("FK__DeviceTok__Accou__33D4B598");
         });
 
         modelBuilder.Entity<Dish>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Dish__3214EC07EEF8A4D5");
+            entity.HasKey(e => e.Id).HasName("PK__Dish__3214EC074AECB070");
 
             entity.ToTable("Dish");
 
@@ -209,24 +209,28 @@ public partial class McsmDbContext : DbContext
                 .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
                 .HasColumnType("datetime");
             entity.Property(e => e.Name).HasMaxLength(50);
-            entity.Property(e => e.UpdateAt)
-                .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
-                .HasColumnType("datetime");
+            entity.Property(e => e.Status).HasMaxLength(20);
+            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Dishes)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Dish__CreatedBy__546180BB");
+                .HasConstraintName("FK__Dish__CreatedBy__123EB7A3");
 
             entity.HasOne(d => d.DishType).WithMany(p => p.Dishes)
                 .HasForeignKey(d => d.DishTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Dish__DishTypeId__5555A4F4");
+                .HasConstraintName("FK__Dish__DishTypeId__1332DBDC");
+
+            entity.HasOne(d => d.Ingredient).WithMany(p => p.Dishes)
+                .HasForeignKey(d => d.IngredientId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Dish__Ingredient__14270015");
         });
 
         modelBuilder.Entity<DishIngredient>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DishIngr__3214EC07E0ACF6BE");
+            entity.HasKey(e => e.Id).HasName("PK__DishIngr__3214EC0770B794CA");
 
             entity.ToTable("DishIngredient");
 
@@ -235,17 +239,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Dish).WithMany(p => p.DishIngredients)
                 .HasForeignKey(d => d.DishId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DishIngre__DishI__5A1A5A11");
+                .HasConstraintName("FK__DishIngre__DishI__17F790F9");
 
             entity.HasOne(d => d.Ingredient).WithMany(p => p.DishIngredients)
                 .HasForeignKey(d => d.IngredientId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__DishIngre__Ingre__5B0E7E4A");
+                .HasConstraintName("FK__DishIngre__Ingre__18EBB532");
         });
 
         modelBuilder.Entity<DishType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DishType__3214EC0755E22689");
+            entity.HasKey(e => e.Id).HasName("PK__DishType__3214EC07B72E70CC");
 
             entity.ToTable("DishType");
 
@@ -255,7 +259,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Feedback>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Feedback__3214EC07808465D6");
+            entity.HasKey(e => e.Id).HasName("PK__Feedback__3214EC0753192592");
 
             entity.ToTable("Feedback");
 
@@ -263,24 +267,22 @@ public partial class McsmDbContext : DbContext
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
                 .HasColumnType("datetime");
-            entity.Property(e => e.UpdateAt)
-                .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
-                .HasColumnType("datetime");
+            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Feedbacks)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Feedback__Create__77AABCF8");
+                .HasConstraintName("FK__Feedback__Create__3587F3E0");
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.Feedbacks)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Feedback__Retrea__789EE131");
+                .HasConstraintName("FK__Feedback__Retrea__367C1819");
         });
 
         modelBuilder.Entity<Ingredient>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Ingredie__3214EC07604D9B53");
+            entity.HasKey(e => e.Id).HasName("PK__Ingredie__3214EC079E1D54C1");
 
             entity.ToTable("Ingredient");
 
@@ -290,7 +292,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Lesson>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Lesson__3214EC07549F7EF6");
+            entity.HasKey(e => e.Id).HasName("PK__Lesson__3214EC0793C3458F");
 
             entity.ToTable("Lesson");
 
@@ -306,16 +308,16 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Lessons)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Lesson__CreatedB__2F2FFC0C");
+                .HasConstraintName("FK__Lesson__CreatedB__5DCAEF64");
         });
 
         modelBuilder.Entity<Level>(entity =>
         {
-            entity.HasKey(e => e.AccountId).HasName("PK__Level__349DA5A6D0F57714");
+            entity.HasKey(e => e.AccountId).HasName("PK__Level__349DA5A641E0E725");
 
             entity.ToTable("Level");
 
-            entity.HasIndex(e => e.AccountId, "UQ__Level__349DA5A7D9819045").IsUnique();
+            entity.HasIndex(e => e.AccountId, "UQ__Level__349DA5A7AD4B5474").IsUnique();
 
             entity.Property(e => e.AccountId).ValueGeneratedNever();
             entity.Property(e => e.RankName).HasMaxLength(50);
@@ -324,12 +326,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Account).WithOne(p => p.Level)
                 .HasForeignKey<Level>(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Level__AccountId__6F4A8121");
+                .HasConstraintName("FK__Level__AccountId__2C3393D0");
         });
 
         modelBuilder.Entity<Menu>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Menu__3214EC0796B8EC00");
+            entity.HasKey(e => e.Id).HasName("PK__Menu__3214EC077950443D");
 
             entity.ToTable("Menu");
 
@@ -337,19 +339,23 @@ public partial class McsmDbContext : DbContext
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
                 .HasColumnType("datetime");
-            entity.Property(e => e.UpdateAt)
-                .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
-                .HasColumnType("datetime");
+            entity.Property(e => e.Status).HasMaxLength(20);
+            entity.Property(e => e.UpdateAt).HasColumnType("datetime");
 
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Menus)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Menu__CreatedBy__5DEAEAF5");
+                .HasConstraintName("FK__Menu__CreatedBy__1BC821DD");
+
+            entity.HasOne(d => d.Dish).WithMany(p => p.Menus)
+                .HasForeignKey(d => d.DishId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Menu__DishId__1CBC4616");
         });
 
         modelBuilder.Entity<MenuDish>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__MenuDish__3214EC0719560CB7");
+            entity.HasKey(e => e.Id).HasName("PK__MenuDish__3214EC07481A1563");
 
             entity.ToTable("MenuDish");
 
@@ -358,17 +364,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Dish).WithMany(p => p.MenuDishes)
                 .HasForeignKey(d => d.DishId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__MenuDish__DishId__63A3C44B");
+                .HasConstraintName("FK__MenuDish__DishId__2180FB33");
 
             entity.HasOne(d => d.Menu).WithMany(p => p.MenuDishes)
                 .HasForeignKey(d => d.MenuId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__MenuDish__MenuId__62AFA012");
+                .HasConstraintName("FK__MenuDish__MenuId__208CD6FA");
         });
 
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Notifica__3214EC07FD3EBA13");
+            entity.HasKey(e => e.Id).HasName("PK__Notifica__3214EC070926476E");
 
             entity.ToTable("Notification");
 
@@ -383,12 +389,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Account).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Notificat__Accou__00750D23");
+                .HasConstraintName("FK__Notificat__Accou__37A5467C");
         });
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Payment__3214EC07A822E5F4");
+            entity.HasKey(e => e.Id).HasName("PK__Payment__3214EC07F7856123");
 
             entity.ToTable("Payment");
 
@@ -405,17 +411,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Account).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Payment__Account__05F8DC4F");
+                .HasConstraintName("FK__Payment__Account__3A4CA8FD");
 
             entity.HasOne(d => d.RetreatReg).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.RetreatRegId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Payment__Retreat__06ED0088");
+                .HasConstraintName("FK__Payment__Retreat__3B40CD36");
         });
 
         modelBuilder.Entity<Post>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Post__3214EC074CA0DBED");
+            entity.HasKey(e => e.Id).HasName("PK__Post__3214EC07D063E4C0");
 
             entity.ToTable("Post");
 
@@ -429,12 +435,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Posts)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Post__CreatedBy__668030F6");
+                .HasConstraintName("FK__Post__CreatedBy__245D67DE");
         });
 
         modelBuilder.Entity<PostImage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PostImag__3214EC074F3891F4");
+            entity.HasKey(e => e.Id).HasName("PK__PostImag__3214EC074F416B0C");
 
             entity.ToTable("PostImage");
 
@@ -446,18 +452,18 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Post).WithMany(p => p.PostImages)
                 .HasForeignKey(d => d.PostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__PostImage__PostI__6A50C1DA");
+                .HasConstraintName("FK__PostImage__PostI__282DF8C2");
         });
 
         modelBuilder.Entity<Profile>(entity =>
         {
-            entity.HasKey(e => e.AccountId).HasName("PK__Profile__349DA5A675F01A24");
+            entity.HasKey(e => e.AccountId).HasName("PK__Profile__349DA5A62AA28953");
 
             entity.ToTable("Profile");
 
-            entity.HasIndex(e => e.AccountId, "UQ__Profile__349DA5A720CF2AB9").IsUnique();
+            entity.HasIndex(e => e.AccountId, "UQ__Profile__349DA5A74C1EC435").IsUnique();
 
-            entity.HasIndex(e => e.PhoneNumber, "UQ__Profile__85FB4E3886949B4B").IsUnique();
+            entity.HasIndex(e => e.PhoneNumber, "UQ__Profile__85FB4E38CED7B186").IsUnique();
 
             entity.Property(e => e.AccountId).ValueGeneratedNever();
             entity.Property(e => e.Avatar).IsUnicode(false);
@@ -472,12 +478,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Account).WithOne(p => p.Profile)
                 .HasForeignKey<Profile>(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Profile__Account__740F363E");
+                .HasConstraintName("FK__Profile__Account__30F848ED");
         });
 
         modelBuilder.Entity<Reaction>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Reaction__3214EC07B058D999");
+            entity.HasKey(e => e.Id).HasName("PK__Reaction__3214EC074D34577D");
 
             entity.ToTable("Reaction");
 
@@ -489,17 +495,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Account).WithMany(p => p.Reactions)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Reaction__Accoun__73DA2C14");
+                .HasConstraintName("FK__Reaction__Accoun__31B762FC");
 
             entity.HasOne(d => d.Post).WithMany(p => p.Reactions)
                 .HasForeignKey(d => d.PostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Reaction__PostId__72E607DB");
+                .HasConstraintName("FK__Reaction__PostId__30C33EC3");
         });
 
         modelBuilder.Entity<Retreat>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Retreat__3214EC07D43864C2");
+            entity.HasKey(e => e.Id).HasName("PK__Retreat__3214EC07881AFD48");
 
             entity.ToTable("Retreat");
 
@@ -514,12 +520,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Retreats)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Retreat__Created__090A5324");
+                .HasConstraintName("FK__Retreat__Created__403A8C7D");
         });
 
         modelBuilder.Entity<RetreatFile>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatF__3214EC078B74472D");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatF__3214EC07C6C3274A");
 
             entity.ToTable("RetreatFile");
 
@@ -533,14 +539,16 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatFiles)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatFi__Retre__10AB74EC");
+                .HasConstraintName("FK__RetreatFi__Retre__47DBAE45");
         });
 
         modelBuilder.Entity<RetreatGroup>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC07F481E386");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC07B116EF48");
 
             entity.ToTable("RetreatGroup");
+
+            entity.HasIndex(e => e.RoomId, "UQ__RetreatG__328639384722701D").IsUnique();
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).HasMaxLength(50);
@@ -548,17 +556,22 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Monk).WithMany(p => p.RetreatGroups)
                 .HasForeignKey(d => d.MonkId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__MonkI__2882FE7D");
+                .HasConstraintName("FK__RetreatGr__MonkI__6A30C649");
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatGroups)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__Retre__278EDA44");
+                .HasConstraintName("FK__RetreatGr__Retre__693CA210");
+
+            entity.HasOne(d => d.Room).WithOne(p => p.RetreatGroup)
+                .HasForeignKey<RetreatGroup>(d => d.RoomId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__RetreatGr__RoomI__6B24EA82");
         });
 
         modelBuilder.Entity<RetreatGroupMember>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC07654530F4");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC07BEF9A21A");
 
             entity.ToTable("RetreatGroupMember");
 
@@ -567,17 +580,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Group).WithMany(p => p.RetreatGroupMembers)
                 .HasForeignKey(d => d.GroupId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__Group__2B5F6B28");
+                .HasConstraintName("FK__RetreatGr__Group__6E01572D");
 
             entity.HasOne(d => d.Member).WithMany(p => p.RetreatGroupMembers)
                 .HasForeignKey(d => d.MemberId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__Membe__2C538F61");
+                .HasConstraintName("FK__RetreatGr__Membe__6EF57B66");
         });
 
         modelBuilder.Entity<RetreatGroupMessage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC077D2F5C74");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC0730D5B582");
 
             entity.ToTable("RetreatGroupMessage");
 
@@ -592,17 +605,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.RetreatGroupMessages)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__Creat__442B18F2");
+                .HasConstraintName("FK__RetreatGr__Creat__7C4F7684");
 
             entity.HasOne(d => d.Group).WithMany(p => p.RetreatGroupMessages)
                 .HasForeignKey(d => d.GroupId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__Group__451F3D2B");
+                .HasConstraintName("FK__RetreatGr__Group__7D439ABD");
         });
 
         modelBuilder.Entity<RetreatLearningOutcome>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatL__3214EC079174FC35");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatL__3214EC0778B9F684");
 
             entity.ToTable("RetreatLearningOutcome");
 
@@ -616,12 +629,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatLearningOutcomes)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatLe__Retre__0CDAE408");
+                .HasConstraintName("FK__RetreatLe__Retre__440B1D61");
         });
 
         modelBuilder.Entity<RetreatLesson>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatL__3214EC073B299AFE");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatL__3214EC07FAB51A09");
 
             entity.ToTable("RetreatLesson");
 
@@ -630,17 +643,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Lesson).WithMany(p => p.RetreatLessons)
                 .HasForeignKey(d => d.LessonId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatLe__Lesso__3AA1AEB8");
+                .HasConstraintName("FK__RetreatLe__Lesso__72C60C4A");
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatLessons)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatLe__Retre__39AD8A7F");
+                .HasConstraintName("FK__RetreatLe__Retre__71D1E811");
         });
 
         modelBuilder.Entity<RetreatMonk>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatM__3214EC073932A3E4");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatM__3214EC079DC17CD6");
 
             entity.ToTable("RetreatMonk");
 
@@ -649,17 +662,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Monk).WithMany(p => p.RetreatMonks)
                 .HasForeignKey(d => d.MonkId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatMo__MonkI__01342732");
+                .HasConstraintName("FK__RetreatMo__MonkI__4BAC3F29");
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatMonks)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatMo__Retre__02284B6B");
+                .HasConstraintName("FK__RetreatMo__Retre__4CA06362");
         });
 
         modelBuilder.Entity<RetreatRegistration>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatR__3214EC07B4CFC23F");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatR__3214EC071443B7A5");
 
             entity.ToTable("RetreatRegistration");
 
@@ -675,34 +688,34 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreateByNavigation).WithMany(p => p.RetreatRegistrations)
                 .HasForeignKey(d => d.CreateBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatRe__Creat__1940BAED");
+                .HasConstraintName("FK__RetreatRe__Creat__4F7CD00D");
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatRegistrations)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatRe__Retre__1A34DF26");
+                .HasConstraintName("FK__RetreatRe__Retre__5070F446");
         });
 
         modelBuilder.Entity<RetreatRegistrationParticipant>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatR__3214EC07949F38C4");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatR__3214EC072CF03670");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
 
             entity.HasOne(d => d.Participant).WithMany(p => p.RetreatRegistrationParticipants)
                 .HasForeignKey(d => d.ParticipantId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatRe__Parti__7D63964E");
+                .HasConstraintName("FK__RetreatRe__Parti__5535A963");
 
             entity.HasOne(d => d.RetreatReg).WithMany(p => p.RetreatRegistrationParticipants)
                 .HasForeignKey(d => d.RetreatRegId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatRe__Retre__7E57BA87");
+                .HasConstraintName("FK__RetreatRe__Retre__5629CD9C");
         });
 
         modelBuilder.Entity<RetreatSchedule>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatS__3214EC07964EB414");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatS__3214EC0759F19CB9");
 
             entity.ToTable("RetreatSchedule");
 
@@ -714,25 +727,25 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Group).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.GroupId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatSc__Group__3E723F9C");
+                .HasConstraintName("FK__RetreatSc__Group__76969D2E");
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatSc__Retre__3D7E1B63");
+                .HasConstraintName("FK__RetreatSc__Retre__75A278F5");
 
             entity.HasOne(d => d.RetreatLesson).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.RetreatLessonId)
-                .HasConstraintName("FK__RetreatSc__Retre__3F6663D5");
+                .HasConstraintName("FK__RetreatSc__Retre__778AC167");
 
             entity.HasOne(d => d.UsedRoom).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.UsedRoomId)
-                .HasConstraintName("FK__RetreatSc__UsedR__405A880E");
+                .HasConstraintName("FK__RetreatSc__UsedR__787EE5A0");
         });
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Role__3214EC07EDA11067");
+            entity.HasKey(e => e.Id).HasName("PK__Role__3214EC0723FB5EB9");
 
             entity.ToTable("Role");
 
@@ -742,7 +755,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Room>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Room__3214EC077D8994C9");
+            entity.HasKey(e => e.Id).HasName("PK__Room__3214EC07B1D8DAF4");
 
             entity.ToTable("Room");
 
@@ -756,12 +769,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.RoomType).WithMany(p => p.Rooms)
                 .HasForeignKey(d => d.RoomTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Room__RoomTypeId__35DCF99B");
+                .HasConstraintName("FK__Room__RoomTypeId__6477ECF3");
         });
 
         modelBuilder.Entity<RoomType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RoomType__3214EC075504A72A");
+            entity.HasKey(e => e.Id).HasName("PK__RoomType__3214EC0719F885B7");
 
             entity.ToTable("RoomType");
 
@@ -771,7 +784,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Tool>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tool__3214EC07D41E4B4A");
+            entity.HasKey(e => e.Id).HasName("PK__Tool__3214EC07AE350112");
 
             entity.ToTable("Tool");
 
@@ -785,7 +798,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<ToolHistory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ToolHist__3214EC0721D0FB57");
+            entity.HasKey(e => e.Id).HasName("PK__ToolHist__3214EC0773A4E893");
 
             entity.ToTable("ToolHistory");
 
@@ -797,17 +810,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.ToolHistories)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ToolHisto__Creat__4CC05EF3");
+                .HasConstraintName("FK__ToolHisto__Creat__04E4BC85");
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.ToolHistories)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ToolHisto__Retre__4DB4832C");
+                .HasConstraintName("FK__ToolHisto__Retre__05D8E0BE");
 
             entity.HasOne(d => d.Tool).WithMany(p => p.ToolHistories)
                 .HasForeignKey(d => d.ToolId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ToolHisto__ToolI__4EA8A765");
+                .HasConstraintName("FK__ToolHisto__ToolI__06CD04F7");
         });
 
         OnModelCreatingPartial(modelBuilder);
