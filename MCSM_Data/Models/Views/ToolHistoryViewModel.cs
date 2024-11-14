@@ -8,7 +8,7 @@
 
         public DateTime CreateAt { get; set; }
 
-        //public virtual AccountViewModel CreatedBy { get; set; } = null!;
+        public virtual AccountViewModel Borrower { get; set; } = null!;
 
         public virtual RetreatViewModel Retreat { get; set; } = null!;
 

@@ -31,7 +31,8 @@ namespace MCSM_API.Configurations
             services.AddScoped<IDeviceTokenService, DeviceTokenService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IRetreatScheduleService, RetreatScheduleService>();
-            //services.AddScoped<IRetreatGroupMemberService, RetreatGroupMemberService>();
+
+            services.AddScoped<IPaymentService, PaymentService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)

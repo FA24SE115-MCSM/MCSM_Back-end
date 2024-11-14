@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace MCSM_Data.Entities;
 
-public partial class Rank
+public partial class Level
 {
-    public Guid Id { get; set; }
-
     public Guid AccountId { get; set; }
+
+    public string RoleType { get; set; } = null!;
 
     public int RankLevel { get; set; }
 

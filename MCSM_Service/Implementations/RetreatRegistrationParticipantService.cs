@@ -1,22 +1,18 @@
 ﻿using AutoMapper;
-using MCSM_Data.Repositories.Interfaces;
-using MCSM_Data;
-using MCSM_Service.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MCSM_Data.Models.Requests.Get;
-using MCSM_Data.Models.Views;
-using MCSM_Data.Repositories.Implementations;
-using Microsoft.EntityFrameworkCore;
 using AutoMapper.QueryableExtensions;
-using MCSM_Utility.Exceptions;
+using MCSM_Data;
 using MCSM_Data.Entities;
-using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Requests.Filters;
-using Org.BouncyCastle.Crypto;
+using MCSM_Data.Models.Requests.Get;
+using MCSM_Data.Models.Requests.Post;
+using MCSM_Data.Models.Views;
+using MCSM_Data.Repositories.Interfaces;
+using MCSM_Service.Interfaces;
+using MCSM_Utility.Constants;
+using MCSM_Utility.Exceptions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 
 namespace MCSM_Service.Implementations
 {
@@ -26,13 +22,20 @@ namespace MCSM_Service.Implementations
         private readonly IProfileRepository _profileRepository;
         private readonly IRetreatRegistrationRepository _retreatRegistrationRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly IRetreatRepository _retreatRepository;
+        private readonly IAccountService _accountService;
+        private readonly IRetreatRegistrationService _retreatRegistrationService;
 
-        public RetreatRegistrationParticipantService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+
+        public RetreatRegistrationParticipantService(IUnitOfWork unitOfWork, IMapper mapper, IAccountService accountService, IRetreatRegistrationService retreatRegistrationService) : base(unitOfWork, mapper)
         {
             _retreatRegistrationParticipantRepository = unitOfWork.RetreatRegistrationParticipant;
             _profileRepository = unitOfWork.Profile;
             _retreatRegistrationRepository = unitOfWork.RetreatRegistration;
             _accountRepository = unitOfWork.Account;
+            _retreatRepository = unitOfWork.Retreat;    
+            _accountService = accountService;
+            _retreatRegistrationService = retreatRegistrationService;
         }
 
         public async Task<ListViewModel<RetreatRegistrationParticipantViewModel>> GetRetreatRegistrationParticipants(RetreatRegistrationParticipantFilterModel filter, PaginationRequestModel pagination)
@@ -87,54 +90,91 @@ namespace MCSM_Service.Implementations
             };
         }
 
-        public async Task<ListViewModel<RetreatRegistrationParticipantViewModel>> CreateRetreatRegistrationParticipants(CreateRetreatRegistrationParticipantModel model)
+        
+
+        public async Task<RetreatRegistrationViewModel> CreateRetreatRegistrationParticipants(CreateRetreatRegistrationParticipantModel model)
         {
-            var participantsToAdd = new List<RetreatRegistrationParticipant>();
-            var addedParticipantId = new List<Guid>();
-            Guid retreatId = _retreatRegistrationRepository.GetMany(rr => rr.Id == model.retreatRegId).First().RetreatId;
-
-            foreach (string participantEmail in model.participantEmail)
+            var result = 0;
+            var newAccounts = new List<CreateAccountModel>();
+            var participants = new List<Guid>();
+            var retreatReg = await _retreatRegistrationRepository.GetMany(r => r.Id == model.RetreatRegId).Include(r => r.Retreat).FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat Registration not found");
+            if (retreatReg.IsPaid)
             {
-                Guid participantId = _accountRepository.GetMany(a => a.Email == participantEmail).First().Id;
-
-                bool isAlreadyRegistered = await CheckAlreadyRegistered(retreatId, participantId);
-
-                if (isAlreadyRegistered)
+                throw new ConflictException("Retreat Registration already paid");
+            }
+            if (retreatReg.IsDeleted)
+            {
+                throw new ConflictException("Retreat Registration is delete");
+            }
+            using (var transaction = _unitOfWork.Transaction())
+            {
+                try
                 {
-                    continue;
+                    var listAccounts = await GetAccountFromFile(model.File);
+                    
+                    foreach (var account in listAccounts)
+                    {
+                        var acc = await _accountRepository.GetMany(acc => acc.Email == account.Email).Include(acc => acc.Role).FirstOrDefaultAsync();
+                        if(acc == null)
+                        {
+                            newAccounts.Add(account);
+                            continue;
+                        }
+
+                        var isAlreadyRegistered = await IsValidAccountToRegistration(acc, retreatReg.RetreatId);
+                        if (isAlreadyRegistered)
+                        {
+                            continue;
+                        }
+                        participants.Add(acc.Id);
+
+                    }
+
+                    var numOfParticipants = newAccounts.Count + participants.Count;
+                    if (numOfParticipants > retreatReg.Retreat.RemainingSlots)
+                        throw new ConflictException("The number of registrants exceeded the remaining capacity of the retreat");
+
+                    var listNewAccountId = await _accountService.CreateNewAccountForRetreatRegistration(newAccounts);
+                    participants.AddRange(listNewAccountId);
+                    foreach (var accountId in participants)
+                    {
+                        var newParticipant = new RetreatRegistrationParticipant
+                        {
+                            Id = Guid.NewGuid(),
+                            RetreatRegId = model.RetreatRegId,
+                            ParticipantId = accountId,
+                        };
+                        _retreatRegistrationParticipantRepository.Add(newParticipant);
+                    }
+                    retreatReg.TotalParticipants += participants.Count;
+                    retreatReg.Retreat.RemainingSlots -= participants.Count;
+                    retreatReg.TotalCost = retreatReg.TotalParticipants * retreatReg.Retreat.Cost;
+                    _retreatRegistrationRepository.Update(retreatReg);
+                    result = await _unitOfWork.SaveChanges();
+                    
+                    transaction.Commit();
                 }
-
-                var participant = new RetreatRegistrationParticipant
+                catch (Exception)
                 {
-                    Id = Guid.NewGuid(),
-                    RetreatRegId = model.retreatRegId,
-                    ParticipantId = participantId
-                };
-
-                participantsToAdd.Add(participant);
-                addedParticipantId.Add(participant.Id);
+                    transaction.Rollback();
+                    throw;
+                }
             }
 
-            if (participantsToAdd.Any())
-            {
-                _retreatRegistrationParticipantRepository.AddRange(participantsToAdd);
-
-                var result = await _unitOfWork.SaveChanges();
-
-                if (result > 0)
-                {
-                    var retreatRegistration = await _retreatRegistrationRepository
-                        .GetMany(r => r.Id == model.retreatRegId)
-                        .FirstOrDefaultAsync() ?? throw new BadRequestException("Retreat registration not found.");
-
-                    retreatRegistration.TotalParticipants += participantsToAdd.Count;
-
-                    await _unitOfWork.SaveChanges();
-                }
-            }
-
-            return await GetRetreatRegistratingParticipants(addedParticipantId);
+            return result > 0 ? await _retreatRegistrationService.GetRetreatRegistration(model.RetreatRegId) : null!;
         }
+
+
+        private async Task<bool> IsValidAccountToRegistration(Account account, Guid retreatId)
+        {
+            if(account.Role.Name != AccountRole.Practitioner)
+            {
+                throw new BadRequestException($"Email '{account.Email}' is not associated with a Practitioner account");
+            }
+
+            return await CheckAlreadyRegistered(retreatId, account.Id);
+        }
+
 
         public async Task<bool> CheckAlreadyRegistered(Guid retreatId, Guid participantId)
         {
@@ -151,5 +191,42 @@ namespace MCSM_Service.Implementations
             return check != null;
         }
 
+
+        private async Task<List<CreateAccountModel>> GetAccountFromFile(IFormFile file)
+        {
+
+            if (file == null || file.Length <= 0)
+            {
+                throw new BadRequestException("No file uploaded");
+            }
+
+            var result = new List<CreateAccountModel>();
+
+            using (var stream = new MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var package = new ExcelPackage(stream))
+                {
+                    var workSheet = package.Workbook.Worksheets[0];
+                    var rowCount = workSheet.Dimension.Rows;
+                    for (int row = 3; row <= rowCount; row++)
+                    {
+                        var account = new CreateAccountModel
+                        {
+                            Email = workSheet.Cells[row, 2].Text,
+                            FirstName = workSheet.Cells[row, 3].Text,
+                            LastName = workSheet.Cells[row, 4].Text,
+                            DateOfBirth = DateTime.Parse(workSheet.Cells[row, 5].Text),
+                            PhoneNumber = workSheet.Cells[row, 6].Text,
+                            Gender = workSheet.Cells[row, 7].Text,
+                        };
+                        result.Add(account);
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }

@@ -6,11 +6,7 @@ namespace MCSM_Data.Models.Views
     {
         public Guid Id { get; set; }
 
-        public Guid MonkId { get; set; }
-
-        public string MonkFirstName { get; set; } = null!;
-
-        public string MonkLastName { get; set; } = null!;
+        public virtual AccountViewModel Monk { get; set; } = null!;
 
         public Guid RetreatId { get; set; }        
     }

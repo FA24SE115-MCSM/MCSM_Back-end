@@ -9,7 +9,7 @@ public partial class RetreatSchedule
 
     public Guid RetreatId { get; set; }
 
-    public Guid GroupId { get; set; }
+    //public Guid GroupId { get; set; }
 
     public Guid? RetreatLessonId { get; set; }
 

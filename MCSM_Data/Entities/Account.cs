@@ -33,17 +33,19 @@ public partial class Account
 
     public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
 
-    public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
+    public virtual Level? Level { get; set; }
 
     public virtual ICollection<Menu> Menus { get; set; } = new List<Menu>();
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
     public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
     public virtual Profile? Profile { get; set; }
 
-    public virtual ICollection<Rank> Ranks { get; set; } = new List<Rank>();
+    public virtual ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
 
     public virtual ICollection<RetreatGroupMember> RetreatGroupMembers { get; set; } = new List<RetreatGroupMember>();
 

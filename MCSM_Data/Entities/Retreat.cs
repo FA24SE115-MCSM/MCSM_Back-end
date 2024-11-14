@@ -15,7 +15,11 @@ public partial class Retreat
 
     public int Capacity { get; set; }
 
+    public int RemainingSlots { get; set; }
+
     public int Duration { get; set; }
+
+    public string? Description { get; set; }
 
     public DateOnly StartDate { get; set; }
 
@@ -23,11 +27,17 @@ public partial class Retreat
 
     public string Status { get; set; } = null!;
 
+    public DateTime CreateAt { get; set; }
+
     public virtual Account CreatedByNavigation { get; set; } = null!;
 
     public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 
+    public virtual ICollection<RetreatFile> RetreatFiles { get; set; } = new List<RetreatFile>();
+
     public virtual ICollection<RetreatGroup> RetreatGroups { get; set; } = new List<RetreatGroup>();
+
+    public virtual ICollection<RetreatLearningOutcome> RetreatLearningOutcomes { get; set; } = new List<RetreatLearningOutcome>();
 
     public virtual ICollection<RetreatLesson> RetreatLessons { get; set; } = new List<RetreatLesson>();
 

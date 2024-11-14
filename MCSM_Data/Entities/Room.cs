@@ -13,7 +13,7 @@ public partial class Room
 
     public int Capacity { get; set; }
 
-    public bool IsActive { get; set; }
+    public string Status { get; set; } = null!;
 
     public DateTime CreateAt { get; set; }
 

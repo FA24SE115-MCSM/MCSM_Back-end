@@ -9,8 +9,10 @@ using MCSM_Data.Models.Requests.Put;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
+using MCSM_Utility.Constants;
 using MCSM_Utility.Enums;
 using MCSM_Utility.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace MCSM_Service.Implementations
@@ -19,10 +21,16 @@ namespace MCSM_Service.Implementations
     {
         private readonly IRetreatRepository _retreatRepository;
         private readonly IAccountRepository _accountRepository;
-        public RetreatService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        private readonly IRetreatFileRepository _retreatFileRepository;
+        private readonly IRetreatLearningOutcomeRepository _retreatLearningOutcomeRepository;
+        private readonly ICloudStorageService _cloudStorageService;
+        public RetreatService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService) : base(unitOfWork, mapper)
         {
             _retreatRepository = unitOfWork.Retreat;
             _accountRepository = unitOfWork.Account;
+            _retreatFileRepository = unitOfWork.RetreatFile;
+            _retreatLearningOutcomeRepository = unitOfWork.RetreatLearningOutcome;
+            _cloudStorageService = cloudStorageService;
         }
 
         public async Task<ListViewModel<RetreatViewModel>> GetRetreats(RetreatFilterModel filter, PaginationRequestModel pagination)
@@ -41,7 +49,7 @@ namespace MCSM_Service.Implementations
 
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
-                .OrderBy(r => r.Name)
+                .OrderByDescending(r => r.CreateAt)
                 .Skip(pagination.PageNumber * pagination.PageSize)
                 .Take(pagination.PageSize);
 
@@ -71,26 +79,48 @@ namespace MCSM_Service.Implementations
 
         public async Task<RetreatViewModel> CreateRetreat(Guid accountId, CreateRetreatModel model)
         {
-            var endDate = GetEndDate(model.StartDate, model.Duration);
-            var retreatId = Guid.NewGuid();
-            var retreat = new Retreat
+            var result = 0;
+            var retreatId = Guid.Empty;
+
+            using(var transaction = _unitOfWork.Transaction())
             {
-                Id = retreatId,
-                CreatedBy = accountId,
-                Name = model.Name,
-                Cost = model.Cost,
-                Capacity = model.Capacity,
-                Duration = model.Duration,
-                StartDate = model.StartDate,
-                EndDate = endDate,
-                Status = GetRetreatStatus(model.Status),
+                try
+                {
+                    var endDate = GetEndDate(model.StartDate, model.Duration);
+                    retreatId = Guid.NewGuid();
+                    
+                    await UploadRetreatImage(retreatId, model.Images, false);
+                    await UploadRetreatDocument(retreatId, model.Documents, false);
+                    await AddLearningOutcome(retreatId, model.LearningOutcome, false);
+                    var retreat = new Retreat
+                    {
+                        Id = retreatId,
+                        CreatedBy = accountId,
+                        Name = model.Name,
+                        Cost = model.Cost,
+                        Capacity = model.Capacity,
+                        RemainingSlots = model.Capacity,
+                        Duration = model.Duration,
+                        Description = model.Description,
+                        StartDate = model.StartDate,
+                        EndDate = endDate,
+                        Status = RetreatStatus.Active.ToString()
+                    };
+                    _retreatRepository.Add(retreat);
+
+                    result = await _unitOfWork.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             };
-            _retreatRepository.Add(retreat);
-
-            var result = await _unitOfWork.SaveChanges();
-
             return result > 0 ? await GetRetreat(retreatId) : null!;
         }
+
+        
 
         public async Task<RetreatViewModel> UpdateRetreat(Guid id, UpdateRetreatModel model)
         {
@@ -99,8 +129,18 @@ namespace MCSM_Service.Implementations
 
             existRetreat.Name = model.Name ?? existRetreat.Name;
             existRetreat.Cost = model.Cost ?? existRetreat.Cost;
-            existRetreat.Capacity = model.Capacity ?? existRetreat.Capacity;
+            existRetreat.Description = model.Description ?? existRetreat.Description;
 
+            if (model.Capacity.HasValue)
+            {
+                var numOfRegistrants = existRetreat.Capacity - existRetreat.RemainingSlots;
+                if (model.Capacity < numOfRegistrants)
+                {
+                    throw new ConflictException($"The registration limit has been exceeded. The maximum capacity is {model.Capacity}, but there are currently {numOfRegistrants} registrants.");
+                }
+                existRetreat.Capacity = model.Capacity.Value;
+                existRetreat.RemainingSlots = model.Capacity.Value - numOfRegistrants;
+            }
 
             if (model.Duration.HasValue)
             {
@@ -117,6 +157,21 @@ namespace MCSM_Service.Implementations
             if (!string.IsNullOrEmpty(model.Status))
             {
                 existRetreat.Status = GetRetreatStatus(model.Status);
+            }
+
+            if(model.Images != null && model.Images.Count > 0)
+            {
+                await UploadRetreatImage(id, model.Images, true);
+            }
+
+            if(model.Documents != null && model.Documents.Count > 0)
+            {
+                await UploadRetreatDocument(id, model.Documents, true);
+            }
+
+            if(model.LearningOutcome != null && model.LearningOutcome.Count > 0)
+            {
+                await AddLearningOutcome(id, model.LearningOutcome, true);
             }
 
             _retreatRepository.Update(existRetreat);
@@ -263,14 +318,48 @@ namespace MCSM_Service.Implementations
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy thông tin");
 
             var startDate = query.Select(r => r.StartDate).FirstOrDefault();
-            var currentDay = (DateTime.UtcNow.Date - startDate.ToDateTime(TimeOnly.MinValue)).Days + 1;
+            var currentDay = Math.Max((DateTime.UtcNow.Date - startDate.ToDateTime(TimeOnly.MinValue)).Days + 1, 0);
             result.CurrentDay = currentDay;
 
-            result.CurrentProgress = result.Duration > 0
-                ? Math.Min((int)((double)currentDay / result.Duration * 100), 100)
-                : 0;
+            //result.CurrentProgress = result.Duration > 0
+            //    ? Math.Max(Math.Min((int)((double)currentDay / result.Duration * 100), 100), 0)
+            //    : 0;
+            decimal currentProgressValue = result.Duration > 0
+        ? Math.Max(Math.Min((int)((double)currentDay / result.Duration * 100), 100), 0)
+        : 0;
+            result.CurrentProgress = $"{currentProgressValue}%";
 
             return result;
+        }
+
+        public async Task<ListViewModel<RetreatViewModel>> GetRetreatsOfAccount(Guid profileId, RetreatFilterModel filter, PaginationRequestModel pagination)
+        {
+            var query = _retreatRepository.GetAll()
+                .Include(r => r.RetreatRegistrations)
+                .ThenInclude(rr => rr.RetreatRegistrationParticipants)
+                .Where(r => r.RetreatRegistrations
+                .Any(rg => rg.RetreatRegistrationParticipants
+                .Any(rgm => rgm.ParticipantId == profileId)) && r.Status != "Cancelled");
+            var totalRow = await query.AsNoTracking().CountAsync();
+            var paginatedQuery = query
+                .OrderByDescending(x => x.EndDate)
+                .Skip(pagination.PageNumber * pagination.PageSize)
+                .Take(pagination.PageSize);
+
+            var retreats = await paginatedQuery
+                .ProjectTo<RetreatViewModel>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+            return new ListViewModel<RetreatViewModel>
+            {
+                Pagination = new PaginationViewModel
+                {
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRow = totalRow,
+                },
+                Data = retreats
+            };
         }
     }
 }

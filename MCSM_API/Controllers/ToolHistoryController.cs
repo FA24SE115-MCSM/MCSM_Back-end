@@ -49,8 +49,7 @@ namespace MCSM_API.Controllers
         [SwaggerOperation(Summary = "Create tool history.")]
         public async Task<ActionResult<ToolHistoryViewModel>> CreateToolHistory([FromBody] CreateToolHistoryModel model)
         {
-            var auth = (AuthModel?)HttpContext.Items["User"];
-            var toolHistory = await _toolHistoryService.CreateToolHistory(auth!.Id ,model);
+            var toolHistory = await _toolHistoryService.CreateToolHistory(model);
             return CreatedAtAction(nameof(GetToolHistory), new { id = toolHistory.Id }, toolHistory);
         }
 

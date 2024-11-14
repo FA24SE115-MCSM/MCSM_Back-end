@@ -14,5 +14,6 @@ namespace MCSM_Service.Interfaces
         Task<RetreatViewModel> UpdateRetreat(Guid id, UpdateRetreatModel model);
         //----------------------------------------
         Task<ProgressTrackingViewModel> GetTrackingProgressOfRetreat(Guid retreatId);
+        Task<ListViewModel<RetreatViewModel>> GetRetreatsOfAccount(Guid profileId, RetreatFilterModel filter, PaginationRequestModel pagination);
     }
 }

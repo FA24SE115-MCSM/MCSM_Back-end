@@ -64,7 +64,7 @@ namespace MCSM_API.Controllers
         [Authorize(AccountRole.Admin, AccountRole.Monk)]
         [ProducesResponseType(typeof(RetreatScheduleViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
-        [SwaggerOperation(Summary = "Update retreat schedule.")]
+        [SwaggerOperation(Summary = "Update retreat schedule lesson and time.")]
         public async Task<ActionResult<RetreatScheduleViewModel>> UpdateRetreatSchedule([FromRoute] Guid id, [FromBody] UpdateRetreatScheduleModel model)
         {
             var schedule = await _retreatScheduleService.UpdateRetreatSchedule(id, model);

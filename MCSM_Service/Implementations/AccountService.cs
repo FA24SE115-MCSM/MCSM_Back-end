@@ -175,6 +175,46 @@ namespace MCSM_Service.Implementations
             return result > 0 ? await GetAccount(accountId) : null!;
         }
 
+        public async Task<List<Guid>> CreateNewAccountForRetreatRegistration(List<CreateAccountModel> listModel)
+        {
+            var result = new List<Guid>();
+            var participantId = await _roleRepository.GetMany(role => role.Name == AccountRole.Practitioner).Select(role => role.Id).FirstOrDefaultAsync();
+            foreach (var model in listModel)
+            {
+                await CheckUniquePhone(model.PhoneNumber);
+                model.RoleId = participantId;
+                var gender = await CheckRoleAndGender(model.RoleId, model.Gender);
+                var accountId = Guid.NewGuid();
+                model.Password = PasswordGenerator.GenerateRandomPassword();
+
+                var profile = new MCSM_Data.Entities.Profile
+                {
+                    AccountId = accountId,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    DateOfBirth = model.DateOfBirth,
+                    PhoneNumber = model.PhoneNumber,
+                    Gender = gender,
+                };
+                _profileRepository.Add(profile);
+
+                var account = new Account
+                {
+                    Id = accountId,
+                    RoleId = model.RoleId,
+                    HashPassword = PasswordHasher.HashPassword(model.Password),
+                    Email = model.Email,
+                    Status = AccountStatus.Pending.ToString(),
+                    VerifyToken = CreateVerifyToken()
+                };
+                _accountRepository.Add(account);
+                result.Add(accountId);
+                await _sendMailService.SendVerificationEmail(account.Email, account.VerifyToken, model.Password);
+                await _unitOfWork.SaveChanges();
+            }
+            return result;
+        }
+
         public async Task<AccountViewModel> UpdateAccount(Guid id, UpdateAccountModel model)
         {
             var profile = await _profileRepository.GetMany(account => account.AccountId == id).Include(profile => profile.Account).FirstOrDefaultAsync() ?? throw new NotFoundException("Account not found.");
@@ -336,6 +376,24 @@ namespace MCSM_Service.Implementations
                 }
             }
         }
+
+        private async Task CheckUniquePhone(string phoneNumber)
+        {
+            var existingAccount = await _accountRepository.GetMany(account => account.Profile != null && account.Profile.PhoneNumber == phoneNumber)
+                                        .Include(account => account.Profile)
+                                        .FirstOrDefaultAsync();
+
+            if (existingAccount != null)
+            {
+
+                if (existingAccount.Profile?.PhoneNumber == phoneNumber)
+                {
+                    throw new BadRequestException($"The phone number '{phoneNumber}' is already in use");
+                }
+            }
+        }
+
+
         private string GenerateJwtToken(AuthModel auth)
         {
             var tokenHandler = new JwtSecurityTokenHandler();

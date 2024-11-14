@@ -11,8 +11,8 @@ namespace MCSM_Data.Models.Views
     {
         public Guid Id { get; set; }
         public Guid RetreatId { get; set; }
-        public string GroupName { get; set; }
-        public string LessionTitle { get; set; }
+        //public string GroupName { get; set; }
+        public string LessonTitle { get; set; }
         public string RoomName { get; set; }
         public DateOnly LessonDate { get; set; }
         public TimeOnly LessonStart { get; set; }
