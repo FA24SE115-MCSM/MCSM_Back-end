@@ -17,6 +17,8 @@ public partial class Room
 
     public DateTime CreateAt { get; set; }
 
+    public virtual RetreatGroup? RetreatGroup { get; set; }
+
     public virtual ICollection<RetreatSchedule> RetreatSchedules { get; set; } = new List<RetreatSchedule>();
 
     public virtual RoomType RoomType { get; set; } = null!;

@@ -9,21 +9,19 @@ public partial class Menu
 
     public Guid CreatedBy { get; set; }
 
+    public Guid DishId { get; set; }
+
     public DateOnly CookDate { get; set; }
-
-    public bool IsBreakfast { get; set; }
-
-    public bool IsLunch { get; set; }
-
-    public bool IsDinner { get; set; }
 
     public DateTime CreateAt { get; set; }
 
-    public DateTime UpdateAt { get; set; }
+    public DateTime? UpdateAt { get; set; }
 
-    public bool IsActive { get; set; }
+    public string Status { get; set; } = null!;
 
     public virtual Account CreatedByNavigation { get; set; } = null!;
+
+    public virtual Dish Dish { get; set; } = null!;
 
     public virtual ICollection<MenuDish> MenuDishes { get; set; } = new List<MenuDish>();
 }
