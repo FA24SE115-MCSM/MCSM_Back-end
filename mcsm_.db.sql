@@ -281,7 +281,6 @@ GO
 CREATE TABLE RetreatSchedule(
 	Id uniqueidentifier primary key NOT NULL,
 	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
-	GroupId uniqueidentifier foreign key references RetreatGroup(Id) NOT NULL,
 	RetreatLessonId uniqueidentifier foreign key references RetreatLesson(Id),
 	UsedRoomId uniqueidentifier foreign key references Room(Id),
 	LessonDate date NOT NULL,

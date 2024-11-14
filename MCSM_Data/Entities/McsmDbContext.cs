@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -715,7 +715,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatSchedule>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatS__3214EC0759F19CB9");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatS__3214EC079499BA79");
 
             entity.ToTable("RetreatSchedule");
 
@@ -724,25 +724,18 @@ public partial class McsmDbContext : DbContext
                 .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
                 .HasColumnType("datetime");
 
-
-            entity.HasOne(d => d.Group).WithMany(p => p.RetreatSchedules)
-                .HasForeignKey(d => d.GroupId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatSc__Group__76969D2E");
-
-
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatSc__Retre__75A278F5");
+                .HasConstraintName("FK__RetreatSc__Retre__4F47C5E3");
 
             entity.HasOne(d => d.RetreatLesson).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.RetreatLessonId)
-                .HasConstraintName("FK__RetreatSc__Retre__778AC167");
+                .HasConstraintName("FK__RetreatSc__Retre__503BEA1C");
 
             entity.HasOne(d => d.UsedRoom).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.UsedRoomId)
-                .HasConstraintName("FK__RetreatSc__UsedR__787EE5A0");
+                .HasConstraintName("FK__RetreatSc__UsedR__51300E55");
         });
 
         modelBuilder.Entity<Role>(entity =>

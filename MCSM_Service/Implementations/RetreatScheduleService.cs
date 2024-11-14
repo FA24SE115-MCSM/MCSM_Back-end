@@ -33,7 +33,7 @@ namespace MCSM_Service.Implementations
 
         public async Task<ListViewModel<RetreatScheduleViewModel>> GetRetreatSchedulesOfARetreat(Guid retreatId, PaginationRequestModel pagination)
         {
-            var db = _retreatScheduleRepository.GetAll().Include(rs => rs.Group)
+            var db = _retreatScheduleRepository.GetAll()
                 .Include(rs => rs.Retreat)
                 .Include(rs => rs.RetreatLesson)
                 .Include(rs => rs.RetreatLesson.Lesson)
