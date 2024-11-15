@@ -44,6 +44,17 @@ namespace MCSM_API.Controllers
             return await _feedbackService.GetFeedback(id);
         }
 
+        [HttpGet]
+        [Route("account/feedbacks")]
+        [ProducesResponseType(typeof(FeedbackViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [SwaggerOperation(Summary = "Get feedback for current user.")]
+        public async Task<List<FeedbackViewModel>> GetFeedbackByAccount()
+        {
+            var auth = (AuthModel?)HttpContext.Items["User"];
+            return await _feedbackService.GetFeedbackByAccount(auth!.Id);
+        }
+
         [HttpPost]
         [ProducesResponseType(typeof(FeedbackViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]

@@ -88,6 +88,21 @@ namespace MCSM_Service.Implementations
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Feedback not found");
         }
 
+        public async Task<List<FeedbackViewModel>> GetFeedbackByAccount(Guid accountId)
+        {
+            var feedbackList = await _feedbackRepository.GetMany(r => r.CreatedBy == accountId)
+                .ProjectTo<FeedbackViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+
+            if (feedbackList == null || !feedbackList.Any())
+            {
+                throw new NotFoundException("No feedback found for the specified account.");
+            }
+            else
+            {
+                return feedbackList;
+            }
+        }
+
         public async Task<FeedbackViewModel> CreateFeedback(Guid accountId, CreateFeedbackModel model)
         {
             var feedbackId = Guid.NewGuid();
