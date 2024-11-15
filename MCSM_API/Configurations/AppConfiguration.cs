@@ -33,6 +33,8 @@ namespace MCSM_API.Configurations
             services.AddScoped<IRetreatScheduleService, RetreatScheduleService>();
 
             services.AddScoped<IPaymentService, PaymentService>();
+
+            services.AddScoped<IFeedbackService, FeedbackService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)

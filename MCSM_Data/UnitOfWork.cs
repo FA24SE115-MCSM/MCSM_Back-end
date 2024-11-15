@@ -30,6 +30,7 @@ namespace MCSM_Data
         private IRetreatLearningOutcomeRepository _retreatLearningOutcome = null!;
         private IRetreatScheduleRepository _retreatSchedule = null!;
         private IPaymentRepository _payment = null!;
+        private IFeedbackRepository _feedback = null!;
 
         public UnitOfWork(McsmDbContext context)
         {
@@ -137,6 +138,11 @@ namespace MCSM_Data
         public IPaymentRepository Payment
         {
             get { return _payment ??= new PaymentRepository(_context); }
+        }
+
+        public IFeedbackRepository Feedback
+        {
+            get { return _feedback ??= new FeedbackRepository(_context); }
         }
         public async Task<int> SaveChanges()
         {

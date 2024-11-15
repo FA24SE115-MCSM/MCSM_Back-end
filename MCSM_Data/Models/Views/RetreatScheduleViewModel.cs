@@ -18,6 +18,6 @@ namespace MCSM_Data.Models.Views
         public TimeOnly LessonStart { get; set; }
         public TimeOnly LessonEnd { get; set; }
         public DateTime CreateAt { get; set; }
-        public virtual RoomViewModel UsedRoom { get; set; } = null!;
+        public virtual RoomViewModel UsedRoom { get; set; }
     }
 }
