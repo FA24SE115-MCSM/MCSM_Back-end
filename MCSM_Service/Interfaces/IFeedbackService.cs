@@ -16,6 +16,7 @@ namespace MCSM_Service.Interfaces
         Task<ListViewModel<FeedbackViewModel>> GetFeedbacks(FeedbackFilterModel filter, PaginationRequestModel pagination);
         Task<FeedbackViewModel> GetFeedback(Guid id);
         Task<List<FeedbackViewModel>> GetFeedbackByAccount(Guid accountId);
+        Task<List<FeedbackViewModel>> GetFeedbackByRetreat(Guid retreatId);
         Task<FeedbackViewModel> CreateFeedback(Guid accountId, CreateFeedbackModel model);
         Task<FeedbackViewModel> UpdateFeedback(Guid feedbackId, UpdateFeedbackModel model);
         Task<FeedbackViewModel> SoftDeleteFeedback(Guid feedbackId);

@@ -12,16 +12,16 @@ namespace MCSM_Data.Models.Requests.Put
     {
 
         [Range(1, 5, ErrorMessage = "RetreatRating must be between 1 and 5.")]
-        public int RetreatRating { get; set; }
+        public int? RetreatRating { get; set; }
 
         [Range(1, 5, ErrorMessage = "MonkRating must be between 1 and 5.")]
-        public int MonkRating { get; set; }
+        public int? MonkRating { get; set; }
 
         [Range(1, 5, ErrorMessage = "RoomRating must be between 1 and 5.")]
-        public int RoomRating { get; set; }
+        public int? RoomRating { get; set; }
 
         [Range(1, 5, ErrorMessage = "FoodRating must be between 1 and 5.")]
-        public int FoodRating { get; set; }
+        public int? FoodRating { get; set; }
 
         public string? YourExperience { get; set; }
 

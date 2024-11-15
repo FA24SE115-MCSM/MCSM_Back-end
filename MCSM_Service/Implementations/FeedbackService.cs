@@ -90,17 +90,14 @@ namespace MCSM_Service.Implementations
 
         public async Task<List<FeedbackViewModel>> GetFeedbackByAccount(Guid accountId)
         {
-            var feedbackList = await _feedbackRepository.GetMany(r => r.CreatedBy == accountId)
+            return await _feedbackRepository.GetMany(f => f.CreatedBy == accountId && f.IsDeleted == false)
                 .ProjectTo<FeedbackViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+        }
 
-            if (feedbackList == null || !feedbackList.Any())
-            {
-                throw new NotFoundException("No feedback found for the specified account.");
-            }
-            else
-            {
-                return feedbackList;
-            }
+        public async Task<List<FeedbackViewModel>> GetFeedbackByRetreat(Guid retreatId)
+        {
+            return await _feedbackRepository.GetMany(f => f.RetreatId == retreatId && f.IsDeleted == false)
+                .ProjectTo<FeedbackViewModel>(_mapper.ConfigurationProvider).ToListAsync();
         }
 
         public async Task<FeedbackViewModel> CreateFeedback(Guid accountId, CreateFeedbackModel model)
@@ -131,10 +128,25 @@ namespace MCSM_Service.Implementations
         {
             var existFeedback = await _feedbackRepository.GetMany(r => r.Id == feedbackId).FirstOrDefaultAsync() ?? throw new NotFoundException("Feedback not found.");
 
-            existFeedback.RetreatRating = model.RetreatRating;
-            existFeedback.MonkRating = model.RetreatRating;
-            existFeedback.RoomRating = model.RoomRating;
-            existFeedback.FoodRating = model.FoodRating;
+            if (model.RetreatRating.HasValue)
+            {
+                existFeedback.RetreatRating = model.RetreatRating.Value;
+            }
+
+            if (model.MonkRating.HasValue)
+            {
+                existFeedback.MonkRating = model.MonkRating.Value;
+            }
+
+            if (model.RoomRating.HasValue)
+            {
+                existFeedback.RoomRating = model.RoomRating.Value;
+            }
+
+            if (model.FoodRating.HasValue)
+            {
+                existFeedback.FoodRating = model.FoodRating.Value;
+            }
             existFeedback.YourExperience = model.YourExperience ?? existFeedback.YourExperience;
             existFeedback.Suggestion = model.Suggestion ?? existFeedback.Suggestion;
             existFeedback.UpdateAt = DateTime.UtcNow;
