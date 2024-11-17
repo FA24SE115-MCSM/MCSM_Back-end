@@ -1,4 +1,5 @@
-﻿using MCSM_Utility.Helpers.PayPalPayment.Models;
+﻿using MCSM_Utility.Exceptions;
+using MCSM_Utility.Helpers.PayPalPayment.Models;
 using MCSM_Utility.Settings;
 using System.Net.Http.Headers;
 using System.Text;
@@ -61,5 +62,58 @@ namespace MCSM_Utility.Helpers.PayPalPayment
 
             return paymentResponse ?? throw new Exception("Unable to retrieve PayPal response.");
         }
+
+        // Phương thức hoàn tiền qua PayPal
+        public static async Task<PayPalPayoutResponse> CreatePayoutAsync(PayPalPayoutModel model, AppSetting appSettings)
+        {
+            var accessToken = await GetAccessTokenAsync(appSettings);
+
+            var payoutRequest = new
+            {
+                sender_batch_header = new
+                {
+                    email_subject = "Refund Request",
+                    recipient_type = "EMAIL"
+                },
+                items = new[]
+                    {
+                        new
+                        {
+                            recipient_wallet = "PAYPAL",
+                            amount = new
+                            {
+                                value = model.Amount.ToString("F2"),
+                                currency = "USD"
+                            },
+                            receiver = model.EmailPaypal,
+                            note = "Refund for Retreat Registration",
+                            sender_item_id = model.ParticipantId.ToString(),
+                        }   
+                }
+            };
+
+            var requestContent = new StringContent(JsonSerializer.Serialize(payoutRequest), Encoding.UTF8, "application/json");
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{appSettings.PayPal.BaseUrl}/v1/payments/payouts");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Content = requestContent;
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorResponse = await response.Content.ReadAsStringAsync();
+                var errorModel = JsonSerializer.Deserialize<PayoutErrorModel>(errorResponse);
+                throw new ConflictException(errorModel!.Message);
+                //throw new Exception($"PayPal payout failed. Status code: {response.StatusCode}. Response: {errorResponse}");
+            }
+
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            var payoutResponse = JsonSerializer.Deserialize<PayPalPayoutResponse>(jsonResponse);
+
+            return payoutResponse;
+        }
+
     }
 }
+

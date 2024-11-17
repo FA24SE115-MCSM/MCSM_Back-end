@@ -12,6 +12,8 @@ namespace MCSM_Service.Interfaces
         Task<PayPalReturnModel> CreatePayment(Guid retreatRegId);
         Task<PaymentViewModel> UpdatePaymentStatus(PayPalPaymentReturn model, PaymentStatus status);
         Task<PaymentViewModel> PayPalPaymentCancel(PayPalCancelModel model);
+        Task<RefundViewModel> RefundPayment(Guid accountId, CreateRefundModel model);
+        Task UpdateRefund(string refundId);
 
         //----------------------------------------------------------------
         Task<ListViewModel<PaymentViewModel>> ViewCustomerPaymentHistory(Guid customerId, PaginationRequestModel pagination);

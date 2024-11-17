@@ -3,7 +3,9 @@
     public enum RetreatStatus
     {
         Active,
-        InActive
+        InActive,
+        Open,
+        Close
 
         //open
         //close

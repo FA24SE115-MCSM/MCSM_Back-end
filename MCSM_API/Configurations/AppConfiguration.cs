@@ -1,4 +1,7 @@
-﻿using MCSM_API.Configurations.Middleware;
+﻿using Hangfire;
+using Hangfire.SqlServer;
+using HangfireBasicAuthenticationFilter;
+using MCSM_API.Configurations.Middleware;
 using MCSM_Data;
 using MCSM_Service.Implementations;
 using MCSM_Service.Interfaces;
@@ -22,6 +25,7 @@ namespace MCSM_API.Configurations
             services.AddScoped<ILessonService, LessonService>();
             services.AddScoped<IRetreatLessonService, RetreatLessonService>();
             services.AddScoped<IRetreatMonkService, RetreatMonkService>();
+            services.AddScoped<IRetreatGroupService, RetreatGroupService>();
             services.AddScoped<IRetreatRegistrationService, RetreatRegistrationService>();
             services.AddScoped<IRetreatRegistrationParticipantService, RetreatRegistrationParticipantService>();
             services.AddScoped<IRetreatRegistrationParticipantService, RetreatRegistrationParticipantService>();
@@ -90,6 +94,55 @@ namespace MCSM_API.Configurations
         public static void UseExceptionHandling(this IApplicationBuilder app)
         {
             app.UseMiddleware<ExceptionHandlingMiddleware>();
+        }
+
+
+        public static void AddHangfireDashboard(this IApplicationBuilder app)
+        {
+            app.UseHangfireDashboard("/hangfire/job-dashboard", new DashboardOptions
+            {
+                DashboardTitle = "Hangfire Job of Plum-Village server",
+                DarkModeEnabled = true,
+                IgnoreAntiforgeryToken = true,
+                Authorization = new[]
+                {
+                    new HangfireCustomBasicAuthenticationFilter
+                    {
+                        User = "admin.mcsm",
+                        Pass = "admin.mcsm.@.@"
+                    }
+                }
+            });
+        }
+
+        public static void AddHangfireServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHangfire(config =>
+            {
+                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection"), new SqlServerStorageOptions
+                    {
+                        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                        QueuePollInterval = TimeSpan.Zero,
+                        UseRecommendedIsolationLevel = true,
+                        DisableGlobalLocks = true
+                    });
+            });
+
+            services.AddHangfireServer();
+        }
+
+        public static void AddHangfireJobs(this IServiceProvider serviceProvider, IRecurringJobManager recurringJobManager)
+        {
+            recurringJobManager.AddOrUpdate(
+                "DivideGroupOfRetreat",
+                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IRetreatGroupService>().DivideGroup(),
+                "0 17 * * *"
+            );
+
         }
     }
 }

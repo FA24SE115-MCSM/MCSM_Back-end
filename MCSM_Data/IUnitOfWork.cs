@@ -27,6 +27,7 @@ namespace MCSM_Data
         public IRetreatLearningOutcomeRepository RetreatLearningOutcome { get; }
         public IRetreatScheduleRepository RetreatSchedule { get; }
         public IPaymentRepository Payment { get; }
+        public IRefundRepository Refund { get; }
 
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

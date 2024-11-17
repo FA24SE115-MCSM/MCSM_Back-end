@@ -12,6 +12,4 @@ public partial class Ingredient
     public virtual ICollection<Allergy> Allergies { get; set; } = new List<Allergy>();
 
     public virtual ICollection<DishIngredient> DishIngredients { get; set; } = new List<DishIngredient>();
-
-    public virtual ICollection<Dish> Dishes { get; set; } = new List<Dish>();
 }

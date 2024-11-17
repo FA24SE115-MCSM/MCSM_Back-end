@@ -53,6 +53,18 @@ namespace MCSM_API.Controllers
         }
 
         [HttpPost]
+        [Route("refund-money")]
+        [Authorize(AccountRole.Practitioner)]
+        [ProducesResponseType(typeof(RefundViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Create Refund payment.")]
+        public async Task<ActionResult<RefundViewModel>> Refund([FromBody]CreateRefundModel model)
+        {
+            var auth = (AuthModel?)HttpContext.Items["User"];
+            var refund = await _payPalService.RefundPayment(auth!.Id, model);
+            return CreatedAtAction(nameof(Refund), new { id = model.RetreatRegId }, refund);
+        }
+
+        [HttpPost]
         [Route("payment-success")]
         [ProducesResponseType(typeof(PayPalReturnModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Return PayPal payment success.")]
@@ -82,16 +94,26 @@ namespace MCSM_API.Controllers
             dynamic webhookEvent = JsonConvert.DeserializeObject(body)!;
             string eventType = webhookEvent.event_type;
 
-            if (eventType == "PAYMENT.SALE.COMPLETED")
+            switch (eventType)
             {
-                var saleId = (string)webhookEvent.resource.id;
-                var retreatRegId = (Guid)webhookEvent.resource.custom_id; 
+                case "PAYMENT.SALE.COMPLETED":
+                    var saleId = (string)webhookEvent.resource.id;
+                    Console.WriteLine($"Sale completed. SaleId: {saleId}");
 
-                Console.WriteLine($"retreatRegId: {retreatRegId}");
+                    break;
 
+                case "PAYMENT.PAYOUTS-ITEM.SUCCEEDED":
+                    string payoutBatchId = webhookEvent.resource.payout_batch_id;
+                    Console.WriteLine($"Sale is pending. payoutBatchId: {payoutBatchId}");
+                    await _payPalService.UpdateRefund(payoutBatchId);
+
+                    break;
+                default:
+                    Console.WriteLine($"Unhandled event type: {eventType}");
+                    break;
             }
 
-            return Ok();
+            return Ok(); // Trả về kết quả OK cho PayPal
         }
 
         //------------------------------------------------------------

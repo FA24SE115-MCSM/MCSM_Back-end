@@ -11,8 +11,6 @@ public partial class Dish
 
     public Guid DishTypeId { get; set; }
 
-    public Guid IngredientId { get; set; }
-
     public string Name { get; set; } = null!;
 
     public string? Note { get; set; }
@@ -29,9 +27,5 @@ public partial class Dish
 
     public virtual DishType DishType { get; set; } = null!;
 
-    public virtual Ingredient Ingredient { get; set; } = null!;
-
     public virtual ICollection<MenuDish> MenuDishes { get; set; } = new List<MenuDish>();
-
-    public virtual ICollection<Menu> Menus { get; set; } = new List<Menu>();
 }

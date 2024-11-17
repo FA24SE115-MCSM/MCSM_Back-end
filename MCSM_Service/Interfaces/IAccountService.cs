@@ -21,5 +21,6 @@ namespace MCSM_Service.Interfaces
         Task VerifyAccount(string token);
         Task ResetPassword(ResetPasswordModel model);
         Task<List<Guid>> CreateNewAccountForRetreatRegistration(List<CreateAccountModel> listModel);
+        Task<DharmaNameViewModel> GetDharmaName(Guid accountId, CreateDharmaNameModel model);
     }
 }

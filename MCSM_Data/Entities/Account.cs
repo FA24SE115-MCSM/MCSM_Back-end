@@ -47,6 +47,8 @@ public partial class Account
 
     public virtual ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
 
+    public virtual ICollection<Refund> Refunds { get; set; } = new List<Refund>();
+
     public virtual ICollection<RetreatGroupMember> RetreatGroupMembers { get; set; } = new List<RetreatGroupMember>();
 
     public virtual ICollection<RetreatGroupMessage> RetreatGroupMessages { get; set; } = new List<RetreatGroupMessage>();

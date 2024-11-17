@@ -119,6 +119,7 @@ CREATE TABLE Retreat(
 	Cost decimal(16,2) NOT NULL,
 	Capacity int NOT NULL,
 	RemainingSlots int NOT NULL,
+	DharmaNamePrefix nvarchar(100) NULL,
 	Duration int NOT NULL,
 	[Description] nvarchar(max) NULL,
 	StartDate date NOT NULL,
@@ -127,6 +128,10 @@ CREATE TABLE Retreat(
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO
+
+--ALTER TABLE Retreat
+--ADD DharmaNamePrefix nvarchar(100) NULL;
+--GO
 
 DROP TABLE IF EXISTS RetreatLearningOutcome
 GO
@@ -184,6 +189,21 @@ CREATE TABLE RetreatRegistrationParticipants(
 	Id uniqueidentifier primary key NOT NULL,
 	ParticipantId uniqueidentifier foreign key references Account(Id) NOT NULL,
 	RetreatRegId uniqueidentifier foreign key references RetreatRegistration(Id) NOT NULL,
+);
+GO
+
+DROP TABLE IF EXISTS Refund;
+GO
+CREATE TABLE Refund (
+    Id nvarchar(255) PRIMARY KEY NOT NULL,
+    RetreatRegId uniqueidentifier foreign key references RetreatRegistration(Id) NOT NULL,
+	ParticipantId uniqueidentifier foreign key references Account(Id) NOT NULL,
+    RefundAmount decimal(16,2) NOT NULL,              
+	TotalAmount decimal(16,2) NOT NULL,                            
+    RefundReason nvarchar(max) NOT NULL,             
+    EmailPaypal nvarchar(255) NOT NULL,  
+	[Status] nvarchar(100) NOT NULL,
+    CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 );
 GO
 
@@ -369,7 +389,6 @@ CREATE TABLE Dish(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
 	DishTypeId uniqueidentifier foreign key references DishType(Id) NOT NULL,
-	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
 	[Name] nvarchar(50) NOT NULL,
 	[Note] nvarchar(max) NULL,
 	[Status] nvarchar(20) NOT NULL,
@@ -383,8 +402,8 @@ GO
 --Table DishIngredient
 CREATE TABLE DishIngredient(
 	Id uniqueidentifier primary key NOT NULL,
-	DishId uniqueidentifier foreign key references Dish(Id) NOT NULL,
-	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL
+	DishId uniqueidentifier foreign key references Dish(Id) NULL,
+	IngredientId uniqueidentifier foreign key references Ingredient(Id) NULL
 );
 GO
 
@@ -394,7 +413,6 @@ GO
 CREATE TABLE Menu(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
-	DishId uniqueidentifier foreign key references Dish(Id) NOT NULL,
 	CookDate date NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime NULL,
@@ -407,8 +425,8 @@ GO
 --Table MenuDish
 CREATE TABLE MenuDish(
 	Id uniqueidentifier primary key NOT NULL,
-	MenuId uniqueidentifier foreign key references Menu(Id) NOT NULL,
-	DishId uniqueidentifier foreign key references Dish(Id) NOT NULL
+	MenuId uniqueidentifier foreign key references Menu(Id) NULL,
+	DishId uniqueidentifier foreign key references Dish(Id) NULL
 );
 GO
 
