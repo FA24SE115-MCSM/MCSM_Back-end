@@ -63,6 +63,33 @@ namespace MCSM_Service.Implementations
             };
         }
 
+        public async Task<ListViewModel<RetreatScheduleViewModel>> GetAllRetreatSchedule(PaginationRequestModel pagination)
+        {
+            var query = _retreatScheduleRepository.GetAll();
+
+            var totalRow = await query.AsNoTracking().CountAsync();
+            var paginatedQuery = query
+                .OrderByDescending(r => r.CreateAt)
+                .Skip(pagination.PageNumber * pagination.PageSize)
+                .Take(pagination.PageSize);
+
+            var retreatSchedule = await paginatedQuery
+                .ProjectTo<RetreatScheduleViewModel>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return new ListViewModel<RetreatScheduleViewModel>
+            {
+                Pagination = new PaginationViewModel
+                {
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRow = totalRow,
+                },
+                Data = retreatSchedule
+            };
+        }
+
         public async Task<RetreatScheduleViewModel> GetRetreatSchedule(Guid id)
         {
             return await _retreatScheduleRepository.GetMany(r => r.Id == id)

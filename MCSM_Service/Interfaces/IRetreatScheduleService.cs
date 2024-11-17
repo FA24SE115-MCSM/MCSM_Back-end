@@ -13,6 +13,7 @@ namespace MCSM_Service.Interfaces
     public interface IRetreatScheduleService
     {
         Task<ListViewModel<RetreatScheduleViewModel>> GetRetreatSchedulesOfARetreat(Guid retreatId, PaginationRequestModel pagination);
+        Task<ListViewModel<RetreatScheduleViewModel>> GetAllRetreatSchedule(PaginationRequestModel pagination);
         Task<RetreatScheduleViewModel> GetRetreatSchedule(Guid id);
         Task<RetreatScheduleViewModel> CreateRetreatSchedule(CreateRetreatScheduleModel model);
         Task<RetreatScheduleViewModel> UpdateRetreatSchedule(Guid id, UpdateRetreatScheduleModel model);
