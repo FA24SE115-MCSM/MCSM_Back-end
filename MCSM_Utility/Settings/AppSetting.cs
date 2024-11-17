@@ -12,5 +12,6 @@
 
         public MailKitSetting MailKit { get; set; } = null!;
         public PayPalSetting PayPal { get; set; } = null!;
+        public DharmaNameSetting DharmaName { get; set; } = null!;
     }
 }

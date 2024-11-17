@@ -27,6 +27,8 @@ public partial class RetreatRegistration
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
+    public virtual ICollection<Refund> Refunds { get; set; } = new List<Refund>();
+
     public virtual Retreat Retreat { get; set; } = null!;
 
     public virtual ICollection<RetreatRegistrationParticipant> RetreatRegistrationParticipants { get; set; } = new List<RetreatRegistrationParticipant>();

@@ -107,5 +107,18 @@ namespace MCSM_API.Controllers
                 message = "Password has been reset and sent to your email!"
             });
         }
+
+        [HttpPost]
+        [Route("dharma-name")]
+        [Authorize(AccountRole.Practitioner)]
+        [ProducesResponseType(typeof(AccountViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Get Dharma Name.")]
+        public async Task<ActionResult<DharmaNameViewModel>> GetDharmaName([FromBody] CreateDharmaNameModel model)
+        {
+            var auth = (AuthModel?)HttpContext.Items["User"];
+            var dharmaName = await _accountService.GetDharmaName(auth!.Id, model);
+            return Ok(dharmaName);
+        }
     }
 }

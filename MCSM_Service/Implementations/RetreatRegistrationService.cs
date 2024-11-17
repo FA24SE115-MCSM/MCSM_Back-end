@@ -198,9 +198,9 @@ namespace MCSM_Service.Implementations
         private async Task<Retreat> CheckRetreat(Guid retreatId, Guid accountId)
         {
             var retreat = await _retreatRepository.GetMany(retreat => retreat.Id == retreatId).FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat not found");
-            if (retreat.Status == RetreatStatus.InActive.ToString())
+            if (retreat.Status != RetreatStatus.Open.ToString())
             {
-                throw new BadRequestException("This retreat is currently inactive. Please check back later.");
+                throw new BadRequestException("This retreat is currently not open. Please check back later.");
             }
 
             if (retreat.RemainingSlots == 0)
