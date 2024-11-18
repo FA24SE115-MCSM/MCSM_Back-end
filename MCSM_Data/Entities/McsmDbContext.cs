@@ -91,8 +91,6 @@ public partial class McsmDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     { }
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//    => optionsBuilder.UseSqlServer("Server=GOD-HAMMER\\HAMMER;Database=MCSM_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -561,34 +559,33 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatGroup>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC079DD70682");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC07352AE1BC");
 
             entity.ToTable("RetreatGroup");
 
-            entity.HasIndex(e => e.RoomId, "UQ__RetreatG__3286393864C4A893").IsUnique();
+            entity.HasIndex(e => e.RoomId, "UQ__RetreatG__32863938307A05F3").IsUnique();
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).HasMaxLength(50);
 
             entity.HasOne(d => d.Monk).WithMany(p => p.RetreatGroups)
                 .HasForeignKey(d => d.MonkId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__MonkI__65F62111");
+                .HasConstraintName("FK__RetreatGr__MonkI__361203C5");
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatGroups)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__Retre__6501FCD8");
+                .HasConstraintName("FK__RetreatGr__Retre__351DDF8C");
 
             entity.HasOne(d => d.Room).WithOne(p => p.RetreatGroup)
                 .HasForeignKey<RetreatGroup>(d => d.RoomId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__RoomI__66EA454A");
+                .HasConstraintName("FK__RetreatGr__RoomI__370627FE");
         });
 
         modelBuilder.Entity<RetreatGroupMember>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC074829726F");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC07CDB0C608");
 
             entity.ToTable("RetreatGroupMember");
 
@@ -597,17 +594,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Group).WithMany(p => p.RetreatGroupMembers)
                 .HasForeignKey(d => d.GroupId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__Group__69C6B1F5");
+                .HasConstraintName("FK__RetreatGr__Group__39E294A9");
 
             entity.HasOne(d => d.Member).WithMany(p => p.RetreatGroupMembers)
                 .HasForeignKey(d => d.MemberId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__Membe__6ABAD62E");
+                .HasConstraintName("FK__RetreatGr__Membe__3AD6B8E2");
         });
 
         modelBuilder.Entity<RetreatGroupMessage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC07032AAE7E");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC0717945384");
 
             entity.ToTable("RetreatGroupMessage");
 
@@ -622,12 +619,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.RetreatGroupMessages)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__Creat__7720AD13");
+                .HasConstraintName("FK__RetreatGr__Creat__3DB3258D");
 
             entity.HasOne(d => d.Group).WithMany(p => p.RetreatGroupMessages)
                 .HasForeignKey(d => d.GroupId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__RetreatGr__Group__7814D14C");
+                .HasConstraintName("FK__RetreatGr__Group__3EA749C6");
         });
 
         modelBuilder.Entity<RetreatLearningOutcome>(entity =>

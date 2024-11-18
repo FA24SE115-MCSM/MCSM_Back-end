@@ -1,4 +1,6 @@
-﻿namespace MCSM_Data.Models.Views
+﻿using MCSM_Data.Entities;
+
+namespace MCSM_Data.Models.Views
 {
     public class PaymentViewModel
     {
@@ -20,6 +22,7 @@
         public DateTime CreateAt { get; set; }
 
         public virtual AccountViewModel Account { get; set; } = null!;
+        public virtual RetreatRegistrationViewModel RetreatReg { get; set; } = null!;
 
     }
 }

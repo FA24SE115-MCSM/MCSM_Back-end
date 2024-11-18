@@ -269,7 +269,7 @@ GO
 CREATE TABLE RetreatGroup(
 	Id uniqueidentifier primary key NOT NULL,
 	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
-	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	MonkId uniqueidentifier foreign key references Account(Id) NULL,
 	RoomId uniqueidentifier unique foreign key references Room(Id) NOT NULL,
 	Name nvarchar(50) NOT NULL
 );
