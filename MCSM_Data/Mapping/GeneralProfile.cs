@@ -79,12 +79,7 @@ namespace MCSM_Data.Mapping
             CreateMap<RetreatFile, RetreatDocumentViewModel>();
             CreateMap<RetreatLearningOutcome, RetreatLearningOutcomeViewModel>();
             CreateMap<Payment, PaymentViewModel>()
-                .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(payment => payment.RetreatReg.Retreat.Name))
-                .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(payment => payment.Account.Email))
-                .ForMember(dest => dest.RegisteredEmails, opt => opt.MapFrom(payment => payment.RetreatReg.RetreatRegistrationParticipants
-                          .Select(participant => participant.Participant.Email).ToList()))
-                .ForMember(dest => dest.RegisteredPhoneNumber, opt => opt.MapFrom(payment => payment.RetreatReg.RetreatRegistrationParticipants
-                          .Select(participant => participant.Participant.Profile.PhoneNumber).ToList()));
+                .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(payment => payment.RetreatReg.Retreat.Name));
             CreateMap<Refund, RefundViewModel>();
             CreateMap<Feedback, FeedbackViewModel>();
 
