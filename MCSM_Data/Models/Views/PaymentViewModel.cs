@@ -7,6 +7,7 @@
         public string RetreatName { get; set; } = null!;
         public Guid RetreatRegId { get; set; }
         public List<string> RegisteredEmails { get; set; }
+        public List<string> RegisteredPhoneNumber { get; set; }
         public string PaypalPaymentId { get; set; } = null!;
 
         public string PaymentMethod { get; set; } = null!;
