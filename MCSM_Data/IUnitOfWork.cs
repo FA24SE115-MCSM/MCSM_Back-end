@@ -29,6 +29,12 @@ namespace MCSM_Data
         public IPaymentRepository Payment { get; }
         public IRefundRepository Refund { get; }
         public IFeedbackRepository Feedback { get; }
+        public IMenuRepository Menu { get; }
+        public IIngredientRepository Ingredient { get; }
+        public IDishRepository Dish { get; }
+        public IDishTypeRepository DishType { get; }
+        public IDishIngredientRepository DishIngredient { get; }
+        public IMenuDishRepository MenuDish { get; }
 
 
         Task<int> SaveChanges();

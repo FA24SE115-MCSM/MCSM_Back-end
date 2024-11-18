@@ -6,7 +6,7 @@
 
         public string RetreatName { get; set; } = null!;
         public Guid RetreatRegId { get; set; }
-
+        public List<string> RegisteredEmails { get; set; }
         public string PaypalPaymentId { get; set; } = null!;
 
         public string PaymentMethod { get; set; } = null!;
@@ -18,8 +18,9 @@
         public string Status { get; set; } = null!;
 
         public DateTime CreateAt { get; set; }
+        public string CreatedBy { get; set; }
 
-        public virtual AccountViewModel Account { get; set; } = null!;
+        //public virtual AccountViewModel Account { get; set; } = null!;
 
     }
 }
