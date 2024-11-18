@@ -11,17 +11,11 @@ public partial class Menu
 
     public DateOnly CookDate { get; set; }
 
-    public bool IsBreakfast { get; set; }
-
-    public bool IsLunch { get; set; }
-
-    public bool IsDinner { get; set; }
-
     public DateTime CreateAt { get; set; }
 
-    public DateTime UpdateAt { get; set; }
+    public DateTime? UpdateAt { get; set; }
 
-    public bool IsActive { get; set; }
+    public string Status { get; set; } = null!;
 
     public virtual Account CreatedByNavigation { get; set; } = null!;
 

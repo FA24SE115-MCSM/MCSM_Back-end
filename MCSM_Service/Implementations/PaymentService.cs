@@ -15,6 +15,7 @@ using MCSM_Utility.Helpers.PayPalPayment.Models;
 using MCSM_Utility.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Org.BouncyCastle.Utilities;
 
 namespace MCSM_Service.Implementations
 {
@@ -23,11 +24,15 @@ namespace MCSM_Service.Implementations
         private readonly AppSetting _appSettings;
         private readonly IPaymentRepository _paymentRepository;
         private readonly IRetreatRegistrationRepository _retreatRegistrationRepository;
+        private readonly IRefundRepository _refundRepository;
+        private readonly IRetreatRegistrationParticipantRepository _retreatRegistrationParticipantRepository;
         public PaymentService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> appSettings) : base(unitOfWork, mapper)
         {
             _appSettings = appSettings.Value;
             _retreatRegistrationRepository = unitOfWork.RetreatRegistration;
             _paymentRepository = unitOfWork.Payment;
+            _refundRepository = unitOfWork.Refund;
+            _retreatRegistrationParticipantRepository = unitOfWork.RetreatRegistrationParticipant;
         }
 
 
@@ -80,6 +85,12 @@ namespace MCSM_Service.Implementations
                 CancelUrl = _appSettings.PayPal.CancelUrl,
             };
             var paymentResponse = await PayPalHelper.CreatePaymentAsync(createPaymentModel, _appSettings);
+
+            var flag = _paymentRepository.GetMany(pay => pay.RetreatRegId == retreatRegId);
+            if (flag.Any()) 
+            {
+                _paymentRepository.RemoveRange(flag);
+            }
 
             var payment = new Payment
             {
@@ -152,6 +163,119 @@ namespace MCSM_Service.Implementations
             return id;
         }
 
+
+
+        public async Task<RefundViewModel> GetRefund(string id)
+        {
+            return await _refundRepository.GetMany(rf => rf.Id == id)
+                .ProjectTo<RefundViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Refund not found");
+        }
+
+
+        private async Task Check(Guid accountId)
+        {
+
+            var flag = await _refundRepository.GetMany(r => r.ParticipantId == accountId).OrderByDescending(r => r.CreateAt).ToListAsync();
+            var date = DateTime.UtcNow.AddHours(7).AddMonths(3);
+
+        }
+
+        public async Task<RefundViewModel> RefundPayment(Guid accountId, CreateRefundModel model)
+        {
+            decimal returnAmount = 0.8m; // 80% hoàn tiền
+
+
+
+            var retreatReg = await _retreatRegistrationRepository.GetMany(reg => reg.Id == model.RetreatRegId)
+                                                                .Include(reg => reg.Retreat)
+                                                                .FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat registration not found");
+
+            if (!retreatReg.IsPaid)
+            {
+                throw new ConflictException("Retreat Registration has not been paid yet");
+            }
+
+            await CheckAccountIsRegisteredForRetreat(model.RetreatRegId, accountId);
+
+
+            decimal refundAmount = retreatReg.Retreat.Cost * returnAmount;
+            var payout = new PayPalPayoutModel
+            {
+                EmailPaypal = model.EmailPaypal,
+                Amount = (int)refundAmount,
+                ParticipantId = accountId,
+            };
+            var refundResponse = await PayPalHelper.CreatePayoutAsync(payout, _appSettings);
+
+            var refund = new Refund
+            {
+                Id = refundResponse.BatchHeader.PayoutBatchId,
+                RetreatRegId = model.RetreatRegId,
+                ParticipantId = accountId,
+                TotalAmount = retreatReg.Retreat.Cost,
+                RefundAmount = refundAmount,
+                RefundReason = model.RefundReason,
+                EmailPaypal = model.EmailPaypal,
+                Status = refundResponse.BatchHeader.BatchStatus
+            };
+            _refundRepository.Add(refund);
+            var result = await _unitOfWork.SaveChanges();
+            return result > 0 ? await GetRefund(refundResponse.BatchHeader.PayoutBatchId) : null!;
+        }
+
+        public async Task UpdateRefund(string refundId)
+        {
+            var refund = await _refundRepository.GetMany(r => r.Id == refundId).FirstOrDefaultAsync() ?? throw new NotFoundException("Refund not found");
+            if(refund.Status == "Success")
+            {
+                return;
+            }
+
+            using (var transaction = _unitOfWork.Transaction())
+            {
+                try
+                {
+                    await RemoveParticipantFormRetreat(refund.RetreatRegId, refund.ParticipantId);
+
+                    refund.Status = "Success";
+                    _refundRepository.Update(refund);
+                    await _unitOfWork.SaveChanges();
+                    
+                    transaction.Commit();
+
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        private async Task CheckAccountIsRegisteredForRetreat(Guid retreatRegId, Guid accountId)
+        {
+            var flag = await _retreatRegistrationParticipantRepository.GetMany(p => p.RetreatRegId == retreatRegId && p.ParticipantId == accountId).FirstOrDefaultAsync();
+            if (flag == null)
+            {
+                throw new ConflictException("This account is not already registered for the retreat.");
+            }
+        }
+
+        private async Task RemoveParticipantFormRetreat(Guid retreatRegId, Guid participantId)
+        {
+            var participantToRemove = await _retreatRegistrationParticipantRepository
+                .GetMany(par => par.RetreatRegId == retreatRegId && par.ParticipantId == participantId).FirstOrDefaultAsync() ?? throw new NotFoundException("Participant not found in this registration.");
+
+            _retreatRegistrationParticipantRepository.Remove(participantToRemove);
+
+            var retreatReg = await _retreatRegistrationRepository.GetMany(reg => reg.Id == retreatRegId).Include(reg => reg.Retreat).FirstOrDefaultAsync() ?? throw new NotFoundException("Not found");
+            retreatReg.TotalParticipants -= 1;
+            retreatReg.TotalCost = retreatReg.TotalParticipants * retreatReg.Retreat.Cost;
+            retreatReg.Retreat.RemainingSlots += 1;
+            _retreatRegistrationRepository.Update(retreatReg);
+            await _unitOfWork.SaveChanges();
+        }
         //-----------------------------------------------------
 
         public async Task<ListViewModel<PaymentViewModel>> ViewCustomerPaymentHistory(Guid customerId, PaginationRequestModel pagination)

@@ -9,6 +9,7 @@ using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
 using MCSM_Utility.Constants;
+using MCSM_Utility.Enums;
 using MCSM_Utility.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -98,6 +99,12 @@ namespace MCSM_Service.Implementations
             var newAccounts = new List<CreateAccountModel>();
             var participants = new List<Guid>();
             var retreatReg = await _retreatRegistrationRepository.GetMany(r => r.Id == model.RetreatRegId).Include(r => r.Retreat).FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat Registration not found");
+
+            if (retreatReg.Retreat.Status != RetreatStatus.Open.ToString())
+            {
+                throw new BadRequestException("This retreat is currently not open. Please check back later.");
+            }
+
             if (retreatReg.IsPaid)
             {
                 throw new ConflictException("Retreat Registration already paid");
@@ -106,6 +113,7 @@ namespace MCSM_Service.Implementations
             {
                 throw new ConflictException("Retreat Registration is delete");
             }
+
             using (var transaction = _unitOfWork.Transaction())
             {
                 try

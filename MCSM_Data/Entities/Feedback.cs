@@ -11,13 +11,21 @@ public partial class Feedback
 
     public Guid RetreatId { get; set; }
 
-    public string Content { get; set; } = null!;
+    public int RetreatRating { get; set; }
 
-    public int Rating { get; set; }
+    public int MonkRating { get; set; }
+
+    public int RoomRating { get; set; }
+
+    public int FoodRating { get; set; }
+
+    public string? YourExperience { get; set; }
+
+    public string? Suggestion { get; set; }
 
     public DateTime CreateAt { get; set; }
 
-    public DateTime UpdateAt { get; set; }
+    public DateTime? UpdateAt { get; set; }
 
     public bool IsDeleted { get; set; }
 

@@ -41,10 +41,20 @@ namespace MCSM_API.Controllers
         [Route("{id}")]
         [ProducesResponseType(typeof(RetreatLessonViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
-        [SwaggerOperation(Summary = "Get retreat lesson by id.")]
+        [SwaggerOperation(Summary = "Get retreat schedule by id.")]
         public async Task<ActionResult<RetreatScheduleViewModel>> GetRetreatSchedule([FromRoute] Guid id)
         {
             return await _retreatScheduleService.GetRetreatSchedule(id);
+        }
+
+        [HttpGet]
+        [Authorize(AccountRole.Admin, AccountRole.Monk)]
+        [ProducesResponseType(typeof(ListViewModel<RetreatScheduleViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Get all retreat schedule.")]
+        public async Task<ActionResult<ListViewModel<RetreatScheduleViewModel>>> GetRetreatSchedule([FromQuery] PaginationRequestModel pagination)
+        {
+            return await _retreatScheduleService.GetAllRetreatSchedule(pagination);
         }
 
         // POST api/<RetreatScheduleController>

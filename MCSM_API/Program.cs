@@ -6,6 +6,7 @@ using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using MCSM_Data.Mapping;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -42,25 +43,42 @@ builder.Services.AddCors(options =>
                           policy.AllowCredentials();
                       });
 });
+
+
+builder.Services.AddHangfireServices(builder.Configuration);
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+
 
 builder.Services.AddDependenceInjection();
 builder.Services.AddSwagger();
 builder.Services.AddAutoMapper(typeof(GeneralProfile));
 
+
+
 var app = builder.Build();
 
+app.UseCors(MyAllowSpecificOrigins);
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
-    app.UseSwagger();
+app.UseSwagger();
     app.UseSwaggerUI();
 //}
 
-app.UseCors(MyAllowSpecificOrigins);
+
 
 app.UseJwt();
+
+
+app.AddHangfireDashboard();
+var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
+app.Services.AddHangfireJobs(recurringJobManager);
+
+
 
 app.UseExceptionHandling();
 

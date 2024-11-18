@@ -13,13 +13,13 @@ public partial class Dish
 
     public string Name { get; set; } = null!;
 
-    public bool IsHalal { get; set; }
+    public string? Note { get; set; }
 
-    public bool IsActive { get; set; }
+    public string Status { get; set; } = null!;
 
     public DateTime CreateAt { get; set; }
 
-    public DateTime UpdateAt { get; set; }
+    public DateTime? UpdateAt { get; set; }
 
     public virtual Account CreatedByNavigation { get; set; } = null!;
 

@@ -127,6 +127,11 @@ namespace MCSM_Service.Implementations
             var existRetreat = await _retreatRepository.GetMany(r => r.Id == id)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat not found");
 
+            if(existRetreat.Status != RetreatStatus.Open.ToString())
+            {
+                throw new BadRequestException("This retreat is currently not open. Please check back later.");
+            }
+
             existRetreat.Name = model.Name ?? existRetreat.Name;
             existRetreat.Cost = model.Cost ?? existRetreat.Cost;
             existRetreat.Description = model.Description ?? existRetreat.Description;
@@ -154,10 +159,10 @@ namespace MCSM_Service.Implementations
                 existRetreat.EndDate = GetEndDate(existRetreat.StartDate, existRetreat.Duration);
             }
 
-            if (!string.IsNullOrEmpty(model.Status))
-            {
-                existRetreat.Status = GetRetreatStatus(model.Status);
-            }
+            //if (!string.IsNullOrEmpty(model.Status))
+            //{
+            //    existRetreat.Status = GetRetreatStatus(model.Status);
+            //}
 
             if(model.Images != null && model.Images.Count > 0)
             {

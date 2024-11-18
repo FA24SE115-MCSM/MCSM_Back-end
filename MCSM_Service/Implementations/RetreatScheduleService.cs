@@ -33,7 +33,7 @@ namespace MCSM_Service.Implementations
 
         public async Task<ListViewModel<RetreatScheduleViewModel>> GetRetreatSchedulesOfARetreat(Guid retreatId, PaginationRequestModel pagination)
         {
-            var db = _retreatScheduleRepository.GetAll().Include(rs => rs.Group)
+            var db = _retreatScheduleRepository.GetAll()
                 .Include(rs => rs.Retreat)
                 .Include(rs => rs.RetreatLesson)
                 .Include(rs => rs.RetreatLesson.Lesson)
@@ -60,6 +60,33 @@ namespace MCSM_Service.Implementations
                     TotalRow = totalRow,
                 },
                 Data = retreatSchedules
+            };
+        }
+
+        public async Task<ListViewModel<RetreatScheduleViewModel>> GetAllRetreatSchedule(PaginationRequestModel pagination)
+        {
+            var query = _retreatScheduleRepository.GetAll();
+
+            var totalRow = await query.AsNoTracking().CountAsync();
+            var paginatedQuery = query
+                .OrderByDescending(r => r.CreateAt)
+                .Skip(pagination.PageNumber * pagination.PageSize)
+                .Take(pagination.PageSize);
+
+            var retreatSchedule = await paginatedQuery
+                .ProjectTo<RetreatScheduleViewModel>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return new ListViewModel<RetreatScheduleViewModel>
+            {
+                Pagination = new PaginationViewModel
+                {
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRow = totalRow,
+                },
+                Data = retreatSchedule
             };
         }
 

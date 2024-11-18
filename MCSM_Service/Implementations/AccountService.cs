@@ -8,6 +8,7 @@ using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Requests.Put;
 using MCSM_Data.Models.Views;
+using MCSM_Data.Repositories.Implementations;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
 using MCSM_Utility.Constants;
@@ -31,6 +32,8 @@ namespace MCSM_Service.Implementations
         private readonly IRoleRepository _roleRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly IProfileRepository _profileRepository;
+        private readonly IRetreatRepository _retreatRepository;
+        private readonly IRetreatRegistrationRepository _retreatRegistrationRepository;
 
         private readonly ICloudStorageService _cloudStorageService;
         private readonly ISendMailService _sendMailService;
@@ -41,6 +44,8 @@ namespace MCSM_Service.Implementations
             _roleRepository = unitOfWork.Role;
             _accountRepository = unitOfWork.Account;
             _profileRepository = unitOfWork.Profile;
+            _retreatRepository = unitOfWork.Retreat;
+            _retreatRegistrationRepository = unitOfWork.RetreatRegistration;
 
             _appSettings = appSettings.Value;
             _cloudStorageService = cloudStorageService;
@@ -334,7 +339,40 @@ namespace MCSM_Service.Implementations
 
         }
 
+
+        public async Task<DharmaNameViewModel> GetDharmaName(Guid accountId, CreateDharmaNameModel model)
+        {
+            var retreat = await _retreatRepository.GetMany(retreat => retreat.Id == model.RetreatId).FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat not found");
+            if (retreat.Status != RetreatStatus.InActive.ToString())
+            {
+                throw new ConflictException("The retreat is not over yet.");
+            }
+            var flag = await CheckAccountIsRegisteredForRetreat(model.RetreatId, accountId);
+            if (!flag)
+            {
+                throw new ConflictException("This account is not already registered for the retreat.");
+            }
+            var profile = await _profileRepository.GetMany(acc => acc.AccountId == accountId).FirstOrDefaultAsync() ?? throw new NotFoundException("Account not found");
+
+            return new DharmaNameViewModel
+            {
+                Name = $"{profile.FirstName} {profile.LastName}",
+                DharmaName = $"{retreat.DharmaNamePrefix} {profile.LastName}",
+                RetreatName = retreat.Name,
+                StartDate = retreat.StartDate,
+                EndDate = retreat.EndDate,
+            };
+
+        }
+
         //PRIVATE METHOD
+        private async Task<bool> CheckAccountIsRegisteredForRetreat(Guid retreatId, Guid accountId)
+        {
+            return await _retreatRegistrationRepository
+                .AnyAsync(retreatReg => retreatReg.RetreatId == retreatId
+                                        && retreatReg.RetreatRegistrationParticipants
+                                            .Any(participant => participant.ParticipantId == accountId));
+        }
         private async Task<string> CheckRoleAndGender(Guid roleId, string gender)
         {
             var role = await _roleRepository.GetMany(role => role.Id == roleId)
