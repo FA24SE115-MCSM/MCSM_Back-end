@@ -58,6 +58,7 @@ namespace MCSM_Service.Implementations
 
 
             return await query
+                .Where(q => q.Status != PaymentStatus.Pending.ToString())
                 .OrderByDescending(p => p.CreateAt)
                 .ProjectTo<PaymentViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
