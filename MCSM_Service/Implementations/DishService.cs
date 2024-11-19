@@ -44,11 +44,6 @@ namespace MCSM_Service.Implementations
                 query = query.Where(r => r.Name.Contains(filter.Name));
             }
 
-            if (filter.Status.HasValue)
-            {
-                query = query.Where(r => r.Status == filter.Status.Value.ToString());
-            }
-
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
                 .OrderByDescending(r => r.CreateAt)
@@ -99,7 +94,6 @@ namespace MCSM_Service.Implementations
                 DishTypeId = check,
                 Name = model.Name,
                 Note = model.Note,
-                Status = DishStatus.Pending.ToString(),
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow
             };
@@ -138,10 +132,6 @@ namespace MCSM_Service.Implementations
 
             existDish.Note = model.Note ?? existDish.Note;
 
-            if (!string.IsNullOrWhiteSpace(model.Status))
-            {
-                existDish.Status = GetDishStatus(model.Status);
-            }
 
             _dishRepository.Update(existDish);
             await _unitOfWork.SaveChanges();

@@ -77,7 +77,6 @@ namespace MCSM_Service.Implementations
                 CookDate = model.CookDate,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
-                Status = MenuStatus.Preparing.ToString()
             };
             _menuRepository.Add(menu);
             await _unitOfWork.SaveChanges();
@@ -113,10 +112,6 @@ namespace MCSM_Service.Implementations
                 .ThenInclude(md => md.Dish)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Menu not found");
 
-            if (!string.IsNullOrWhiteSpace(model.Status))
-            {
-                existMenu.Status = GetMenuStatus(model.Status);
-            }
 
             var updatedDishNames = model.DishName.Select(d => d.ToLower()).ToList();
             var existingDishIds = existMenu.MenuDishes.Select(md => md.DishId).ToList();
