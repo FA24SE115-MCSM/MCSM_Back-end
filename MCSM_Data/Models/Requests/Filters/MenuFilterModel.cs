@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace MCSM_Data.Models.Requests.Filters
 {
-    public class IngredientFilterModel
+    public class MenuFilterModel
     {
-        public string? Name { get; set; } = null!;
+        public string? MenuName { get; set; }
+        public DateOnly? CookDate { get; set; }
     }
 }

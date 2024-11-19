@@ -1,9 +1,9 @@
 ﻿namespace MCSM_Utility.Enums
 {
-    public enum MenuStatus
-    {
-        Preparing,
-        Serving,
-        Finished
+    public enum MenuName
+    {   
+        Breakfast,
+        Lunch,
+        Dinner
     }
 }

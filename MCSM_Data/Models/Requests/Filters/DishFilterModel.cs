@@ -12,8 +12,6 @@ namespace MCSM_Data.Models.Requests.Filters
         public string? DishTypeName { get; set; }
 
         public string? Name { get; set; }
-
-        public DishStatus? Status { get; set; }
     }
 
     public class DishTypeFilterModel

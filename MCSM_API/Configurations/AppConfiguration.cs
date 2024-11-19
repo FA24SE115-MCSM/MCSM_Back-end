@@ -42,7 +42,6 @@ namespace MCSM_API.Configurations
             services.AddScoped<IDishService, DishService>();
             services.AddScoped<IDishTypeService, DishTypeService>();
             services.AddScoped<IMenuService, MenuService>();
-            services.AddScoped<IIngredientService, IngredientService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)

@@ -87,6 +87,17 @@ namespace MCSM_Service.Implementations
             return result > 0 ? await GetDishType(typeId) : null!;
         }
 
+        public async Task DeleteDishType(Guid id)
+        {
+            var dishType = await _dishTypeRepository.GetMany(dt => dt.Id == id)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy loại món ăn");
+
+            _dishTypeRepository.Remove(dishType);
+
+            await _unitOfWork.SaveChanges();
+        }
+
+
         private async Task<bool> CheckDuplicatedName(string typeName)
         {
             var type = await _dishTypeRepository.GetMany(d => d.Name == typeName).AsNoTracking().AnyAsync();

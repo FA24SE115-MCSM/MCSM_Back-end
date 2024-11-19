@@ -21,7 +21,6 @@ public partial class Account
 
     public DateTime? UpdateAt { get; set; }
 
-    public virtual ICollection<Allergy> Allergies { get; set; } = new List<Allergy>();
 
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
 
