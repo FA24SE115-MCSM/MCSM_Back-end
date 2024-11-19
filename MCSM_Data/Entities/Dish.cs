@@ -15,8 +15,6 @@ public partial class Dish
 
     public string? Note { get; set; }
 
-    public string Status { get; set; } = null!;
-
     public DateTime CreateAt { get; set; }
 
     public DateTime? UpdateAt { get; set; }
