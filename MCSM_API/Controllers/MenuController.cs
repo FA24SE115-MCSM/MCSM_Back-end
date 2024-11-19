@@ -5,7 +5,6 @@ using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Requests.Put;
 using MCSM_Data.Models.Views;
-using MCSM_Service.Implementations;
 using MCSM_Service.Interfaces;
 using MCSM_Utility.Constants;
 using Microsoft.AspNetCore.Mvc;
@@ -29,9 +28,9 @@ namespace MCSM_API.Controllers
         //[Authorize(AccountRole.Admin)]
         [ProducesResponseType(typeof(ListViewModel<MenuViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all menus.")]
-        public async Task<ActionResult<ListViewModel<MenuViewModel>>> GetDishes([FromQuery] MenuFilterModel filter, [FromQuery] PaginationRequestModel pagination)
+        public async Task<ActionResult<ListViewModel<MenuViewModel>>> GetDishes([FromQuery] PaginationRequestModel pagination)
         {
-            return await _menuService.GetMenus(filter, pagination);
+            return await _menuService.GetMenus(pagination);
         }
 
         [HttpGet]
@@ -45,7 +44,6 @@ namespace MCSM_API.Controllers
         }
 
         [HttpPost]
-        [Authorize(AccountRole.Admin, AccountRole.Monk)]
         [ProducesResponseType(typeof(MenuViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Create menu.")]
@@ -59,7 +57,6 @@ namespace MCSM_API.Controllers
         // PUT api/<FeedbackController>/5
         [HttpPut]
         [Route("{id}")]
-        [Authorize(AccountRole.Admin, AccountRole.Monk)]
         [ProducesResponseType(typeof(MenuViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update dish.")]
@@ -69,21 +66,10 @@ namespace MCSM_API.Controllers
             return CreatedAtAction(nameof(GetMenu), new { id = dish.Id }, dish);
         }
 
-        // DELETE api/<MenuController>/5
-        [HttpDelete]
-        [Route("{id}")]
-        [Authorize(AccountRole.Admin, AccountRole.Monk)]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
-        [SwaggerOperation(Summary = "Remove menu.")]
-        public async Task<IActionResult> DeleteMenu([FromRoute] Guid id)
-        {
-            await _menuService.DeleteMenu(id);
-            return Ok(new
-            {
-                status = StatusCodes.Status200OK,
-                message = "Menu đã được xóa."
-            });
-        }
+        //// DELETE api/<MenuController>/5
+        //[HttpDelete("{id}")]
+        //public void Delete(int id)
+        //{
+        //}
     }
 }

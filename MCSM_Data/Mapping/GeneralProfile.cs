@@ -83,12 +83,14 @@ namespace MCSM_Data.Mapping
             CreateMap<Refund, RefundViewModel>();
             CreateMap<Feedback, FeedbackViewModel>();
 
+            CreateMap<Ingredient, IngredientViewModel>();
             CreateMap<Menu, MenuViewModel>()
                 .ForMember(dest => dest.CreatedByEmail, otp => otp.MapFrom(menu => menu.CreatedByNavigation.Email))
                 .ForMember(dest => dest.Dishes, otp => otp.MapFrom(menu => menu.MenuDishes.Select(md => md.Dish)));
             CreateMap<Dish, DishViewModel>()
                 .ForMember(dest => dest.CreatedByEmail, otp => otp.MapFrom(dish => dish.CreatedByNavigation.Email))
-                .ForMember(dest => dest.DishTypeName, otp => otp.MapFrom(dish => dish.DishType.Name));
+                .ForMember(dest => dest.DishTypeName, otp => otp.MapFrom(dish => dish.DishType.Name))
+                .ForMember(dest => dest.Ingredients, otp => otp.MapFrom(dish => dish.DishIngredients.Select(di => di.Ingredient)));
             CreateMap<DishType, DishTypeViewModel>();
 
         }

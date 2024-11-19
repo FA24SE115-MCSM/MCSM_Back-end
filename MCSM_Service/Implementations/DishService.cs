@@ -25,12 +25,14 @@ namespace MCSM_Service.Implementations
     {
         private readonly IDishRepository _dishRepository;
         private readonly IDishTypeRepository _dishTypeRepository;
-        private readonly IMenuDishRepository _menuDishRepository;
+        private readonly IIngredientRepository _ingredientRepository;
+        private readonly IDishIngredientRepository _dishIngredientRepository;
         public DishService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
             _dishRepository = unitOfWork.Dish;
             _dishTypeRepository = unitOfWork.DishType;
-            _menuDishRepository = unitOfWork.MenuDish;
+            _ingredientRepository = unitOfWork.Ingredient;
+            _dishIngredientRepository = unitOfWork.DishIngredient;
         }
 
         public async Task<ListViewModel<DishViewModel>> GetDishes(DishFilterModel filter, PaginationRequestModel pagination)
@@ -42,9 +44,9 @@ namespace MCSM_Service.Implementations
                 query = query.Where(r => r.Name.Contains(filter.Name));
             }
 
-            if (!string.IsNullOrEmpty(filter.DishTypeName))
+            if (filter.Status.HasValue)
             {
-                query = query.Where(r => r.DishType.Name.Contains(filter.DishTypeName));
+                query = query.Where(r => r.Status == filter.Status.Value.ToString());
             }
 
             var totalRow = await query.AsNoTracking().CountAsync();
@@ -97,10 +99,31 @@ namespace MCSM_Service.Implementations
                 DishTypeId = check,
                 Name = model.Name,
                 Note = model.Note,
+                Status = DishStatus.Pending.ToString(),
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow
             };
             _dishRepository.Add(dish);
+            await _unitOfWork.SaveChanges();
+            foreach (var ingredientName in model.IngredientNames)
+            {
+                var existingIngredient = _ingredientRepository.GetMany(i => i.Name.ToLower() == ingredientName.ToLower()).FirstOrDefault();
+
+                if (existingIngredient == null)
+                {
+                    throw new NotFoundException($"Ingredient '{ingredientName}' not found.");
+                }
+
+                var dishIngredient = new DishIngredient
+                {
+                    Id = Guid.NewGuid(),
+                    DishId = dishId,
+                    IngredientId = existingIngredient.Id
+                };
+
+                _dishIngredientRepository.Add(dishIngredient);
+                
+            }
             await _unitOfWork.SaveChanges();
 
             return await GetDish(dishId);
@@ -109,13 +132,53 @@ namespace MCSM_Service.Implementations
         public async Task<DishViewModel> UpdateDish(Guid id, UpdateDishModel model)
         {
             var existDish = await _dishRepository.GetMany(r => r.Id == id)
+                .Include(d => d.DishIngredients)
+                .ThenInclude(di => di.Ingredient)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Dish not found");
 
             existDish.Note = model.Note ?? existDish.Note;
-            existDish.UpdateAt = DateTime.UtcNow;
+
+            if (!string.IsNullOrWhiteSpace(model.Status))
+            {
+                existDish.Status = GetDishStatus(model.Status);
+            }
 
             _dishRepository.Update(existDish);
             await _unitOfWork.SaveChanges();
+
+            var existingIngredientIds = existDish.DishIngredients.Select(di => di.IngredientId).ToList();
+            var updatedIngredientNames = model.IngredientNames.Select(i => i.ToLower()).ToList();
+
+
+            foreach (var ingredientName in model.IngredientNames)
+            {
+                var existingIngredient = await _ingredientRepository.GetMany(i => i.Name.ToLower() == ingredientName.ToLower())
+                    .FirstOrDefaultAsync();
+
+                if (existingIngredient == null)
+                {
+                    throw new NotFoundException($"Ingredient '{ingredientName}' not found.");
+                }
+
+                if (!existingIngredientIds.Contains(existingIngredient.Id))
+                {
+                    existDish.DishIngredients.Add(new DishIngredient
+                    {
+                        Id = Guid.NewGuid(),
+                        DishId = id,
+                        IngredientId = existingIngredient.Id
+                    });
+                }
+            }
+
+            var ingredientsToRemove = existDish.DishIngredients
+                .Where(di => di.Ingredient != null && !updatedIngredientNames.Contains(di.Ingredient.Name.ToLower()))
+                .ToList();
+
+            foreach (var ingredientToRemove in ingredientsToRemove)
+            {
+                existDish.DishIngredients.Remove(ingredientToRemove);
+            }
 
             //_dishRepository.Update(existDish);
             //var result = await _unitOfWork.SaveChanges();
@@ -124,36 +187,15 @@ namespace MCSM_Service.Implementations
             return await GetDish(id);
         }
 
-        public async Task DeleteDish(Guid id)
+        private string GetDishStatus(string status)
         {
-            var menuDishes = await _menuDishRepository.GetMany(md => md.DishId == id).ToListAsync();
-
-            if (menuDishes.Any())
+            if (status != DishStatus.Pending.ToString() && status != DishStatus.Cooking.ToString() && status != DishStatus.Ready.ToString())
             {
-                foreach (var menuDish in menuDishes)
-                {
-                    _menuDishRepository.Remove(menuDish);
-                }
-                await _unitOfWork.SaveChanges();
+                throw new BadRequestException("Invalid status. Please provide either 'Pending', 'Cooking' or 'Ready'.");
             }
 
-            var dish = await _dishRepository.GetMany(d => d.Id == id)
-                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy món ăn");
-
-            _dishRepository.Remove(dish);
-
-            await _unitOfWork.SaveChanges();
+            return status;
         }
-
-        //private string GetDishStatus(string status)
-        //{
-        //    if (status != DishStatus.Pending.ToString() && status != DishStatus.Cooking.ToString() && status != DishStatus.Ready.ToString())
-        //    {
-        //        throw new BadRequestException("Invalid status. Please provide either 'Pending', 'Cooking' or 'Ready'.");
-        //    }
-
-        //    return status;
-        //}
 
         private async Task<bool> CheckDuplicatedName(string dishName)
         {

@@ -15,6 +15,7 @@ namespace MCSM_Data.Models.Requests.Post
         public string Name { get; set; } = null!;
 
         public string? Note { get; set; }
+        public List<string> IngredientNames { get; set; } = new List<string>();
     }
 
     public class CreateDishTypeModel

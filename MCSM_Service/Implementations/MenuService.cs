@@ -18,7 +18,6 @@ using MCSM_Data.Models.Requests.Post;
 using MCSM_Utility.Enums;
 using MCSM_Service.Interfaces;
 using MCSM_Data.Models.Requests.Put;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MCSM_Service.Implementations
 {
@@ -34,26 +33,9 @@ namespace MCSM_Service.Implementations
             _dishRepository = unitOfWork.Dish;
         }
 
-        public async Task<ListViewModel<MenuViewModel>> GetMenus(MenuFilterModel filter, PaginationRequestModel pagination)
+        public async Task<ListViewModel<MenuViewModel>> GetMenus(PaginationRequestModel pagination)
         {
             var query = _menuRepository.GetAll();
-
-            if (!string.IsNullOrEmpty(filter.MenuName))
-            {
-                if (!Enum.TryParse<MenuName>(filter.MenuName, out var name))
-                {
-                    throw new BadRequestException("Invalid name (Breakfast/Lunch/Dinner)");
-                }
-                else
-                {
-                    query = query.Where(m => m.MenuName.Contains(filter.MenuName));
-                }
-            }
-
-            if (filter.CookDate.HasValue)
-            {
-                query = query.Where(m => m.CookDate == filter.CookDate);
-            }
 
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
@@ -61,7 +43,7 @@ namespace MCSM_Service.Implementations
                 .Skip(pagination.PageNumber * pagination.PageSize)
                 .Take(pagination.PageSize);
 
-            var menus = await paginatedQuery
+            var retreats = await paginatedQuery
                 .ProjectTo<MenuViewModel>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
@@ -74,7 +56,7 @@ namespace MCSM_Service.Implementations
                     PageSize = pagination.PageSize,
                     TotalRow = totalRow,
                 },
-                Data = menus
+                Data = retreats
             };
         }
 
@@ -88,21 +70,14 @@ namespace MCSM_Service.Implementations
         public async Task<MenuViewModel> CreateMenu(Guid accountId, CreateMenuModel model)
         {
             var menuId = Guid.NewGuid();
-            if (!string.IsNullOrEmpty(model.MenuName))
-            {
-                if (!Enum.TryParse<MenuName>(model.MenuName, out var name))
-                {
-                    throw new BadRequestException("Invalid name (Breakfast/Lunch/Dinner)");
-                }
-            }
             var menu = new Menu
             {
                 Id = menuId,
-                MenuName = model.MenuName,
                 CreatedBy = accountId,
                 CookDate = model.CookDate,
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
+                Status = MenuStatus.Preparing.ToString()
             };
             _menuRepository.Add(menu);
             await _unitOfWork.SaveChanges();
@@ -138,23 +113,13 @@ namespace MCSM_Service.Implementations
                 .ThenInclude(md => md.Dish)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Menu not found");
 
-            if (!string.IsNullOrEmpty(model.MenuName))
+            if (!string.IsNullOrWhiteSpace(model.Status))
             {
-                if (!Enum.TryParse<MenuName>(model.MenuName, out var name))
-                {
-                    throw new BadRequestException("Invalid name (Breakfast/Lunch/Dinner)");
-                }
-                else
-                {
-                    existMenu.MenuName = model.MenuName;
-                }
+                existMenu.Status = GetMenuStatus(model.Status);
             }
-
-            existMenu.CookDate = model.CookDate ?? existMenu.CookDate;
 
             var updatedDishNames = model.DishName.Select(d => d.ToLower()).ToList();
             var existingDishIds = existMenu.MenuDishes.Select(md => md.DishId).ToList();
-
 
             foreach (var dishName in model.DishName)
             {
@@ -184,45 +149,25 @@ namespace MCSM_Service.Implementations
             foreach (var dishToRemove in dishesToRemove)
             {
                 existMenu.MenuDishes.Remove(dishToRemove);
-                await _unitOfWork.SaveChanges();
             }
 
             _menuRepository.Update(existMenu);
             await _unitOfWork.SaveChanges();
 
+            await _unitOfWork.SaveChanges();
+
             return await GetMenu(id);
         }
 
-        public async Task DeleteMenu(Guid id)
-        {
-            var menuDishes = await _menuDishRepository.GetMany(md => md.MenuId == id).ToListAsync();
 
-            if (menuDishes.Any())
+        private string GetMenuStatus(string status)
+        {
+            if (status != MenuStatus.Preparing.ToString() && status != MenuStatus.Serving.ToString() && status != MenuStatus.Finished.ToString())
             {
-                foreach (var menuDish in menuDishes)
-                {
-                    _menuDishRepository.Remove(menuDish);
-                }
-                await _unitOfWork.SaveChanges();
+                throw new BadRequestException("Invalid status. Please provide either 'Preparing', 'Serving' or 'Finish'.");
             }
 
-            var menu = await _menuRepository.GetMany(d => d.Id == id)
-                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy menu");
-
-            _menuRepository.Remove(menu);
-
-            await _unitOfWork.SaveChanges();
+            return status;
         }
-
-
-        //private string GetMenuStatus(string status)
-        //{
-        //    if (status != MenuStatus.Preparing.ToString() && status != MenuStatus.Serving.ToString() && status != MenuStatus.Finished.ToString())
-        //    {
-        //        throw new BadRequestException("Invalid status. Please provide either 'Preparing', 'Serving' or 'Finish'.");
-        //    }
-
-        //    return status;
-        //}
     }
 }

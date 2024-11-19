@@ -31,8 +31,10 @@ namespace MCSM_Data
         private IRetreatScheduleRepository _retreatSchedule = null!;
         private IPaymentRepository _payment = null!;
         private IMenuRepository _menu = null!;
+        private IIngredientRepository _ingredient = null!;
         private IDishRepository _dish = null!;
         private IDishTypeRepository _dishType = null!;
+        private IDishIngredientRepository _dishIngredient = null!;
         private IMenuDishRepository _menuDish = null!;
 
         private IRefundRepository _refund = null!;
@@ -165,6 +167,11 @@ namespace MCSM_Data
             get { return _menu ??= new MenuRepository(_context); }
         }
 
+        public IIngredientRepository Ingredient
+        {
+            get { return _ingredient ??= new IngredientRepository(_context); }
+        }
+
         public IDishRepository Dish
         {
             get { return _dish ??= new DishRepository(_context); }
@@ -173,6 +180,11 @@ namespace MCSM_Data
         public IDishTypeRepository DishType
         {
             get { return _dishType ??= new DishTypeRepository(_context); }
+        }
+
+        public IDishIngredientRepository DishIngredient
+        {
+            get { return _dishIngredient ??= new DishIngredientRepository(_context); }
         }
 
         public IMenuDishRepository MenuDish

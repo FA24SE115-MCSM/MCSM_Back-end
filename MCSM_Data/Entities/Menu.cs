@@ -7,15 +7,15 @@ public partial class Menu
 {
     public Guid Id { get; set; }
 
-    public string? MenuName { get; set; }
-
     public Guid CreatedBy { get; set; }
 
     public DateOnly CookDate { get; set; }
 
     public DateTime CreateAt { get; set; }
 
-    public DateTime UpdateAt { get; set; }
+    public DateTime? UpdateAt { get; set; }
+
+    public string Status { get; set; } = null!;
 
     public virtual Account CreatedByNavigation { get; set; } = null!;
 

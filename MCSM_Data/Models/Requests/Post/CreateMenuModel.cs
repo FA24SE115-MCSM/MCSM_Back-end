@@ -1,5 +1,4 @@
 ﻿using MCSM_Data.Entities;
-using MCSM_Utility.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +9,6 @@ namespace MCSM_Data.Models.Requests.Post
 {
     public class CreateMenuModel
     {
-        public string? MenuName { get; set; }
         public DateOnly CookDate { get; set; }
 
         //public virtual ICollection<MenuDish> MenuDishes { get; set; } = new List<MenuDish>();
