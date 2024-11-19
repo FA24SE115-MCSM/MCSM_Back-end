@@ -391,7 +391,6 @@ CREATE TABLE Dish(
 	DishTypeId uniqueidentifier foreign key references DishType(Id) NOT NULL,
 	[Name] nvarchar(50) NOT NULL,
 	[Note] nvarchar(max) NULL,
-	[Status] nvarchar(20) NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime
 );
@@ -413,10 +412,10 @@ GO
 CREATE TABLE Menu(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	MenuName nvarchar(250) NULL,
 	CookDate date NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime NULL,
-	[Status] nvarchar(20) NOT NULL,
 );
 GO
 
