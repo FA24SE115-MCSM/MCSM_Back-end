@@ -17,5 +17,6 @@ namespace MCSM_Service.Interfaces
         Task<DishViewModel> GetDish(Guid id);
         Task<DishViewModel> CreateDish(Guid accountId, CreateDishModel model);
         Task<DishViewModel> UpdateDish(Guid id, UpdateDishModel model);
+        Task DeleteDish(Guid id);
     }
 }

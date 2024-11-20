@@ -19,8 +19,6 @@ namespace MCSM_Data.Models.Views
 
         public string Name { get; set; } = null!;
 
-        public string Status { get; set; } = null!;
-
         public DateTime CreateAt { get; set; }
 
         public DateTime UpdateAt { get; set; }
@@ -32,7 +30,6 @@ namespace MCSM_Data.Models.Views
         //public virtual Account CreatedByNavigation { get; set; } = null!;
 
         //public virtual DishType DishType { get; set; } = null!;
-
 
         //public virtual Menu? Menu { get; set; }
     }

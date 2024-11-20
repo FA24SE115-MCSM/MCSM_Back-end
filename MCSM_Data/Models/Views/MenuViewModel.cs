@@ -10,8 +10,8 @@ namespace MCSM_Data.Models.Views
     public class MenuViewModel
     {
         public Guid Id { get; set; }
+        public string MenuName { get; set; }
         public Guid CreatedBy { get; set; }
-
         public string CreatedByEmail { get; set; }
 
         public DateOnly CookDate { get; set; }
@@ -20,9 +20,6 @@ namespace MCSM_Data.Models.Views
 
         public DateTime UpdateAt { get; set; }
 
-        public string Status { get; set; } = null!;
-
-        public virtual ICollection<DishViewModel> Dishes { get; set; } = new List<DishViewModel>();
-        public virtual ICollection<IngredientViewModel> Ingredients { get; set; } = new List<IngredientViewModel>();
+        public ICollection<DishViewModel> Dishes { get; set; } = new List<DishViewModel>();
     }
 }

@@ -14,7 +14,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace MCSM_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/dish-type")]
     [ApiController]
     public class DishTypeController : ControllerBase
     {
@@ -25,7 +25,6 @@ namespace MCSM_API.Controllers
         }
         // GET: api/<DishTypeController>
         [HttpGet]
-        [Authorize(AccountRole.Admin, AccountRole.Monk)]
         [ProducesResponseType(typeof(ListViewModel<DishTypeViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all dish types.")]
         public async Task<ActionResult<ListViewModel<DishTypeViewModel>>> GetDishTypes([FromQuery] DishTypeFilterModel filter, [FromQuery] PaginationRequestModel pagination)
@@ -35,7 +34,6 @@ namespace MCSM_API.Controllers
 
         // GET api/<DishTypeController>/5
         [HttpGet]
-        [Authorize(AccountRole.Admin, AccountRole.Monk)]
         [Route("{id}")]
         [ProducesResponseType(typeof(DishTypeViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
@@ -48,7 +46,7 @@ namespace MCSM_API.Controllers
         // POST api/<DishTypeController>
         [HttpPost]
         [Authorize(AccountRole.Admin, AccountRole.Monk)]
-        [ProducesResponseType(typeof(IngredientViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(DishTypeViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Create Dish Type.")]
         public async Task<ActionResult<DishTypeViewModel>> CreateFeedback([FromForm] CreateDishTypeModel model)

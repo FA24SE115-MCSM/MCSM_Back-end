@@ -15,5 +15,6 @@ namespace MCSM_Service.Interfaces
         Task<ListViewModel<DishTypeViewModel>> GetDishTypes(DishTypeFilterModel filter, PaginationRequestModel pagination);
         Task<DishTypeViewModel> GetDishType(Guid id);
         Task<DishTypeViewModel> CreateDishType(CreateDishTypeModel model);
+        Task DeleteDishType(Guid id);
     }
 }

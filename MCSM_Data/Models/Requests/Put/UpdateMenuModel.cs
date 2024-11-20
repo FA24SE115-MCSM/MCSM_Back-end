@@ -9,7 +9,8 @@ namespace MCSM_Data.Models.Requests.Put
 {
     public class UpdateMenuModel
     {
-        public string? Status { get; set; } = null!;
+        public string? MenuName { get; set; }
+        public DateOnly? CookDate { get; set; }
 
         public List<string>? DishName { get; set; }
     }
