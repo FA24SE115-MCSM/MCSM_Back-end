@@ -45,6 +45,7 @@ namespace MCSM_API.Controllers
         }
 
         [HttpPost]
+        [Authorize(AccountRole.Admin, AccountRole.Monk)]
         [ProducesResponseType(typeof(DishViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Create dish.")]
@@ -58,6 +59,7 @@ namespace MCSM_API.Controllers
         // PUT api/<FeedbackController>/5
         [HttpPut]
         [Route("{id}")]
+        [Authorize(AccountRole.Admin, AccountRole.Monk)]
         [ProducesResponseType(typeof(DishViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update dish.")]
@@ -67,10 +69,21 @@ namespace MCSM_API.Controllers
             return CreatedAtAction(nameof(GetDish), new { id = dish.Id }, dish);
         }
 
-        //// DELETE api/<DishController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
+        // DELETE api/<DishController>/5
+        [HttpDelete]
+        [Route("{id}")]
+        [Authorize(AccountRole.Admin, AccountRole.Monk)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status400BadRequest)]
+        [SwaggerOperation(Summary = "Remove dish.")]
+        public async Task<IActionResult> DeleteDish([FromRoute] Guid id)
+        {
+            await _dishService.DeleteDish(id);
+            return Ok(new
+            {
+                status = StatusCodes.Status200OK,
+                message = "Món ăn đã được xóa."
+            });
+        }
     }
 }

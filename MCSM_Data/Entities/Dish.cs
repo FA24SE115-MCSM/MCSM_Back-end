@@ -15,15 +15,11 @@ public partial class Dish
 
     public string? Note { get; set; }
 
-    public string Status { get; set; } = null!;
-
     public DateTime CreateAt { get; set; }
 
     public DateTime? UpdateAt { get; set; }
 
     public virtual Account CreatedByNavigation { get; set; } = null!;
-
-    public virtual ICollection<DishIngredient> DishIngredients { get; set; } = new List<DishIngredient>();
 
     public virtual DishType DishType { get; set; } = null!;
 

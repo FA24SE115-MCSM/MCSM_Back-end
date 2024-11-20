@@ -91,21 +91,16 @@ namespace MCSM_Data.Mapping
             CreateMap<RetreatFile, RetreatDocumentViewModel>();
             CreateMap<RetreatLearningOutcome, RetreatLearningOutcomeViewModel>();
             CreateMap<Payment, PaymentViewModel>()
-                .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(payment => payment.RetreatReg.Retreat.Name))
-                .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(payment => payment.Account.Email))
-                .ForMember(dest => dest.RegisteredEmails, opt => opt.MapFrom(payment => payment.RetreatReg.RetreatRegistrationParticipants
-                          .Select(participant => participant.Participant.Email).ToList()));
+                .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(payment => payment.RetreatReg.Retreat.Name));
             CreateMap<Refund, RefundViewModel>();
             CreateMap<Feedback, FeedbackViewModel>();
 
-            CreateMap<Ingredient, IngredientViewModel>();
             CreateMap<Menu, MenuViewModel>()
                 .ForMember(dest => dest.CreatedByEmail, otp => otp.MapFrom(menu => menu.CreatedByNavigation.Email))
                 .ForMember(dest => dest.Dishes, otp => otp.MapFrom(menu => menu.MenuDishes.Select(md => md.Dish)));
             CreateMap<Dish, DishViewModel>()
                 .ForMember(dest => dest.CreatedByEmail, otp => otp.MapFrom(dish => dish.CreatedByNavigation.Email))
-                .ForMember(dest => dest.DishTypeName, otp => otp.MapFrom(dish => dish.DishType.Name))
-                .ForMember(dest => dest.Ingredients, otp => otp.MapFrom(dish => dish.DishIngredients.Select(di => di.Ingredient)));
+                .ForMember(dest => dest.DishTypeName, otp => otp.MapFrom(dish => dish.DishType.Name));
             CreateMap<DishType, DishTypeViewModel>();
 
         }

@@ -35,10 +35,9 @@ namespace MCSM_API.Controllers
         }
 
         [HttpGet]
-        [Authorize(AccountRole.Admin)]
         [ProducesResponseType(typeof(List<PaymentViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all payments.")]
-        public async Task<ActionResult<List<PaymentViewModel>>> GetRoles([FromQuery] PaymentFilterModel filter)
+        public async Task<ActionResult<List<PaymentViewModel>>> GetPayments([FromQuery] PaymentFilterModel filter)
         {
             return await _payPalService.GetPayments(filter);
         }

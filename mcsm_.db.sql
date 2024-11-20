@@ -269,7 +269,7 @@ GO
 CREATE TABLE RetreatGroup(
 	Id uniqueidentifier primary key NOT NULL,
 	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
-	MonkId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	MonkId uniqueidentifier foreign key references Account(Id) NULL,
 	RoomId uniqueidentifier unique foreign key references Room(Id) NOT NULL,
 	Name nvarchar(50) NOT NULL
 );
@@ -355,23 +355,23 @@ GO
 ------
 DROP TABLE IF EXISTS Ingredient
 GO
---Table Ingredient
-CREATE TABLE Ingredient(
-	Id uniqueidentifier primary key NOT NULL,
-	Name nvarchar(50) NOT NULL
-);
-GO
+----Table Ingredient
+--CREATE TABLE Ingredient(
+--	Id uniqueidentifier primary key NOT NULL,
+--	Name nvarchar(50) NOT NULL
+--);
+--GO
 
 
 DROP TABLE IF EXISTS Allergy
 GO
---Table Allergy
-CREATE TABLE Allergy(
-	Id uniqueidentifier primary key NOT NULL,
-	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
-	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL
-);
-GO
+----Table Allergy
+--CREATE TABLE Allergy(
+--	Id uniqueidentifier primary key NOT NULL,
+--	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
+--	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL
+--);
+--GO
 
 DROP TABLE IF EXISTS DishType
 GO
@@ -391,7 +391,6 @@ CREATE TABLE Dish(
 	DishTypeId uniqueidentifier foreign key references DishType(Id) NOT NULL,
 	[Name] nvarchar(50) NOT NULL,
 	[Note] nvarchar(max) NULL,
-	[Status] nvarchar(20) NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime
 );
@@ -399,13 +398,13 @@ GO
 
 DROP TABLE IF EXISTS DishIngredient
 GO
---Table DishIngredient
-CREATE TABLE DishIngredient(
-	Id uniqueidentifier primary key NOT NULL,
-	DishId uniqueidentifier foreign key references Dish(Id) NULL,
-	IngredientId uniqueidentifier foreign key references Ingredient(Id) NULL
-);
-GO
+----Table DishIngredient
+--CREATE TABLE DishIngredient(
+--	Id uniqueidentifier primary key NOT NULL,
+--	DishId uniqueidentifier foreign key references Dish(Id) NULL,
+--	IngredientId uniqueidentifier foreign key references Ingredient(Id) NULL
+--);
+--GO
 
 DROP TABLE IF EXISTS Menu
 GO
@@ -413,10 +412,10 @@ GO
 CREATE TABLE Menu(
 	Id uniqueidentifier primary key NOT NULL,
 	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+	MenuName nvarchar(250) NULL,
 	CookDate date NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime NULL,
-	[Status] nvarchar(20) NOT NULL,
 );
 GO
 
