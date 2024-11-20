@@ -25,14 +25,11 @@ namespace MCSM_Service.Implementations
     {
         private readonly IDishRepository _dishRepository;
         private readonly IDishTypeRepository _dishTypeRepository;
-        private readonly IIngredientRepository _ingredientRepository;
-        private readonly IDishIngredientRepository _dishIngredientRepository;
+
         public DishService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
             _dishRepository = unitOfWork.Dish;
             _dishTypeRepository = unitOfWork.DishType;
-            _ingredientRepository = unitOfWork.Ingredient;
-            _dishIngredientRepository = unitOfWork.DishIngredient;
         }
 
         public async Task<ListViewModel<DishViewModel>> GetDishes(DishFilterModel filter, PaginationRequestModel pagination)
@@ -99,25 +96,25 @@ namespace MCSM_Service.Implementations
             };
             _dishRepository.Add(dish);
             await _unitOfWork.SaveChanges();
-            foreach (var ingredientName in model.IngredientNames)
-            {
-                var existingIngredient = _ingredientRepository.GetMany(i => i.Name.ToLower() == ingredientName.ToLower()).FirstOrDefault();
+            //foreach (var ingredientName in model.IngredientNames)
+            //{
+            //    var existingIngredient = _ingredientRepository.GetMany(i => i.Name.ToLower() == ingredientName.ToLower()).FirstOrDefault();
 
-                if (existingIngredient == null)
-                {
-                    throw new NotFoundException($"Ingredient '{ingredientName}' not found.");
-                }
+            //    if (existingIngredient == null)
+            //    {
+            //        throw new NotFoundException($"Ingredient '{ingredientName}' not found.");
+            //    }
 
-                var dishIngredient = new DishIngredient
-                {
-                    Id = Guid.NewGuid(),
-                    DishId = dishId,
-                    IngredientId = existingIngredient.Id
-                };
+            //    var dishIngredient = new DishIngredient
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        DishId = dishId,
+            //        IngredientId = existingIngredient.Id
+            //    };
 
-                _dishIngredientRepository.Add(dishIngredient);
+            //    _dishIngredientRepository.Add(dishIngredient);
                 
-            }
+            //}
             await _unitOfWork.SaveChanges();
 
             return await GetDish(dishId);
@@ -125,54 +122,53 @@ namespace MCSM_Service.Implementations
 
         public async Task<DishViewModel> UpdateDish(Guid id, UpdateDishModel model)
         {
-            var existDish = await _dishRepository.GetMany(r => r.Id == id)
-                .Include(d => d.DishIngredients)
-                .ThenInclude(di => di.Ingredient)
-                .FirstOrDefaultAsync() ?? throw new NotFoundException("Dish not found");
+            //var existDish = await _dishRepository.GetMany(r => r.Id == id)
+            //    .ThenInclude(di => di.Ingredient)
+            //    .FirstOrDefaultAsync() ?? throw new NotFoundException("Dish not found");
 
-            existDish.Note = model.Note ?? existDish.Note;
+            //existDish.Note = model.Note ?? existDish.Note;
 
-
-            _dishRepository.Update(existDish);
-            await _unitOfWork.SaveChanges();
-
-            var existingIngredientIds = existDish.DishIngredients.Select(di => di.IngredientId).ToList();
-            var updatedIngredientNames = model.IngredientNames.Select(i => i.ToLower()).ToList();
-
-
-            foreach (var ingredientName in model.IngredientNames)
-            {
-                var existingIngredient = await _ingredientRepository.GetMany(i => i.Name.ToLower() == ingredientName.ToLower())
-                    .FirstOrDefaultAsync();
-
-                if (existingIngredient == null)
-                {
-                    throw new NotFoundException($"Ingredient '{ingredientName}' not found.");
-                }
-
-                if (!existingIngredientIds.Contains(existingIngredient.Id))
-                {
-                    existDish.DishIngredients.Add(new DishIngredient
-                    {
-                        Id = Guid.NewGuid(),
-                        DishId = id,
-                        IngredientId = existingIngredient.Id
-                    });
-                }
-            }
-
-            var ingredientsToRemove = existDish.DishIngredients
-                .Where(di => di.Ingredient != null && !updatedIngredientNames.Contains(di.Ingredient.Name.ToLower()))
-                .ToList();
-
-            foreach (var ingredientToRemove in ingredientsToRemove)
-            {
-                existDish.DishIngredients.Remove(ingredientToRemove);
-            }
 
             //_dishRepository.Update(existDish);
-            //var result = await _unitOfWork.SaveChanges();
-            await _unitOfWork.SaveChanges();
+            //await _unitOfWork.SaveChanges();
+
+            //var existingIngredientIds = existDish.DishIngredients.Select(di => di.IngredientId).ToList();
+            //var updatedIngredientNames = model.IngredientNames.Select(i => i.ToLower()).ToList();
+
+
+            //foreach (var ingredientName in model.IngredientNames)
+            //{
+            //    var existingIngredient = await _ingredientRepository.GetMany(i => i.Name.ToLower() == ingredientName.ToLower())
+            //        .FirstOrDefaultAsync();
+
+            //    if (existingIngredient == null)
+            //    {
+            //        throw new NotFoundException($"Ingredient '{ingredientName}' not found.");
+            //    }
+
+            //    if (!existingIngredientIds.Contains(existingIngredient.Id))
+            //    {
+            //        existDish.DishIngredients.Add(new DishIngredient
+            //        {
+            //            Id = Guid.NewGuid(),
+            //            DishId = id,
+            //            IngredientId = existingIngredient.Id
+            //        });
+            //    }
+            //}
+
+            //var ingredientsToRemove = existDish.DishIngredients
+            //    .Where(di => di.Ingredient != null && !updatedIngredientNames.Contains(di.Ingredient.Name.ToLower()))
+            //    .ToList();
+
+            //foreach (var ingredientToRemove in ingredientsToRemove)
+            //{
+            //    existDish.DishIngredients.Remove(ingredientToRemove);
+            //}
+
+            ////_dishRepository.Update(existDish);
+            ////var result = await _unitOfWork.SaveChanges();
+            //await _unitOfWork.SaveChanges();
 
             return await GetDish(id);
         }

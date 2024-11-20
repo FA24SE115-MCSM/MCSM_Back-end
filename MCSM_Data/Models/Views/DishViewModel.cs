@@ -33,7 +33,6 @@ namespace MCSM_Data.Models.Views
 
         //public virtual DishType DishType { get; set; } = null!;
 
-        public virtual ICollection<IngredientViewModel> Ingredients { get; set; } = new List<IngredientViewModel>();
 
         //public virtual Menu? Menu { get; set; }
     }

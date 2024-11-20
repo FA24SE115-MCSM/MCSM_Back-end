@@ -355,23 +355,23 @@ GO
 ------
 DROP TABLE IF EXISTS Ingredient
 GO
---Table Ingredient
-CREATE TABLE Ingredient(
-	Id uniqueidentifier primary key NOT NULL,
-	Name nvarchar(50) NOT NULL
-);
-GO
+----Table Ingredient
+--CREATE TABLE Ingredient(
+--	Id uniqueidentifier primary key NOT NULL,
+--	Name nvarchar(50) NOT NULL
+--);
+--GO
 
 
 DROP TABLE IF EXISTS Allergy
 GO
---Table Allergy
-CREATE TABLE Allergy(
-	Id uniqueidentifier primary key NOT NULL,
-	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
-	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL
-);
-GO
+----Table Allergy
+--CREATE TABLE Allergy(
+--	Id uniqueidentifier primary key NOT NULL,
+--	IngredientId uniqueidentifier foreign key references Ingredient(Id) NOT NULL,
+--	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL
+--);
+--GO
 
 DROP TABLE IF EXISTS DishType
 GO
@@ -398,13 +398,13 @@ GO
 
 DROP TABLE IF EXISTS DishIngredient
 GO
---Table DishIngredient
-CREATE TABLE DishIngredient(
-	Id uniqueidentifier primary key NOT NULL,
-	DishId uniqueidentifier foreign key references Dish(Id) NULL,
-	IngredientId uniqueidentifier foreign key references Ingredient(Id) NULL
-);
-GO
+----Table DishIngredient
+--CREATE TABLE DishIngredient(
+--	Id uniqueidentifier primary key NOT NULL,
+--	DishId uniqueidentifier foreign key references Dish(Id) NULL,
+--	IngredientId uniqueidentifier foreign key references Ingredient(Id) NULL
+--);
+--GO
 
 DROP TABLE IF EXISTS Menu
 GO

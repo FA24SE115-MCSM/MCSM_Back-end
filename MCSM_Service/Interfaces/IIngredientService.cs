@@ -11,8 +11,8 @@ namespace MCSM_Service.Interfaces
 {
     public interface IIngredientService
     {
-        Task<ListViewModel<IngredientViewModel>> GetIngredients(IngredientFilterModel filter, PaginationRequestModel pagination);
-        Task<IngredientViewModel> GetIngredient(Guid id);
-        Task<IngredientViewModel> CreateIngredients(CreateIngredientModel model);
+        //Task<ListViewModel<IngredientViewModel>> GetIngredients(IngredientFilterModel filter, PaginationRequestModel pagination);
+        //Task<IngredientViewModel> GetIngredient(Guid id);
+        //Task<IngredientViewModel> CreateIngredients(CreateIngredientModel model);
     }
 }

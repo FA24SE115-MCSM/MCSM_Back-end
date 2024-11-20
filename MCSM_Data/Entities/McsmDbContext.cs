@@ -17,8 +17,6 @@ public partial class McsmDbContext : DbContext
 
     public virtual DbSet<Account> Accounts { get; set; }
 
-    public virtual DbSet<Allergy> Allergies { get; set; }
-
     public virtual DbSet<Article> Articles { get; set; }
 
     public virtual DbSet<Comment> Comments { get; set; }
@@ -27,13 +25,9 @@ public partial class McsmDbContext : DbContext
 
     public virtual DbSet<Dish> Dishes { get; set; }
 
-    public virtual DbSet<DishIngredient> DishIngredients { get; set; }
-
     public virtual DbSet<DishType> DishTypes { get; set; }
 
     public virtual DbSet<Feedback> Feedbacks { get; set; }
-
-    public virtual DbSet<Ingredient> Ingredients { get; set; }
 
     public virtual DbSet<Lesson> Lessons { get; set; }
 
@@ -90,17 +84,18 @@ public partial class McsmDbContext : DbContext
     public virtual DbSet<ToolHistory> ToolHistories { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    { }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=GOD-HAMMER\\HAMMER;Database=MCSM_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Account>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Account__3214EC07D32496CF");
+            entity.HasKey(e => e.Id).HasName("PK__Account__3214EC079EFE6174");
 
             entity.ToTable("Account");
 
-            entity.HasIndex(e => e.Email, "UQ__Account__A9D10534647ED285").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__Account__A9D105344AEE3FBA").IsUnique();
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateAt)
@@ -122,28 +117,9 @@ public partial class McsmDbContext : DbContext
                 .HasConstraintName("FK__Account__RoleId__398D8EEE");
         });
 
-        modelBuilder.Entity<Allergy>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Allergy__3214EC07149860CA");
-
-            entity.ToTable("Allergy");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
-            entity.HasOne(d => d.Account).WithMany(p => p.Allergies)
-                .HasForeignKey(d => d.AccountId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Allergy__Account__236943A5");
-
-            entity.HasOne(d => d.Ingredient).WithMany(p => p.Allergies)
-                .HasForeignKey(d => d.IngredientId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Allergy__Ingredi__22751F6C");
-        });
-
         modelBuilder.Entity<Article>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Article__3214EC07C3E3B893");
+            entity.HasKey(e => e.Id).HasName("PK__Article__3214EC07DB94675A");
 
             entity.ToTable("Article");
 
@@ -166,7 +142,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC07D0D6C800");
+            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC077EFA723D");
 
             entity.ToTable("Comment");
 
@@ -179,12 +155,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Post).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.PostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Comment__PostId__40058253");
+                .HasConstraintName("FK__Comment__PostId__367C1819");
         });
 
         modelBuilder.Entity<DeviceToken>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DeviceTo__3214EC07F2DA5670");
+            entity.HasKey(e => e.Id).HasName("PK__DeviceTo__3214EC073F521E02");
 
             entity.ToTable("DeviceToken");
 
@@ -202,7 +178,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Dish>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Dish__3214EC073AF97007");
+            entity.HasKey(e => e.Id).HasName("PK__Dish__3214EC079F67C95D");
 
             entity.ToTable("Dish");
 
@@ -216,34 +192,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Dishes)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Dish__CreatedBy__282DF8C2");
+                .HasConstraintName("FK__Dish__CreatedBy__22751F6C");
 
             entity.HasOne(d => d.DishType).WithMany(p => p.Dishes)
                 .HasForeignKey(d => d.DishTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Dish__DishTypeId__29221CFB");
-        });
-
-        modelBuilder.Entity<DishIngredient>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__DishIngr__3214EC071B251FEE");
-
-            entity.ToTable("DishIngredient");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
-            entity.HasOne(d => d.Dish).WithMany(p => p.DishIngredients)
-                .HasForeignKey(d => d.DishId)
-                .HasConstraintName("FK__DishIngre__DishI__2CF2ADDF");
-
-            entity.HasOne(d => d.Ingredient).WithMany(p => p.DishIngredients)
-                .HasForeignKey(d => d.IngredientId)
-                .HasConstraintName("FK__DishIngre__Ingre__2DE6D218");
+                .HasConstraintName("FK__Dish__DishTypeId__236943A5");
         });
 
         modelBuilder.Entity<DishType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__DishType__3214EC0718F07AD5");
+            entity.HasKey(e => e.Id).HasName("PK__DishType__3214EC071E23FB05");
 
             entity.ToTable("DishType");
 
@@ -253,7 +212,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Feedback>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Feedback__3214EC071FD40246");
+            entity.HasKey(e => e.Id).HasName("PK__Feedback__3214EC0755F2570C");
 
             entity.ToTable("Feedback");
 
@@ -266,27 +225,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Feedbacks)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Feedback__Create__498EEC8D");
+                .HasConstraintName("FK__Feedback__Create__40058253");
 
             entity.HasOne(d => d.Retreat).WithMany(p => p.Feedbacks)
                 .HasForeignKey(d => d.RetreatId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Feedback__Retrea__4A8310C6");
-        });
-
-        modelBuilder.Entity<Ingredient>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Ingredie__3214EC0701AF33E2");
-
-            entity.ToTable("Ingredient");
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.Name).HasMaxLength(50);
+                .HasConstraintName("FK__Feedback__Retrea__40F9A68C");
         });
 
         modelBuilder.Entity<Lesson>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Lesson__3214EC0726D78169");
+            entity.HasKey(e => e.Id).HasName("PK__Lesson__3214EC07309A317F");
 
             entity.ToTable("Lesson");
 
@@ -307,11 +256,11 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Level>(entity =>
         {
-            entity.HasKey(e => e.AccountId).HasName("PK__Level__349DA5A6A586CDF0");
+            entity.HasKey(e => e.AccountId).HasName("PK__Level__349DA5A69668F62A");
 
             entity.ToTable("Level");
 
-            entity.HasIndex(e => e.AccountId, "UQ__Level__349DA5A74A9A70DD").IsUnique();
+            entity.HasIndex(e => e.AccountId, "UQ__Level__349DA5A73C6DA6C0").IsUnique();
 
             entity.Property(e => e.AccountId).ValueGeneratedNever();
             entity.Property(e => e.RankName).HasMaxLength(50);
@@ -325,7 +274,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Menu>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Menu__3214EC07EEAFAE00");
+            entity.HasKey(e => e.Id).HasName("PK__Menu__3214EC071FA007F2");
 
             entity.ToTable("Menu");
 
@@ -339,12 +288,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Menus)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Menu__CreatedBy__30C33EC3");
+                .HasConstraintName("FK__Menu__CreatedBy__2739D489");
         });
 
         modelBuilder.Entity<MenuDish>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__MenuDish__3214EC074F74FFF5");
+            entity.HasKey(e => e.Id).HasName("PK__MenuDish__3214EC07D5FA1DB3");
 
             entity.ToTable("MenuDish");
 
@@ -352,16 +301,16 @@ public partial class McsmDbContext : DbContext
 
             entity.HasOne(d => d.Dish).WithMany(p => p.MenuDishes)
                 .HasForeignKey(d => d.DishId)
-                .HasConstraintName("FK__MenuDish__DishId__3587F3E0");
+                .HasConstraintName("FK__MenuDish__DishId__2BFE89A6");
 
             entity.HasOne(d => d.Menu).WithMany(p => p.MenuDishes)
                 .HasForeignKey(d => d.MenuId)
-                .HasConstraintName("FK__MenuDish__MenuId__3493CFA7");
+                .HasConstraintName("FK__MenuDish__MenuId__2B0A656D");
         });
 
         modelBuilder.Entity<Notification>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Notifica__3214EC07E0453B4B");
+            entity.HasKey(e => e.Id).HasName("PK__Notifica__3214EC074290A2F0");
 
             entity.ToTable("Notification");
 
@@ -381,7 +330,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Payment__3214EC070A0D36AF");
+            entity.HasKey(e => e.Id).HasName("PK__Payment__3214EC074BE7C1B2");
 
             entity.ToTable("Payment");
 
@@ -408,7 +357,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Post>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Post__3214EC075FD15805");
+            entity.HasKey(e => e.Id).HasName("PK__Post__3214EC07890F80EE");
 
             entity.ToTable("Post");
 
@@ -422,12 +371,12 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.Posts)
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Post__CreatedBy__3864608B");
+                .HasConstraintName("FK__Post__CreatedBy__2EDAF651");
         });
 
         modelBuilder.Entity<PostImage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__PostImag__3214EC07078812A9");
+            entity.HasKey(e => e.Id).HasName("PK__PostImag__3214EC07A1892993");
 
             entity.ToTable("PostImage");
 
@@ -439,18 +388,18 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Post).WithMany(p => p.PostImages)
                 .HasForeignKey(d => d.PostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__PostImage__PostI__3C34F16F");
+                .HasConstraintName("FK__PostImage__PostI__32AB8735");
         });
 
         modelBuilder.Entity<Profile>(entity =>
         {
-            entity.HasKey(e => e.AccountId).HasName("PK__Profile__349DA5A6281D222A");
+            entity.HasKey(e => e.AccountId).HasName("PK__Profile__349DA5A604A7BEF2");
 
             entity.ToTable("Profile");
 
-            entity.HasIndex(e => e.AccountId, "UQ__Profile__349DA5A79C67F561").IsUnique();
+            entity.HasIndex(e => e.AccountId, "UQ__Profile__349DA5A7C8E9B47D").IsUnique();
 
-            entity.HasIndex(e => e.PhoneNumber, "UQ__Profile__85FB4E38B0DF23ED").IsUnique();
+            entity.HasIndex(e => e.PhoneNumber, "UQ__Profile__85FB4E385B2B1522").IsUnique();
 
             entity.Property(e => e.AccountId).ValueGeneratedNever();
             entity.Property(e => e.Avatar).IsUnicode(false);
@@ -470,7 +419,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Reaction>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Reaction__3214EC07FE77922D");
+            entity.HasKey(e => e.Id).HasName("PK__Reaction__3214EC0726282199");
 
             entity.ToTable("Reaction");
 
@@ -482,17 +431,17 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.Account).WithMany(p => p.Reactions)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Reaction__Accoun__45BE5BA9");
+                .HasConstraintName("FK__Reaction__Accoun__3C34F16F");
 
             entity.HasOne(d => d.Post).WithMany(p => p.Reactions)
                 .HasForeignKey(d => d.PostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Reaction__PostId__44CA3770");
+                .HasConstraintName("FK__Reaction__PostId__3B40CD36");
         });
 
         modelBuilder.Entity<Refund>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Refund__3214EC0788C83955");
+            entity.HasKey(e => e.Id).HasName("PK__Refund__3214EC0799EB0038");
 
             entity.ToTable("Refund");
 
@@ -518,7 +467,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Retreat>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Retreat__3214EC07536AA6FF");
+            entity.HasKey(e => e.Id).HasName("PK__Retreat__3214EC079CDF803E");
 
             entity.ToTable("Retreat");
 
@@ -539,7 +488,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatFile>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatF__3214EC07368F3273");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatF__3214EC07BA9EA169");
 
             entity.ToTable("RetreatFile");
 
@@ -558,11 +507,11 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatGroup>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC07E8FB7636");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC077A45E8A3");
 
             entity.ToTable("RetreatGroup");
 
-            entity.HasIndex(e => e.RoomId, "UQ__RetreatG__328639388466F858").IsUnique();
+            entity.HasIndex(e => e.RoomId, "UQ__RetreatG__328639389076344D").IsUnique();
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.Name).HasMaxLength(50);
@@ -584,7 +533,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatGroupMember>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC0740D5C3D5");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC077642F194");
 
             entity.ToTable("RetreatGroupMember");
 
@@ -603,7 +552,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatGroupMessage>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC072D71F3C9");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatG__3214EC0789497ED0");
 
             entity.ToTable("RetreatGroupMessage");
 
@@ -628,7 +577,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatLearningOutcome>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatL__3214EC07F370208C");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatL__3214EC07FFF8C1CE");
 
             entity.ToTable("RetreatLearningOutcome");
 
@@ -647,7 +596,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatLesson>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatL__3214EC07E8B98D2F");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatL__3214EC07752413EE");
 
             entity.ToTable("RetreatLesson");
 
@@ -666,7 +615,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatMonk>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatM__3214EC07650F17F4");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatM__3214EC0707C79AD7");
 
             entity.ToTable("RetreatMonk");
 
@@ -685,7 +634,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatRegistration>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatR__3214EC07A9EC4168");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatR__3214EC0718207F11");
 
             entity.ToTable("RetreatRegistration");
 
@@ -711,7 +660,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatRegistrationParticipant>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatR__3214EC07A98F3BA8");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatR__3214EC07B78BDD7E");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
 
@@ -728,7 +677,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RetreatSchedule>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RetreatS__3214EC0714568583");
+            entity.HasKey(e => e.Id).HasName("PK__RetreatS__3214EC07D516AC60");
 
             entity.ToTable("RetreatSchedule");
 
@@ -753,7 +702,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Role__3214EC073AADCC8A");
+            entity.HasKey(e => e.Id).HasName("PK__Role__3214EC0717868DB7");
 
             entity.ToTable("Role");
 
@@ -763,7 +712,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Room>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Room__3214EC07A5789AA5");
+            entity.HasKey(e => e.Id).HasName("PK__Room__3214EC078EF4EFAC");
 
             entity.ToTable("Room");
 
@@ -782,7 +731,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<RoomType>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RoomType__3214EC0748E348A8");
+            entity.HasKey(e => e.Id).HasName("PK__RoomType__3214EC072870A4C5");
 
             entity.ToTable("RoomType");
 
@@ -792,7 +741,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Tool>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Tool__3214EC0765A67459");
+            entity.HasKey(e => e.Id).HasName("PK__Tool__3214EC07EA306972");
 
             entity.ToTable("Tool");
 
@@ -806,7 +755,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<ToolHistory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__ToolHist__3214EC078E04964A");
+            entity.HasKey(e => e.Id).HasName("PK__ToolHist__3214EC0716FB07BD");
 
             entity.ToTable("ToolHistory");
 

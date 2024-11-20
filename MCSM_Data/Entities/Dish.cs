@@ -21,8 +21,6 @@ public partial class Dish
 
     public virtual Account CreatedByNavigation { get; set; } = null!;
 
-    public virtual ICollection<DishIngredient> DishIngredients { get; set; } = new List<DishIngredient>();
-
     public virtual DishType DishType { get; set; } = null!;
 
     public virtual ICollection<MenuDish> MenuDishes { get; set; } = new List<MenuDish>();
