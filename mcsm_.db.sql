@@ -459,7 +459,7 @@ GO
 CREATE TABLE Comment(
 	Id uniqueidentifier primary key NOT NULL,
 	PostId uniqueidentifier foreign key references Post(Id) NOT NULL,
-	ReplyTo uniqueidentifier NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Content nvarchar(MAX),
 	UpdateAt datetime,
 	IsDeleted bit NOT NULL DEFAULT 0, 
@@ -474,9 +474,16 @@ CREATE TABLE Reaction(
 	Id uniqueidentifier primary key NOT NULL,
 	PostId uniqueidentifier foreign key references Post(Id) NOT NULL,
 	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
-	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
+	ReactionType NVARCHAR(50) NOT NULL DEFAULT 'Like',
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+	unique(PostId, AccountId)
 );
 GO
+
+
+--ALTER TABLE Reaction
+--ADD ReactionType NVARCHAR(50) NOT NULL DEFAULT 'Like';
+--GO
 
 DROP TABLE IF EXISTS Feedback
 GO

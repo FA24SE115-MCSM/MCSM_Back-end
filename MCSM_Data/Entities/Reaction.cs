@@ -11,6 +11,8 @@ public partial class Reaction
 
     public Guid AccountId { get; set; }
 
+    public string ReactionType { get; set; } = null!;
+
     public DateTime CreateAt { get; set; }
 
     public virtual Account Account { get; set; } = null!;

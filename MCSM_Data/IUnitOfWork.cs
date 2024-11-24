@@ -33,6 +33,10 @@ namespace MCSM_Data
         public IDishRepository Dish { get; }
         public IDishTypeRepository DishType { get; }
         public IMenuDishRepository MenuDish { get; }
+        public IPostRepository Post { get; }
+        public IPostImageRepository PostImage { get; }
+        public ICommentRepository Comment { get; }
+        public IReactionRepository Reaction { get; }
 
 
         Task<int> SaveChanges();

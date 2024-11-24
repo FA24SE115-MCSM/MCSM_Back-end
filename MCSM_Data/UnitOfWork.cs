@@ -38,7 +38,10 @@ namespace MCSM_Data
         private IRefundRepository _refund = null!;
 
         private IFeedbackRepository _feedback = null!;
-
+        private IPostRepository _post = null!;
+        private IPostImageRepository _postImage = null!;
+        private IReactionRepository _reaction = null!;
+        private ICommentRepository _comment = null!;
 
         public UnitOfWork(McsmDbContext context)
         {
@@ -183,6 +186,22 @@ namespace MCSM_Data
             get { return _menuDish ??= new MenuDishRepository(_context); }
         }
 
+        public IPostRepository Post
+        {
+            get { return _post ??= new PostRepository(_context); }
+        }
+        public IPostImageRepository PostImage
+        {
+            get { return _postImage ??= new PostImageRepository(_context); }
+        }
+        public ICommentRepository Comment
+        {
+            get { return _comment ??= new CommentRepository(_context); }
+        }
+        public IReactionRepository Reaction
+        {
+            get { return _reaction ??= new ReactionRepository(_context); }
+        }
         public async Task<int> SaveChanges()
         {
             return await _context.SaveChangesAsync();

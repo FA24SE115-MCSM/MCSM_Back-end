@@ -104,7 +104,7 @@ namespace MCSM_Service.Implementations
                         Description = model.Description,
                         StartDate = model.StartDate,
                         EndDate = endDate,
-                        Status = RetreatStatus.Active.ToString()
+                        Status = RetreatStatus.Open.ToString()
                     };
                     _retreatRepository.Add(retreat);
 
