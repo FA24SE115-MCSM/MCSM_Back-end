@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using MCSM_Data;
 using MCSM_Data.Entities;
 using MCSM_Data.Models.Requests.Filters;
+using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
@@ -36,12 +37,23 @@ namespace MCSM_Service.Implementations
             _appSettings = appSettings.Value;
         }
 
-        public async Task<ListViewModel<RetreatGroupViewModel>> GetRetreatGroups(RetreatGroupFilterModel filter, PaginationViewModel pagination)
+        public async Task<ListViewModel<RetreatGroupViewModel>> GetRetreatGroups(RetreatGroupFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _retreatGroupRepository.GetAll();
-            if (!string.IsNullOrEmpty(filter.Name))
+            if (filter.GroupId.HasValue)
             {
-                query = query.Where(r => r.Name.Contains(filter.Name));
+                query = query.Where(r => r.Id == filter.GroupId.Value);
+            }
+
+            if (filter.RetreatId.HasValue)
+            {
+                query = query.Where(r => r.RetreatId == filter.RetreatId.Value);
+            }
+
+            if (filter.ParticipantId.HasValue)
+            {
+                query = query.Where(r => r.RetreatGroupMembers
+                                            .Any(rgm => rgm.MemberId == filter.ParticipantId.Value));
             }
 
             var totalRow = await query.AsNoTracking().CountAsync();
