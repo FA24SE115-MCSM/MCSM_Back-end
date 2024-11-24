@@ -94,7 +94,8 @@ namespace MCSM_Data.Mapping
             CreateMap<Comment, CommentViewModel>();
             CreateMap<PostImage, PostImageViewModel>();
             CreateMap<Reaction, ReactionViewModel>();
-
+            CreateMap<RetreatGroup, RetreatGroupViewModel>();
+            CreateMap<RetreatGroupMember, RetreatGroupMemberViewModel>();
         }
     }
 }
