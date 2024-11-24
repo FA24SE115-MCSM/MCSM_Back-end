@@ -23,6 +23,8 @@ public partial class Account
 
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
 
+    public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
     public virtual ICollection<DeviceToken> DeviceTokens { get; set; } = new List<DeviceToken>();
 
     public virtual ICollection<Dish> Dishes { get; set; } = new List<Dish>();

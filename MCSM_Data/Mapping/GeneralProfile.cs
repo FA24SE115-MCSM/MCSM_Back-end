@@ -90,6 +90,10 @@ namespace MCSM_Data.Mapping
                 .ForMember(dest => dest.CreatedByEmail, otp => otp.MapFrom(dish => dish.CreatedByNavigation.Email))
                 .ForMember(dest => dest.DishTypeName, otp => otp.MapFrom(dish => dish.DishType.Name));
             CreateMap<DishType, DishTypeViewModel>();
+            CreateMap<Post, PostViewModel>();
+            CreateMap<Comment, CommentViewModel>();
+            CreateMap<PostImage, PostImageViewModel>();
+            CreateMap<Reaction, ReactionViewModel>();
 
         }
     }

@@ -140,7 +140,7 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Comment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC077EFA723D");
+            entity.HasKey(e => e.Id).HasName("PK__Comment__3214EC07DEF9A77B");
 
             entity.ToTable("Comment");
 
@@ -150,10 +150,15 @@ public partial class McsmDbContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.UpdateAt).HasColumnType("datetime");
 
+            entity.HasOne(d => d.Account).WithMany(p => p.Comments)
+                .HasForeignKey(d => d.AccountId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Comment__Account__634EBE90");
+
             entity.HasOne(d => d.Post).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.PostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Comment__PostId__367C1819");
+                .HasConstraintName("FK__Comment__PostId__625A9A57");
         });
 
         modelBuilder.Entity<DeviceToken>(entity =>
@@ -417,24 +422,29 @@ public partial class McsmDbContext : DbContext
 
         modelBuilder.Entity<Reaction>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Reaction__3214EC0726282199");
+            entity.HasKey(e => e.Id).HasName("PK__Reaction__3214EC0760CAB195");
 
             entity.ToTable("Reaction");
+
+            entity.HasIndex(e => new { e.PostId, e.AccountId }, "UQ__Reaction__D95BBA43AE92C918").IsUnique();
 
             entity.Property(e => e.Id).ValueGeneratedNever();
             entity.Property(e => e.CreateAt)
                 .HasDefaultValueSql("(dateadd(hour,(7),getutcdate()))")
                 .HasColumnType("datetime");
+            entity.Property(e => e.ReactionType)
+                .HasMaxLength(50)
+                .HasDefaultValue("Like");
 
             entity.HasOne(d => d.Account).WithMany(p => p.Reactions)
                 .HasForeignKey(d => d.AccountId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Reaction__Accoun__3C34F16F");
+                .HasConstraintName("FK__Reaction__Accoun__5224328E");
 
             entity.HasOne(d => d.Post).WithMany(p => p.Reactions)
                 .HasForeignKey(d => d.PostId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Reaction__PostId__3B40CD36");
+                .HasConstraintName("FK__Reaction__PostId__51300E55");
         });
 
         modelBuilder.Entity<Refund>(entity =>
