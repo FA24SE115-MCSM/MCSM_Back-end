@@ -4,11 +4,13 @@ using MCSM_Data;
 using MCSM_Data.Entities;
 using MCSM_Data.Models.Requests.Filters;
 using MCSM_Data.Models.Requests.Get;
+using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
 using MCSM_Utility.Constants;
 using MCSM_Utility.Enums;
+using MCSM_Utility.Exceptions;
 using MCSM_Utility.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -187,5 +189,20 @@ namespace MCSM_Service.Implementations
             await _unitOfWork.SaveChanges();
         }
 
+        public async Task<RetreatGroupViewModel> AssignedMonk(CreateMonkForGroupModel model)
+        {
+            var retreatGroup = await _retreatGroupRepository.GetMany(r => r.Id == model.RetreatGroupId).FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat group not found");
+            var flag = await _accountRepository.GetMany(a => a.Id == model.MonkId).Include(r => r.Role).FirstOrDefaultAsync() ?? throw new NotFoundException("Account not found");
+            if(flag.Role.Name != AccountRole.Monk && flag.Role.Name != AccountRole.Nun)
+            {
+                throw new ConflictException("Please choose Monk/Nun");
+            }
+
+            retreatGroup.MonkId = model.MonkId;
+            _retreatGroupRepository.Update(retreatGroup);
+            var result = await _unitOfWork.SaveChanges();
+
+            return _mapper.Map<RetreatGroupViewModel>(retreatGroup);
+        }
     }
 }

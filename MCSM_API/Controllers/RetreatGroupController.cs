@@ -1,5 +1,6 @@
 ﻿using MCSM_Data.Models.Requests.Filters;
 using MCSM_Data.Models.Requests.Get;
+using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Views;
 using MCSM_Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,15 @@ namespace MCSM_API.Controllers
         public async Task<ActionResult<ListViewModel<RetreatGroupViewModel>>> GetAccounts([FromQuery] RetreatGroupFilterModel filter, [FromQuery] PaginationRequestModel pagination)
         {
             return await _retreatGroupService.GetRetreatGroups(filter, pagination);
+        }
+
+        [HttpPost]
+        [Route("assign-monk")]
+        [ProducesResponseType(typeof(RetreatGroupViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Assigned monk for retreat groups.")]
+        public async Task<ActionResult<RetreatGroupViewModel>> AssignedMonk([FromBody] CreateMonkForGroupModel model)
+        {
+            return await _retreatGroupService.AssignedMonk(model);
         }
     }
 }
