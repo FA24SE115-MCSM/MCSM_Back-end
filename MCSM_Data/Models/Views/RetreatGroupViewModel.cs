@@ -8,7 +8,7 @@ namespace MCSM_Data.Models.Views
 
         public string Name { get; set; } = null!;
 
-        //public virtual AccountViewModel? Monk { get; set; }
+        public virtual AccountViewModel? Monk { get; set; }
 
         //public virtual Retreat Retreat { get; set; } = null!;
 
