@@ -48,20 +48,20 @@ namespace MCSM_API.Controllers
 
 
 
-        [HttpDelete]
-        [Route("{id}")]
-        [Authorize(AccountRole.Admin, AccountRole.Monk, AccountRole.Nun, AccountRole.Practitioner)]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [SwaggerOperation(Summary = "Remove reaction.")]
-        public async Task<IActionResult> UpdateReaction([FromRoute] Guid id)
-        {
-            var auth = (AuthModel?)HttpContext.Items["User"];
-            var flag = await _reactionService.UpdateReaction(id, auth!.Id);
-            if (flag)
-            {
-                return NoContent();
-            }
-            return BadRequest();
-        }
+        //[HttpDelete]
+        //[Route("{id}")]
+        //[Authorize(AccountRole.Admin, AccountRole.Monk, AccountRole.Nun, AccountRole.Practitioner)]
+        //[ProducesResponseType(StatusCodes.Status201Created)]
+        //[SwaggerOperation(Summary = "Remove reaction.")]
+        //public async Task<IActionResult> UpdateReaction([FromRoute] Guid id)
+        //{
+        //    var auth = (AuthModel?)HttpContext.Items["User"];
+        //    var flag = await _reactionService.UpdateReaction(id, auth!.Id);
+        //    if (flag)
+        //    {
+        //        return NoContent();
+        //    }
+        //    return BadRequest();
+        //}
     }
 }

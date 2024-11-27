@@ -20,7 +20,8 @@ namespace MCSM_Data.Mapping
                 .ForMember(dest => dest.Avatar, otp => otp.MapFrom(account => account.Profile!.Avatar));
 
             CreateMap<RoomType, RoomTypeViewModel>();
-            CreateMap<Room, RoomViewModel>();
+            CreateMap<Room, RoomViewModel>()
+                .ForMember(dest => dest.RetreatGroupMembers, otp => otp.MapFrom(room => room.RetreatGroup!.RetreatGroupMembers));
             CreateMap<Retreat, RetreatViewModel>()
                 .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(retreat => retreat.CreatedByNavigation))
                 .ForMember(dest => dest.RetreatImages, otp => otp.MapFrom(retreat => retreat.RetreatFiles.Where(file => file.Type == RetreatFileType.Image)))
