@@ -46,6 +46,18 @@ namespace MCSM_API.Controllers
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, comment);
         }
 
+        [HttpPost]
+        [Route("reply")]
+        [Authorize(AccountRole.Admin, AccountRole.Monk, AccountRole.Nun, AccountRole.Practitioner)]
+        [ProducesResponseType(typeof(CommentViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Reply comment.")]
+        public async Task<ActionResult<CommentViewModel>> ReplyComment([FromBody] CreateReplyCommentModel model)
+        {
+            var auth = (AuthModel?)HttpContext.Items["User"];
+            var comment = await _commentService.ReplyComment(auth!.Id, model);
+            return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, comment);
+        }
+
 
 
         [HttpPut]

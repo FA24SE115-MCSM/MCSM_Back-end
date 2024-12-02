@@ -53,6 +53,25 @@ namespace MCSM_Service.Implementations
             return result > 0 ? await GetComment(commentId) : null!;
         }
 
+        public async Task<CommentViewModel> ReplyComment(Guid accountId, CreateReplyCommentModel model)
+        {
+            var flag = await CheckComment(model.CommentId);
+            var commentId = Guid.NewGuid();
+
+            var comment = new Comment
+            {
+                Id = commentId,
+                PostId = flag.PostId,
+                ParentCommentId = model.CommentId,
+                AccountId = accountId,
+                Content = model.Content,
+            };
+
+            _commentRepository.Add(comment);
+            var result = await _unitOfWork.SaveChanges();
+            return result > 0 ? await GetComment(commentId) : null!;
+        }
+
         public async Task<CommentViewModel> UpdateComment(Guid id, UpdateCommentModel model)
         {
             var exsitComment = await _commentRepository.GetMany(c => c.Id == id).FirstOrDefaultAsync() ?? throw new NotFoundException("Comment not found");
@@ -68,6 +87,12 @@ namespace MCSM_Service.Implementations
         private async Task CheckPost(Guid postId)
         {
             var post = await _postRepository.GetMany(p => p.Id == postId).FirstOrDefaultAsync() ?? throw new NotFoundException("Post not found");
+
+        }
+        
+        private async Task<Comment> CheckComment(Guid commentId)
+        {
+            return await _commentRepository.GetMany(p => p.Id == commentId).FirstOrDefaultAsync() ?? throw new NotFoundException("Comment not found");
 
         }
 

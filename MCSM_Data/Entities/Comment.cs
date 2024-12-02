@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace MCSM_Data.Entities;
+﻿namespace MCSM_Data.Entities;
 
 public partial class Comment
 {
@@ -13,6 +10,8 @@ public partial class Comment
 
     public string? Content { get; set; }
 
+    public Guid? ParentCommentId { get; set; }
+
     public DateTime? UpdateAt { get; set; }
 
     public bool IsDeleted { get; set; }
@@ -20,6 +19,10 @@ public partial class Comment
     public DateTime CreateAt { get; set; }
 
     public virtual Account Account { get; set; } = null!;
+
+    public virtual ICollection<Comment> InverseParentComment { get; set; } = new List<Comment>();
+
+    public virtual Comment? ParentComment { get; set; }
 
     public virtual Post Post { get; set; } = null!;
 }

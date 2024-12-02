@@ -35,6 +35,7 @@ CREATE TABLE Account(
 	Email varchar(50) unique NOT NULL,
 	HashPassword varchar(255) NOT NULL,
 	VerifyToken varchar(max) NOT NULL,
+	IsOnline BIT NOT NULL DEFAULT 0,
 	[Status] nvarchar(100) NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime
@@ -256,7 +257,7 @@ GO
 CREATE TABLE Room(
 	Id uniqueidentifier primary key NOT NULL,
 	RoomTypeId uniqueidentifier foreign key references RoomType(Id) NOT NULL,
-	[Name] nvarchar(50) NOT NULL,
+	[Name] nvarchar(255) NOT NULL,
 	Capacity int NOT NULL,
 	[Status] nvarchar(20) NOT NULL,
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
@@ -271,7 +272,7 @@ CREATE TABLE RetreatGroup(
 	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
 	MonkId uniqueidentifier foreign key references Account(Id) NULL,
 	RoomId uniqueidentifier unique foreign key references Room(Id) NOT NULL,
-	Name nvarchar(50) NOT NULL
+	Name nvarchar(255) NOT NULL
 );
 GO
 
@@ -310,20 +311,23 @@ CREATE TABLE RetreatSchedule(
 );
 GO
 
-DROP TABLE IF EXISTS RetreatGroupMessage
-GO
---Table RetreatGroupMessage
-CREATE TABLE RetreatGroupMessage(
-	Id uniqueidentifier primary key NOT NULL,
-	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
-	GroupId uniqueidentifier foreign key references RetreatGroup(Id) NOT NULL,
-	ReplyTo uniqueidentifier,
-	Content nvarchar(max) NOT NULL,
-	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
-	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
-	IsDeleted bit NOT NULL
-);
-GO
+
+
+
+--DROP TABLE IF EXISTS RetreatGroupMessage
+--GO
+----Table RetreatGroupMessage
+--CREATE TABLE RetreatGroupMessage(
+--	Id uniqueidentifier primary key NOT NULL,
+--	CreatedBy uniqueidentifier foreign key references Account(Id) NOT NULL,
+--	GroupId uniqueidentifier foreign key references RetreatGroup(Id) NOT NULL,
+--	ReplyTo uniqueidentifier,
+--	Content nvarchar(max) NOT NULL,
+--	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+--	UpdateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+--	IsDeleted bit NOT NULL
+--);
+--GO
 
 DROP TABLE IF EXISTS Tool
 GO
@@ -460,6 +464,7 @@ CREATE TABLE Comment(
 	Id uniqueidentifier primary key NOT NULL,
 	PostId uniqueidentifier foreign key references Post(Id) NOT NULL,
 	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	ParentCommentId uniqueidentifier NULL FOREIGN KEY REFERENCES Comment(Id),
 	Content nvarchar(MAX),
 	UpdateAt datetime,
 	IsDeleted bit NOT NULL DEFAULT 0, 
@@ -501,5 +506,35 @@ CREATE TABLE Feedback(
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
 	UpdateAt datetime NULL,
 	IsDeleted bit NOT NULL
+);
+GO
+
+
+DROP TABLE IF EXISTS Conversations 
+GO
+CREATE TABLE Conversations (
+    Id uniqueidentifier primary key NOT NULL,
+    CreatedAt DATETIME DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
+);
+GO
+
+DROP TABLE IF EXISTS ConversationParticipants 
+GO
+CREATE TABLE ConversationParticipants (
+    ConversationId uniqueidentifier foreign key references Conversations(Id) NOT NULL,
+    AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+    JoinedAt DATETIME DEFAULT DATEADD(HOUR, 7, GETUTCDATE()),
+    PRIMARY KEY (ConversationId, AccountId)
+);
+GO
+
+DROP TABLE IF EXISTS [Messages] 
+GO
+CREATE TABLE [Messages] (
+    Id uniqueidentifier primary key NOT NULL,
+    ConversationId uniqueidentifier foreign key references Conversations(Id) NOT NULL,
+    SenderId uniqueidentifier foreign key references Account(Id) NOT NULL,
+    Content NVARCHAR(MAX) NOT NULL,    -- Nội dung tin nhắn
+    SendAt DATETIME DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO

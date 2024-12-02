@@ -2,6 +2,7 @@
 using MCSM_Utility.Helpers.PayPalPayment.Models;
 using MCSM_Utility.Settings;
 using System.Net.Http.Headers;
+using System.Runtime;
 using System.Text;
 using System.Text.Json;
 
@@ -62,6 +63,90 @@ namespace MCSM_Utility.Helpers.PayPalPayment
 
             return paymentResponse ?? throw new Exception("Unable to retrieve PayPal response.");
         }
+
+
+        public static async Task<bool> RefundPaymentAsync(string saleId, decimal amount, AppSetting appSettings)
+        {
+            var accessToken = await GetAccessTokenAsync(appSettings);
+
+            // Yêu cầu hoàn tiền
+            var refundRequest = new
+            {
+                amount = new
+                {
+                    total = amount.ToString("F2"),
+                    currency = "USD"
+                }
+            };
+
+            var requestContent = new StringContent(JsonSerializer.Serialize(refundRequest), Encoding.UTF8, "application/json");
+
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{appSettings.PayPal.BaseUrl}/v1/payments/sale/{saleId}/refund");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Content = requestContent;
+
+            var response = await _httpClient.SendAsync(request);
+
+            // Kiểm tra kết quả trả về
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to refund payment. Error: {errorContent}");
+            }
+
+            return true;
+        }
+
+        public static async Task<string> GetSaleIdAsync(string paymentId, AppSetting appSettings)
+        {
+            var accessToken = await GetAccessTokenAsync(appSettings);
+
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{appSettings.PayPal.BaseUrl}/v1/payments/payment/{paymentId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to retrieve payment details. Error: {errorContent}");
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var paymentDetails = JsonSerializer.Deserialize<PayPalPaymentResponse>(json);
+
+            // Lấy sale_id từ transactions
+            var saleId = paymentDetails?.Transactions
+                ?.SelectMany(t => t.RelatedResources)
+                ?.FirstOrDefault(r => r.Sale != null)?.Sale.Id;
+
+            return saleId ?? throw new Exception("Unable to retrieve sale_id from payment details.");
+        }
+
+        public static async Task<bool> ExecutePaymentAsync(string paymentId, string payerId, AppSetting appSettings)
+        {
+            var accessToken = await GetAccessTokenAsync(appSettings);
+
+
+            // Gọi Execute Payment API
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{appSettings.PayPal.BaseUrl}/v1/payments/payment/{paymentId}/execute");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            request.Content = new StringContent(JsonSerializer.Serialize(new { payer_id = payerId }), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Execute Payment Failed: {errorContent}");
+            }
+
+            // Nếu thành công
+            var result = await response.Content.ReadAsStringAsync();
+            var paymentDetails = JsonSerializer.Deserialize<PayPalPaymentResponse>(result);
+
+            return paymentDetails?.State == "approved";
+        }
+
 
         // Phương thức hoàn tiền qua PayPal
         public static async Task<PayPalPayoutResponse> CreatePayoutAsync(PayPalPayoutModel model, AppSetting appSettings)

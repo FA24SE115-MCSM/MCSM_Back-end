@@ -3,5 +3,7 @@
     public class PayPalPaymentReturn
     {
         public string PayPalPaymentId { get; set; } = null!;
+        public string PayerId { get; set; } = null!;
+
     }
 }

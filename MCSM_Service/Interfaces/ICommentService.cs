@@ -7,6 +7,8 @@ namespace MCSM_Service.Interfaces
     public interface ICommentService
     {
         Task<CommentViewModel> GetComment(Guid id);
+
+        Task<CommentViewModel> ReplyComment(Guid accountId, CreateReplyCommentModel model);
         Task<CommentViewModel> CreateComment(Guid accountId, CreateCommentModel model);
         Task<CommentViewModel> UpdateComment(Guid id, UpdateCommentModel model);
     }

@@ -64,6 +64,29 @@ namespace MCSM_Service.Implementations
                 .ToListAsync();
         }
 
+        public async Task<bool> RefundPayment(Guid retreatRegId)
+        {
+            var payment = await _paymentRepository.GetMany(p => p.RetreatRegId == retreatRegId).Include(src => src.RetreatReg).FirstOrDefaultAsync()
+                          ?? throw new NotFoundException("Payment not found for retreat registration.");
+
+            if (payment.Status != PaymentStatus.Success.ToString())
+            {
+                throw new ConflictException("Cannot refund a payment that is not completed.");
+            }
+
+            var saleId = await PayPalHelper.GetSaleIdAsync(payment.PaypalPaymentId, _appSettings);
+            var success = await PayPalHelper.RefundPaymentAsync(saleId, payment.Amount, _appSettings);
+
+            if (success)
+            {
+                payment.RetreatReg.IsPaid = false;
+                payment.Status = PaymentStatus.Refunded.ToString();
+                await _unitOfWork.SaveChanges();
+            }
+
+            return success;
+
+        }
 
         public async Task<PayPalReturnModel> CreatePayment(Guid retreatRegId)
         {
@@ -123,6 +146,8 @@ namespace MCSM_Service.Implementations
 
         public async Task<PaymentViewModel> UpdatePaymentStatus(PayPalPaymentReturn model, PaymentStatus status)
         {
+            var executeResult = await PayPalHelper.ExecutePaymentAsync(model.PayPalPaymentId, model.PayerId, _appSettings);
+
             var payment = await _paymentRepository.GetMany(p => p.PaypalPaymentId == model.PayPalPaymentId).Include(p => p.RetreatReg).FirstOrDefaultAsync() ?? throw new NotFoundException("Payment not found");
 
             payment.Status = status.ToString();
@@ -221,13 +246,14 @@ namespace MCSM_Service.Implementations
                 Status = refundResponse.BatchHeader.BatchStatus
             };
             _refundRepository.Add(refund);
+
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetRefund(refundResponse.BatchHeader.PayoutBatchId) : null!;
         }
 
         public async Task UpdateRefund(string refundId)
         {
-            var refund = await _refundRepository.GetMany(r => r.Id == refundId).FirstOrDefaultAsync() ?? throw new NotFoundException("Refund not found");
+            var refund = await _refundRepository.GetMany(r => r.Id == refundId).Include(re => re.RetreatReg).FirstOrDefaultAsync() ?? throw new NotFoundException("Refund not found");
             if(refund.Status == "Success")
             {
                 return;
@@ -240,6 +266,7 @@ namespace MCSM_Service.Implementations
                     await RemoveParticipantFormRetreat(refund.RetreatRegId, refund.ParticipantId);
 
                     refund.Status = "Success";
+                    refund.RetreatReg.IsPaid = false;
                     _refundRepository.Update(refund);
                     await _unitOfWork.SaveChanges();
                     
@@ -277,6 +304,13 @@ namespace MCSM_Service.Implementations
             _retreatRegistrationRepository.Update(retreatReg);
             await _unitOfWork.SaveChanges();
         }
+
+
+
+
+
+
+
         //-----------------------------------------------------
 
         public async Task<ListViewModel<PaymentViewModel>> ViewCustomerPaymentHistory(Guid customerId, PaginationRequestModel pagination)
@@ -305,5 +339,8 @@ namespace MCSM_Service.Implementations
                 Data = payments
             };
         }
+
+
+
     }
 }

@@ -91,12 +91,25 @@ namespace MCSM_Data.Mapping
                 .ForMember(dest => dest.CreatedByEmail, otp => otp.MapFrom(dish => dish.CreatedByNavigation.Email))
                 .ForMember(dest => dest.DishTypeName, otp => otp.MapFrom(dish => dish.DishType.Name));
             CreateMap<DishType, DishTypeViewModel>();
-            CreateMap<Post, PostViewModel>();
-            CreateMap<Comment, CommentViewModel>();
+            CreateMap<Post, PostViewModel>()
+            .ForMember(dest => dest.Comments, opt => opt.MapFrom(src =>
+                src.Comments.Where(c => !src.Comments
+                    .SelectMany(x => x.InverseParentComment)
+                    .Select(x => x.Id)
+                    .Contains(c.Id))
+                .OrderByDescending(c => c.CreateAt)
+            ));
+
             CreateMap<PostImage, PostImageViewModel>();
             CreateMap<Reaction, ReactionViewModel>();
             CreateMap<RetreatGroup, RetreatGroupViewModel>();
             CreateMap<RetreatGroupMember, RetreatGroupMemberViewModel>();
+            CreateMap<Conversation, ConversationViewModel>();
+            CreateMap<ConversationParticipant, ConversationParticipantViewModel>();
+            CreateMap<Message, MessageViewModel>();
+
+            CreateMap<Comment, CommentViewModel>();
+            CreateMap<Comment, ChildCommentViewModel>();
         }
     }
 }

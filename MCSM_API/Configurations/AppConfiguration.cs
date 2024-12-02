@@ -45,6 +45,7 @@ namespace MCSM_API.Configurations
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<IReactionService, ReactionService>();
+            services.AddScoped<IChatService, ChatService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)

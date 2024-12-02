@@ -42,6 +42,16 @@ namespace MCSM_API.Controllers
             return await _payPalService.GetPayments(filter);
         }
 
+        //[HttpPost]
+        //[Route("refund/{retreatRegId}")]
+        //[ProducesResponseType(typeof(PayPalReturnModel), StatusCodes.Status201Created)]
+        //[SwaggerOperation(Summary = "Test refund.")]
+        //public async Task<ActionResult<PayPalReturnModel>> Refund([FromRoute] Guid retreatRegId)
+        //{
+        //    var status = await _payPalService.RefundPayment(retreatRegId);
+        //    return Ok(status);
+        //}
+
         [HttpPost]
         [ProducesResponseType(typeof(PayPalReturnModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Create PayPal payment.")]
