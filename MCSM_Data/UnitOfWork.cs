@@ -42,6 +42,9 @@ namespace MCSM_Data
         private IPostImageRepository _postImage = null!;
         private IReactionRepository _reaction = null!;
         private ICommentRepository _comment = null!;
+        private IConversationRepository _conversation = null!;
+        private IConversationParticipantRepository _conversationParticipant = null!;
+        private IMessageRepository _message = null!;
 
         public UnitOfWork(McsmDbContext context)
         {
@@ -201,6 +204,19 @@ namespace MCSM_Data
         public IReactionRepository Reaction
         {
             get { return _reaction ??= new ReactionRepository(_context); }
+        }
+
+        public IConversationRepository Conversation
+        {
+            get { return _conversation ??= new ConversationRepository(_context); }
+        }
+        public IConversationParticipantRepository ConversationParticipant
+        {
+            get { return _conversationParticipant ??= new ConversationParticipantRepository(_context); }
+        }
+        public IMessageRepository Message
+        {
+            get { return _message ??= new MessageRepository(_context); }
         }
         public async Task<int> SaveChanges()
         {

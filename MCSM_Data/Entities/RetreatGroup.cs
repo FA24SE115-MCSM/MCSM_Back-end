@@ -21,7 +21,5 @@ public partial class RetreatGroup
 
     public virtual ICollection<RetreatGroupMember> RetreatGroupMembers { get; set; } = new List<RetreatGroupMember>();
 
-    public virtual ICollection<RetreatGroupMessage> RetreatGroupMessages { get; set; } = new List<RetreatGroupMessage>();
-
     public virtual Room Room { get; set; } = null!;
 }

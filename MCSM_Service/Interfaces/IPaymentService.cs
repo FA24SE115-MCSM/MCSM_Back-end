@@ -8,6 +8,7 @@ namespace MCSM_Service.Interfaces
 {
     public interface IPaymentService
     {
+        Task<bool> RefundPayment(Guid retreatRegId);
         Task<List<PaymentViewModel>> GetPayments(PaymentFilterModel filter);
         Task<PayPalReturnModel> CreatePayment(Guid retreatRegId);
         Task<PaymentViewModel> UpdatePaymentStatus(PayPalPaymentReturn model, PaymentStatus status);

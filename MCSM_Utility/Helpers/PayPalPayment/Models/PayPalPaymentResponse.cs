@@ -33,6 +33,9 @@ namespace MCSM_Utility.Helpers.PayPalPayment.Models
 
         [JsonPropertyName("description")]
         public string Description { get; set; } = null!;
+
+        [JsonPropertyName("related_resources")]
+        public List<PayPalRelatedResource> RelatedResources { get; set; } = new();
     }
 
     public class Payer
@@ -48,5 +51,23 @@ namespace MCSM_Utility.Helpers.PayPalPayment.Models
 
         [JsonPropertyName("currency")]
         public string Currency { get; set; } = null!;
+    }
+
+    public class PayPalRelatedResource
+    {
+        [JsonPropertyName("sale")]
+        public PayPalSale? Sale { get; set; }
+    }
+
+    public class PayPalSale
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = null!;
+
+        [JsonPropertyName("state")]
+        public string State { get; set; } = null!;
+
+        [JsonPropertyName("amount")]
+        public PayPalAmount Amount { get; set; } = null!;
     }
 }

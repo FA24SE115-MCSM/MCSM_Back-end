@@ -38,6 +38,11 @@ namespace MCSM_Service.Implementations
                 query = query.Where(p => p.Status == filter.Status.Value.ToString());
             }
 
+            if(filter.AccountId.HasValue)
+            {
+                query = query.Where(p => p.CreatedBy == filter.AccountId.Value);
+            }
+
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
                 .OrderByDescending(r => r.CreateAt)

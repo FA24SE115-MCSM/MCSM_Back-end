@@ -1,4 +1,4 @@
-using MCSM_API.Configurations;
+﻿using MCSM_API.Configurations;
 using MCSM_Data.Entities;
 using MCSM_Utility.Settings;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using MCSM_Data.Mapping;
 using Hangfire;
+using MCSM_API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -51,7 +52,11 @@ builder.Services.AddHangfireServices(builder.Configuration);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-
+builder.Services.AddSignalR(options =>
+{
+    options.KeepAliveInterval = TimeSpan.FromSeconds(10); 
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+});
 
 builder.Services.AddDependenceInjection();
 builder.Services.AddSwagger();
@@ -87,5 +92,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/chat-hub");
+app.MapHub<AccountHub>("/list-user");
 
 app.Run();
