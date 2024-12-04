@@ -15,6 +15,8 @@ public partial class RetreatGroup
 
     public string Name { get; set; } = null!;
 
+    public virtual ICollection<GroupSchedule> GroupSchedules { get; set; } = new List<GroupSchedule>();
+
     public virtual Account? Monk { get; set; }
 
     public virtual Retreat Retreat { get; set; } = null!;
