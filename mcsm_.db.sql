@@ -303,10 +303,21 @@ CREATE TABLE RetreatSchedule(
 	Id uniqueidentifier primary key NOT NULL,
 	RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
 	RetreatLessonId uniqueidentifier foreign key references RetreatLesson(Id),
-	UsedRoomId uniqueidentifier foreign key references Room(Id),
 	LessonDate date NOT NULL,
 	LessonStart time NOT NULL,
 	LessonEnd time NOT NULL,
+	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
+);
+GO
+
+DROP TABLE IF EXISTS GroupSchedule
+GO
+--Table GroupSchedule
+CREATE TABLE GroupSchedule(
+	Id uniqueidentifier primary key NOT NULL,
+	RetreatScheduleId uniqueidentifier foreign key references RetreatSchedule(Id) NOT NULL,
+	GroupId uniqueidentifier foreign key references RetreatGroup(Id),
+	UsedRoomId uniqueidentifier foreign key references Room(Id),
 	CreateAt datetime NOT NULL DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO

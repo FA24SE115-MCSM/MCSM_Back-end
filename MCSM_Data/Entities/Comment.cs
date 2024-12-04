@@ -1,4 +1,7 @@
-﻿namespace MCSM_Data.Entities;
+﻿using System;
+using System.Collections.Generic;
+
+namespace MCSM_Data.Entities;
 
 public partial class Comment
 {
@@ -8,9 +11,9 @@ public partial class Comment
 
     public Guid AccountId { get; set; }
 
-    public string? Content { get; set; }
-
     public Guid? ParentCommentId { get; set; }
+
+    public string? Content { get; set; }
 
     public DateTime? UpdateAt { get; set; }
 
