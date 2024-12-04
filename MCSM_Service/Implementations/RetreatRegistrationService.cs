@@ -220,6 +220,7 @@ namespace MCSM_Service.Implementations
         {
             return await _retreatRegistrationRepository
                 .AnyAsync(retreatReg => retreatReg.RetreatId == retreatId
+                                        && retreatReg.IsPaid
                                         && retreatReg.RetreatRegistrationParticipants
                                             .Any(participant => participant.ParticipantId == accountId));
         }
