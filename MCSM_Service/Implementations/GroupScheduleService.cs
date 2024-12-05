@@ -16,6 +16,7 @@ using MCSM_Utility.Exceptions;
 using MCSM_Data.Entities;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Requests.Put;
+using MCSM_Data.Models.Requests.Get;
 
 namespace MCSM_Service.Implementations
 {
@@ -29,7 +30,7 @@ namespace MCSM_Service.Implementations
             _roomRepository = unitOfWork.Room;
         }
 
-        public async Task<ListViewModel<GroupScheduleViewModel>> GetGroupSchedules(GroupScheduleFilterModel filter, PaginationViewModel pagination)
+        public async Task<ListViewModel<GroupScheduleViewModel>> GetGroupSchedules(GroupScheduleFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _groupScheduleRepository.GetAll();
             if (filter.GroupId != null)
@@ -75,7 +76,7 @@ namespace MCSM_Service.Implementations
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Schedule not found");
         }
 
-        public async Task<GroupScheduleViewModel> CreateGroupSchedule(Guid accountId, CreateGroupScheduleModel model)
+        public async Task<GroupScheduleViewModel> CreateGroupSchedule(CreateGroupScheduleModel model)
         {
             var groupScheduleId = Guid.NewGuid();
             var groupSchedule = new GroupSchedule
@@ -86,7 +87,12 @@ namespace MCSM_Service.Implementations
                 UsedRoomId = _roomRepository.GetMany(rs => rs.Name == model.RoomName).First().Id,
                 CreateAt = DateTime.UtcNow
             };
-            var validateScheduleRoom = await CheckOverlapScheduleRoom((Guid)groupSchedule.UsedRoomId, groupSchedule.RetreatSchedule.LessonDate, groupSchedule.RetreatSchedule.LessonStart, groupSchedule.RetreatSchedule.LessonEnd);
+            //var validateScheduleRoom = await CheckOverlapScheduleRoom((Guid)groupSchedule.UsedRoomId, groupSchedule.RetreatSchedule.LessonDate, groupSchedule.RetreatSchedule.LessonStart, groupSchedule.RetreatSchedule.LessonEnd);
+            //if (validateScheduleRoom)
+            //{
+            //    throw new BadRequestException("Room is already in use at this period.");
+            //}
+            var validateScheduleRoom = await CheckOverlapScheduleRoom((Guid)groupSchedule.UsedRoomId, groupSchedule.RetreatScheduleId);
             if (validateScheduleRoom)
             {
                 throw new BadRequestException("Room is already in use at this period.");
@@ -104,26 +110,67 @@ namespace MCSM_Service.Implementations
             return result > 0 ? await GetGroupSchedule(groupScheduleId) : null!;
         }
 
-        //public async Task<GroupScheduleViewModel> UpdateGroupSchedule(Guid id, UpdateGroupScheduleModel model)
-        //{
-        //    var existSchedule = await _groupScheduleRepository.GetMany(rs => rs.Id == id).FirstOrDefaultAsync() ?? throw new NotFoundException("Schedule not found");
-        //    if (model.RetreatScheduleId.HasValue)
-        //    {
-        //        existSchedule.RetreatScheduleId = model.RetreatScheduleId.Value;
-        //    }
+        public async Task<GroupScheduleViewModel> UpdateGroupSchedule(Guid id, UpdateGroupScheduleModel model)
+        {
+            var existSchedule = await _groupScheduleRepository.GetMany(rs => rs.Id == id).FirstOrDefaultAsync() ?? throw new NotFoundException("Schedule not found");
+            if (model.RetreatScheduleId.HasValue)
+            {
+                existSchedule.RetreatScheduleId = model.RetreatScheduleId.Value;
+            }
 
-        //    if (!string.IsNullOrWhiteSpace(model.RoomName))
-        //    {
-        //        existSchedule.UsedRoomId = parsedLessonStart;
-        //    }
+            //if (!string.IsNullOrWhiteSpace(model.RoomName))
+            //{
+            //    existSchedule.UsedRoomId = _roomRepository.GetMany(r => r.Name == model.RoomName).FirstOrDefault().Id;
+            //}
+            existSchedule.UsedRoomId = _roomRepository.GetMany(r => r.Name == model.RoomName).FirstOrDefault().Id;
+
+            //var validateScheduleRoom = await CheckOverlapScheduleRoom((Guid)existSchedule.UsedRoomId, existSchedule.RetreatSchedule.LessonDate, existSchedule.RetreatSchedule.LessonStart, existSchedule.RetreatSchedule.LessonEnd);
+            //if (validateScheduleRoom)
+            //{
+            //    throw new BadRequestException("Updating room is already in use at this period.");
+            //}
+
+            var validateScheduleRoom = await CheckOverlapScheduleRoom((Guid)existSchedule.UsedRoomId, (Guid)existSchedule.RetreatScheduleId);
+            if (validateScheduleRoom)
+            {
+                throw new BadRequestException("Updating room is already in use at this period.");
+            }
+
+            var validateRoom = await ValidateRoomType((Guid)existSchedule.UsedRoomId);
+            if (validateRoom)
+            {
+                throw new BadRequestException("The updating schedule designated room is not meant for educational activities.");
+            }
+
+            _groupScheduleRepository.Update(existSchedule);
+
+            var result = await _unitOfWork.SaveChanges();
+            return result > 0 ? await GetGroupSchedule(id) : null!;
+        }
+
+        public async Task DeleteGroupSchedule(Guid id)
+        {
+            var groupSchedule = await _groupScheduleRepository.GetMany(gs => gs.Id == id)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy lịch");
+
+            _groupScheduleRepository.Remove(groupSchedule);
+
+            await _unitOfWork.SaveChanges();
+        }
+
+        //public async Task<bool> CheckOverlapScheduleRoom(Guid roomId, DateOnly lessonDate, TimeOnly lessonStart, TimeOnly lessonEnd)
+        //{
+        //    var schedule = await _groupScheduleRepository.GetMany(gs => gs.UsedRoomId == roomId && gs.RetreatSchedule.LessonDate.Equals(lessonDate)
+        //    && ((lessonStart >= gs.RetreatSchedule.LessonStart && lessonStart < gs.RetreatSchedule.LessonEnd) || (lessonEnd > gs.RetreatSchedule.LessonStart && lessonEnd <= gs.RetreatSchedule.LessonEnd) || (lessonStart <= gs.RetreatSchedule.LessonStart && lessonEnd >= gs.RetreatSchedule.LessonEnd)))
+        //    .AsNoTracking()
+        //    .AnyAsync();
+
+        //    return schedule;
         //}
 
-        public async Task<bool> CheckOverlapScheduleRoom(Guid roomId, DateOnly lessonDate, TimeOnly lessonStart, TimeOnly lessonEnd)
+        public async Task<bool> CheckOverlapScheduleRoom(Guid roomId, Guid retreatScheduleId)
         {
-            var schedule = await _groupScheduleRepository.GetMany(gs => gs.UsedRoomId == roomId && gs.RetreatSchedule.LessonDate.Equals(lessonDate)
-            && ((lessonStart >= gs.RetreatSchedule.LessonStart && lessonStart < gs.RetreatSchedule.LessonEnd) || (lessonEnd > gs.RetreatSchedule.LessonStart && lessonEnd <= gs.RetreatSchedule.LessonEnd) || (lessonStart <= gs.RetreatSchedule.LessonStart && lessonEnd >= gs.RetreatSchedule.LessonEnd)))
-            .AsNoTracking()
-            .AnyAsync();
+            var schedule = await _groupScheduleRepository.GetMany(gs => gs.UsedRoomId == roomId && gs.RetreatScheduleId == retreatScheduleId).AsNoTracking().AnyAsync();
 
             return schedule;
         }

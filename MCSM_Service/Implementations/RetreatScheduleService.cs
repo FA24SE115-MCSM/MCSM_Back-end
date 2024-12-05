@@ -25,11 +25,13 @@ namespace MCSM_Service.Implementations
         private readonly IRetreatScheduleRepository _retreatScheduleRepository;
         private readonly IRoomRepository _roomRepository;
         private readonly IRetreatGroupRepository _retreatGroupRepository;
+        private readonly IGroupScheduleRepository _groupScheduleRepository;
         public RetreatScheduleService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
             _retreatScheduleRepository = unitOfWork.RetreatSchedule;
             _roomRepository = unitOfWork.Room;
             _retreatGroupRepository = unitOfWork.RetreatGroup;
+            _groupScheduleRepository = unitOfWork.GroupSchedule;
         }
 
         public async Task<ListViewModel<RetreatScheduleViewModel>> GetRetreatSchedulesOfARetreat(Guid retreatId, PaginationRequestModel pagination)
@@ -221,6 +223,17 @@ namespace MCSM_Service.Implementations
 
         public async Task DeleteRetreatSchedule(Guid id)
         {
+            var groupSchedules = await _groupScheduleRepository.GetMany(gs => gs.RetreatScheduleId == id).ToListAsync();
+
+            if (groupSchedules.Any())
+            {
+                foreach (var groupSchedule in groupSchedules)
+                {
+                    _groupScheduleRepository.Remove(groupSchedule);
+                }
+                await _unitOfWork.SaveChanges();
+            }
+
             var existRetreatSchedule = await _retreatScheduleRepository.GetMany(rs => rs.Id == id)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy lịch học");
 
