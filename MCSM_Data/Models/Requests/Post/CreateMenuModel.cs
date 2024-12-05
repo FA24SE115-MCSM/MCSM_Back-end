@@ -10,7 +10,7 @@ namespace MCSM_Data.Models.Requests.Post
 {
     public class CreateMenuModel
     {
-        public string? MenuName { get; set; }
+        public string MenuName { get; set; }
         public DateOnly CookDate { get; set; }
 
         public virtual List<string> DishName { get; set; } = new List<string>();

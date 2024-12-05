@@ -34,6 +34,7 @@ namespace MCSM_Data
         private IDishRepository _dish = null!;
         private IDishTypeRepository _dishType = null!;
         private IMenuDishRepository _menuDish = null!;
+        private IGroupScheduleRepository _groupSchedule = null!;
 
         private IRefundRepository _refund = null!;
 
@@ -147,6 +148,11 @@ namespace MCSM_Data
         public IRetreatScheduleRepository RetreatSchedule
         {
             get { return _retreatSchedule ??= new RetreatScheduleRepository(_context); }
+        }
+
+        public IGroupScheduleRepository GroupSchedule
+        {
+            get { return _groupSchedule ??= new GroupScheduleRepository(_context); }
         }
 
         public IPaymentRepository Payment

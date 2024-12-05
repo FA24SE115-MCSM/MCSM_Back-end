@@ -3,6 +3,7 @@ using Hangfire.SqlServer;
 using HangfireBasicAuthenticationFilter;
 using MCSM_API.Configurations.Middleware;
 using MCSM_Data;
+using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Implementations;
 using MCSM_Service.Interfaces;
 using Microsoft.OpenApi.Models;
@@ -35,6 +36,7 @@ namespace MCSM_API.Configurations
             services.AddScoped<IDeviceTokenService, DeviceTokenService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IRetreatScheduleService, RetreatScheduleService>();
+            services.AddScoped<IGroupScheduleService, GroupScheduleService>();
 
             services.AddScoped<IPaymentService, PaymentService>();
 

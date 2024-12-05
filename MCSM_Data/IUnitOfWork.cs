@@ -26,6 +26,7 @@ namespace MCSM_Data
         public IRetreatFileRepository RetreatFile { get; }
         public IRetreatLearningOutcomeRepository RetreatLearningOutcome { get; }
         public IRetreatScheduleRepository RetreatSchedule { get; }
+        public IGroupScheduleRepository GroupSchedule { get; }
         public IPaymentRepository Payment { get; }
         public IRefundRepository Refund { get; }
         public IFeedbackRepository Feedback { get; }
