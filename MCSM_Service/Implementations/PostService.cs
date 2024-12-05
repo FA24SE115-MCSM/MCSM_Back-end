@@ -38,6 +38,11 @@ namespace MCSM_Service.Implementations
                 query = query.Where(p => p.Status == filter.Status.Value.ToString());
             }
 
+            if (!string.IsNullOrEmpty(filter.Content))
+            {
+                query = query.Where(p => p.Content!.Contains(filter.Content));
+            }
+
             if(filter.AccountId.HasValue)
             {
                 query = query.Where(p => p.CreatedBy == filter.AccountId.Value);
