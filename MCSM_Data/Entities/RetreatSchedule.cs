@@ -11,8 +11,6 @@ public partial class RetreatSchedule
 
     public Guid? RetreatLessonId { get; set; }
 
-    public Guid? UsedRoomId { get; set; }
-
     public DateOnly LessonDate { get; set; }
 
     public TimeOnly LessonStart { get; set; }
@@ -21,9 +19,9 @@ public partial class RetreatSchedule
 
     public DateTime CreateAt { get; set; }
 
+    public virtual ICollection<GroupSchedule> GroupSchedules { get; set; } = new List<GroupSchedule>();
+
     public virtual Retreat Retreat { get; set; } = null!;
 
     public virtual RetreatLesson? RetreatLesson { get; set; }
-
-    public virtual Room? UsedRoom { get; set; }
 }

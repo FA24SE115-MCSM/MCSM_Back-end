@@ -26,6 +26,7 @@ namespace MCSM_Data
         public IRetreatFileRepository RetreatFile { get; }
         public IRetreatLearningOutcomeRepository RetreatLearningOutcome { get; }
         public IRetreatScheduleRepository RetreatSchedule { get; }
+        public IGroupScheduleRepository GroupSchedule { get; }
         public IPaymentRepository Payment { get; }
         public IRefundRepository Refund { get; }
         public IFeedbackRepository Feedback { get; }
@@ -33,6 +34,13 @@ namespace MCSM_Data
         public IDishRepository Dish { get; }
         public IDishTypeRepository DishType { get; }
         public IMenuDishRepository MenuDish { get; }
+        public IPostRepository Post { get; }
+        public IPostImageRepository PostImage { get; }
+        public ICommentRepository Comment { get; }
+        public IReactionRepository Reaction { get; }
+        public IConversationRepository Conversation { get; }
+        public IConversationParticipantRepository ConversationParticipant { get; }
+        public IMessageRepository Message { get; }
 
 
         Task<int> SaveChanges();

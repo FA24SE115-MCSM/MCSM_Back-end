@@ -64,7 +64,7 @@ namespace MCSM_Service.Implementations
                 .Skip(pagination.PageNumber * pagination.PageSize)
                 .Take(pagination.PageSize);
 
-            var retreats = await paginatedQuery
+            var feedbacks = await paginatedQuery
                 .ProjectTo<FeedbackViewModel>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
@@ -77,7 +77,7 @@ namespace MCSM_Service.Implementations
                     PageSize = pagination.PageSize,
                     TotalRow = totalRow,
                 },
-                Data = retreats
+                Data = feedbacks
             };
         }
 

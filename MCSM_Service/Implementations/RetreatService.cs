@@ -104,7 +104,7 @@ namespace MCSM_Service.Implementations
                         Description = model.Description,
                         StartDate = model.StartDate,
                         EndDate = endDate,
-                        Status = RetreatStatus.Active.ToString()
+                        Status = RetreatStatus.Open.ToString()
                     };
                     _retreatRepository.Add(retreat);
 
@@ -344,7 +344,7 @@ namespace MCSM_Service.Implementations
                 .ThenInclude(rr => rr.RetreatRegistrationParticipants)
                 .Where(r => r.RetreatRegistrations
                 .Any(rg => rg.RetreatRegistrationParticipants
-                .Any(rgm => rgm.ParticipantId == profileId)) && r.Status != "Cancelled");
+                .Any(rgm => rgm.ParticipantId == profileId) && rg.Payments.Any(p => p.Status == PaymentStatus.Success.ToString()) && r.Status != RetreatStatus.InActive.ToString()));
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
                 .OrderByDescending(x => x.EndDate)

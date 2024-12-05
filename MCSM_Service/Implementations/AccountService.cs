@@ -387,7 +387,7 @@ namespace MCSM_Service.Implementations
 
             if(role.Name == AccountRole.Nun)
             {
-                result = "Female";
+                result = "FeMale";
             }
 
             return result;

@@ -22,6 +22,9 @@
 
         public string Status { get; set; } = null!;
 
+        public bool IsOnline { get; set; }
+
+
         public DateTime CreateAt { get; set; }
 
         public DateTime? UpdateAt { get; set; }

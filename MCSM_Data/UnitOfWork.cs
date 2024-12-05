@@ -34,11 +34,18 @@ namespace MCSM_Data
         private IDishRepository _dish = null!;
         private IDishTypeRepository _dishType = null!;
         private IMenuDishRepository _menuDish = null!;
+        private IGroupScheduleRepository _groupSchedule = null!;
 
         private IRefundRepository _refund = null!;
 
         private IFeedbackRepository _feedback = null!;
-
+        private IPostRepository _post = null!;
+        private IPostImageRepository _postImage = null!;
+        private IReactionRepository _reaction = null!;
+        private ICommentRepository _comment = null!;
+        private IConversationRepository _conversation = null!;
+        private IConversationParticipantRepository _conversationParticipant = null!;
+        private IMessageRepository _message = null!;
 
         public UnitOfWork(McsmDbContext context)
         {
@@ -143,6 +150,11 @@ namespace MCSM_Data
             get { return _retreatSchedule ??= new RetreatScheduleRepository(_context); }
         }
 
+        public IGroupScheduleRepository GroupSchedule
+        {
+            get { return _groupSchedule ??= new GroupScheduleRepository(_context); }
+        }
+
         public IPaymentRepository Payment
         {
             get { return _payment ??= new PaymentRepository(_context); }
@@ -183,6 +195,35 @@ namespace MCSM_Data
             get { return _menuDish ??= new MenuDishRepository(_context); }
         }
 
+        public IPostRepository Post
+        {
+            get { return _post ??= new PostRepository(_context); }
+        }
+        public IPostImageRepository PostImage
+        {
+            get { return _postImage ??= new PostImageRepository(_context); }
+        }
+        public ICommentRepository Comment
+        {
+            get { return _comment ??= new CommentRepository(_context); }
+        }
+        public IReactionRepository Reaction
+        {
+            get { return _reaction ??= new ReactionRepository(_context); }
+        }
+
+        public IConversationRepository Conversation
+        {
+            get { return _conversation ??= new ConversationRepository(_context); }
+        }
+        public IConversationParticipantRepository ConversationParticipant
+        {
+            get { return _conversationParticipant ??= new ConversationParticipantRepository(_context); }
+        }
+        public IMessageRepository Message
+        {
+            get { return _message ??= new MessageRepository(_context); }
+        }
         public async Task<int> SaveChanges()
         {
             return await _context.SaveChangesAsync();

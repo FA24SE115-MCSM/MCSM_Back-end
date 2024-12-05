@@ -15,6 +15,8 @@ public partial class Account
 
     public string VerifyToken { get; set; } = null!;
 
+    public bool IsOnline { get; set; }
+
     public string Status { get; set; } = null!;
 
     public DateTime CreateAt { get; set; }
@@ -22,6 +24,10 @@ public partial class Account
     public DateTime? UpdateAt { get; set; }
 
     public virtual ICollection<Article> Articles { get; set; } = new List<Article>();
+
+    public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
+    public virtual ICollection<ConversationParticipant> ConversationParticipants { get; set; } = new List<ConversationParticipant>();
 
     public virtual ICollection<DeviceToken> DeviceTokens { get; set; } = new List<DeviceToken>();
 
@@ -34,6 +40,8 @@ public partial class Account
     public virtual Level? Level { get; set; }
 
     public virtual ICollection<Menu> Menus { get; set; } = new List<Menu>();
+
+    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
@@ -48,8 +56,6 @@ public partial class Account
     public virtual ICollection<Refund> Refunds { get; set; } = new List<Refund>();
 
     public virtual ICollection<RetreatGroupMember> RetreatGroupMembers { get; set; } = new List<RetreatGroupMember>();
-
-    public virtual ICollection<RetreatGroupMessage> RetreatGroupMessages { get; set; } = new List<RetreatGroupMessage>();
 
     public virtual ICollection<RetreatGroup> RetreatGroups { get; set; } = new List<RetreatGroup>();
 

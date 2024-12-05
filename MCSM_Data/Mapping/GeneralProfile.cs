@@ -20,7 +20,8 @@ namespace MCSM_Data.Mapping
                 .ForMember(dest => dest.Avatar, otp => otp.MapFrom(account => account.Profile!.Avatar));
 
             CreateMap<RoomType, RoomTypeViewModel>();
-            CreateMap<Room, RoomViewModel>();
+            CreateMap<Room, RoomViewModel>()
+                .ForMember(dest => dest.RetreatGroupMembers, otp => otp.MapFrom(room => room.RetreatGroup!.RetreatGroupMembers));
             CreateMap<Retreat, RetreatViewModel>()
                 .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(retreat => retreat.CreatedByNavigation))
                 .ForMember(dest => dest.RetreatImages, otp => otp.MapFrom(retreat => retreat.RetreatFiles.Where(file => file.Type == RetreatFileType.Image)))
@@ -45,9 +46,15 @@ namespace MCSM_Data.Mapping
                 //.ForMember(dest => dest.GroupName, otp => otp.MapFrom(retreatSched => retreatSched.Group.Name))
                 .ForMember(dest => dest.LessonTitle, otp => otp.MapFrom(retreatSched => retreatSched.RetreatLesson.Lesson.Title))
                 //.ForMember(dest => dest.RoomName, otp => otp.MapFrom(retreatSched => retreatSched.UsedRoom.Name))
-                .ForMember(dest => dest.UsedRoom, otp => otp.MapFrom(retreatSched => retreatSched.UsedRoom))
                 .ForMember(dest => dest.LessonContent, otp => otp.MapFrom(retreatSched => retreatSched.RetreatLesson.Lesson.Content));
             CreateMap<Room, RetreatScheduleViewModel>().ForMember(dest => dest.RoomName, otp => otp.MapFrom(room => room.Name));
+
+            CreateMap<GroupSchedule, GroupScheduleViewModel>()
+                .ForMember(dest => dest.GroupName, otp => otp.MapFrom(groupSched => groupSched.Group.Name))
+                .ForMember(dest => dest.RoomName, otp => otp.MapFrom(groupSched => groupSched.UsedRoom.Name))
+                .ForMember(dest => dest.LessonDate, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.LessonDate))
+                .ForMember(dest => dest.LessonStart, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.LessonStart))
+                .ForMember(dest => dest.LessonEnd, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.LessonEnd));
 
             CreateMap<Retreat, ProgressTrackingViewModel>()
                 .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(progress => progress.Name))
@@ -102,7 +109,25 @@ namespace MCSM_Data.Mapping
                 .ForMember(dest => dest.CreatedByEmail, otp => otp.MapFrom(dish => dish.CreatedByNavigation.Email))
                 .ForMember(dest => dest.DishTypeName, otp => otp.MapFrom(dish => dish.DishType.Name));
             CreateMap<DishType, DishTypeViewModel>();
+            CreateMap<Post, PostViewModel>()
+            .ForMember(dest => dest.Comments, opt => opt.MapFrom(src =>
+                src.Comments.Where(c => !src.Comments
+                    .SelectMany(x => x.InverseParentComment)
+                    .Select(x => x.Id)
+                    .Contains(c.Id))
+                .OrderByDescending(c => c.CreateAt)
+            ));
 
+            CreateMap<PostImage, PostImageViewModel>();
+            CreateMap<Reaction, ReactionViewModel>();
+            CreateMap<RetreatGroup, RetreatGroupViewModel>();
+            CreateMap<RetreatGroupMember, RetreatGroupMemberViewModel>();
+            CreateMap<Conversation, ConversationViewModel>();
+            CreateMap<ConversationParticipant, ConversationParticipantViewModel>();
+            CreateMap<Message, MessageViewModel>();
+
+            CreateMap<Comment, CommentViewModel>();
+            CreateMap<Comment, ChildCommentViewModel>();
         }
     }
 }

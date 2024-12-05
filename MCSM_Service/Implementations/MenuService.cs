@@ -95,6 +95,12 @@ namespace MCSM_Service.Implementations
                     throw new BadRequestException("Invalid name (Breakfast/Lunch/Dinner)");
                 }
             }
+            var validateMenuExist = await CheckMenuExistInDay(model.MenuName, model.CookDate);
+            if (validateMenuExist)
+            {
+                throw new BadRequestException($"Menu {model.MenuName} for {model.CookDate} already exist, please update the existing menu instead");
+            }
+
             var menu = new Menu
             {
                 Id = menuId,
@@ -104,6 +110,7 @@ namespace MCSM_Service.Implementations
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow,
             };
+
             _menuRepository.Add(menu);
             await _unitOfWork.SaveChanges();
 
@@ -113,7 +120,7 @@ namespace MCSM_Service.Implementations
 
                 if (existingDish == null)
                 {
-                    throw new NotFoundException($"Ingredient '{dishName}' not found.");
+                    throw new NotFoundException($"Dish '{dishName}' not found.");
                 }
 
                 var menuDish = new MenuDish
@@ -212,6 +219,12 @@ namespace MCSM_Service.Implementations
             _menuRepository.Remove(menu);
 
             await _unitOfWork.SaveChanges();
+        }
+
+        public async Task<bool> CheckMenuExistInDay(string menuName, DateOnly cookDate)
+        {
+            var menuExist = await _menuRepository.GetMany(m => m.MenuName == menuName && m.CookDate == cookDate).AsNoTracking().AnyAsync();
+            return menuExist;
         }
 
     }

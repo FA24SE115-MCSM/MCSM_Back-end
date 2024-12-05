@@ -12,7 +12,7 @@ namespace MCSM_Data.Models.Requests.Post
         //public Guid GroupId { get; set; }
         public Guid RetreatLessionId { get; set; }
         //public string? RoomName { get; set; }
-        public Guid UsedRoomId { get; set; }
+        //public Guid UsedRoomId { get; set; }
         public DateOnly LessonDate { get; set; }
         //public TimeOnly LessonStart { get; set; }
         //public TimeOnly LessonEnd { get; set; }

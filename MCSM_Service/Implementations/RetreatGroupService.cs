@@ -3,11 +3,14 @@ using AutoMapper.QueryableExtensions;
 using MCSM_Data;
 using MCSM_Data.Entities;
 using MCSM_Data.Models.Requests.Filters;
+using MCSM_Data.Models.Requests.Get;
+using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
 using MCSM_Utility.Constants;
 using MCSM_Utility.Enums;
+using MCSM_Utility.Exceptions;
 using MCSM_Utility.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -23,8 +26,9 @@ namespace MCSM_Service.Implementations
         private readonly IAccountRepository _accountRepository;
         private readonly IRoomTypeRepository _roomTypeRepository;
         private readonly IRetreatGroupMemberRepository _retreatGroupMemberRepository;
+        private readonly IPaymentService _paymentService;
         private readonly AppSetting _appSettings;
-        public RetreatGroupService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> appSettings) : base(unitOfWork, mapper)
+        public RetreatGroupService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> appSettings, IPaymentService paymentService) : base(unitOfWork, mapper)
         {
             _retreatGroupRepository = unitOfWork.RetreatGroup;
             _retreatRepository = unitOfWork.Retreat;
@@ -34,14 +38,26 @@ namespace MCSM_Service.Implementations
             _roomTypeRepository = unitOfWork.RoomType;
             _retreatGroupMemberRepository = unitOfWork.RetreatGroupMember;
             _appSettings = appSettings.Value;
+            _paymentService = paymentService;
         }
 
-        public async Task<ListViewModel<RetreatGroupViewModel>> GetRetreatGroups(RetreatGroupFilterModel filter, PaginationViewModel pagination)
+        public async Task<ListViewModel<RetreatGroupViewModel>> GetRetreatGroups(RetreatGroupFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _retreatGroupRepository.GetAll();
-            if (!string.IsNullOrEmpty(filter.Name))
+            if (filter.GroupId.HasValue)
             {
-                query = query.Where(r => r.Name.Contains(filter.Name));
+                query = query.Where(r => r.Id == filter.GroupId.Value);
+            }
+
+            if (filter.RetreatId.HasValue)
+            {
+                query = query.Where(r => r.RetreatId == filter.RetreatId.Value);
+            }
+
+            if (filter.ParticipantId.HasValue)
+            {
+                query = query.Where(r => r.RetreatGroupMembers
+                                            .Any(rgm => rgm.MemberId == filter.ParticipantId.Value));
             }
 
             var totalRow = await query.AsNoTracking().CountAsync();
@@ -76,7 +92,7 @@ namespace MCSM_Service.Implementations
                 .Include(re => re.RetreatRegistrations)
                 .ToListAsync();
 
-            if(retreats != null)
+            if(retreats != null && retreats.Count > 0)
             {
                 await DivideGroupsForRetreat(retreats);
             }
@@ -101,9 +117,14 @@ namespace MCSM_Service.Implementations
                         {
                             continue;
                         }
+                        if(retreat.RemainingSlots > (retreat.Capacity / 2))
+                        {
+                            await CancelRetreat(retreat);
+                            continue;
+                        }
                         await CreateDharmaNamePrefix(retreat);
-                        var participants = await _retreatRegistrationRepository.GetMany(reg => reg.RetreatId == retreat.Id).SelectMany(reg => reg.RetreatRegistrationParticipants).ToListAsync();
-                        await AddParticipantToGroup(retreat.Id, participants, bedRoomTypeId);
+                        var participants = await _retreatRegistrationRepository.GetMany(reg => reg.RetreatId == retreat.Id).SelectMany(reg => reg.RetreatRegistrationParticipants).Include(reg => reg.Participant).ThenInclude(acc => acc.Profile).ToListAsync();
+                        await AddParticipantToGroup(retreat, participants, bedRoomTypeId);
                     }
                     transaction.Commit();
                 }
@@ -112,6 +133,24 @@ namespace MCSM_Service.Implementations
                     transaction.Rollback();
                     throw;
                 }
+            }
+        }
+
+        private async Task CancelRetreat(Retreat retreat)
+        {
+            if(retreat.RetreatRegistrations.Count > 0)
+            {
+                foreach(var reg in retreat.RetreatRegistrations)
+                {
+                    if (reg.IsPaid)
+                    {
+                        var flag = await _paymentService.RefundPayment(reg.Id);
+                    }
+                }
+
+                retreat.Status = RetreatStatus.Close.ToString();
+                _retreatRepository.Update(retreat);
+                await _unitOfWork.SaveChanges();
             }
         }
 
@@ -128,23 +167,49 @@ namespace MCSM_Service.Implementations
         }
 
 
-        private async Task AddParticipantToGroup(Guid retreatId, List<RetreatRegistrationParticipant> participants, Guid bedRoomTypeId)
+        private async Task AddParticipantToGroup(Retreat retreat, List<RetreatRegistrationParticipant> participants, Guid bedRoomTypeId)
         {
             const int groupSize = 20;
             int groupNumber = 1;
             var random = new Random();
+
+            // Lấy thông tin retreat
+            var retreatName = retreat.Name;
+
+            // Phân chia danh sách theo giới tính
+            var maleParticipants = participants.Where(p => p.Participant.Profile!.Gender == "Male").ToList();
+            var femaleParticipants = participants.Where(p => p.Participant.Profile!.Gender == "FeMale").ToList();
+
+            // Chia nhóm cho nam
+            groupNumber = AssignParticipantsToGroups(retreat.Id, retreatName, maleParticipants, bedRoomTypeId, groupNumber, random, groupSize, "Male");
+
+            // Chia nhóm cho nữ
+            groupNumber = AssignParticipantsToGroups(retreat.Id, retreatName, femaleParticipants, bedRoomTypeId, groupNumber, random, groupSize, "FeMale");
+
+            await _unitOfWork.SaveChanges();
+        }
+
+        private int AssignParticipantsToGroups(
+            Guid retreatId,
+            string retreatName,
+            List<RetreatRegistrationParticipant> participants,
+            Guid bedRoomTypeId,
+            int groupNumber,
+            Random random,
+            int groupSize,
+            string gender)
+        {
             var shuffledParticipants = participants.OrderBy(_ => random.Next()).ToList();
 
             for (int i = 0; i < shuffledParticipants.Count; i += groupSize)
             {
-                // Lấy nhóm thiền sinh trong phòng hiện tại tối đa 20 người
                 var currentGroup = shuffledParticipants.Skip(i).Take(groupSize).ToList();
 
                 var room = new Room
                 {
                     Id = Guid.NewGuid(),
                     RoomTypeId = bedRoomTypeId,
-                    Name = $"Room of group {groupNumber}",
+                    Name = $"{retreatName} - Room {groupNumber} ({gender})",
                     Capacity = groupSize,
                     Status = RoomStatus.Active.ToString()
                 };
@@ -153,12 +218,12 @@ namespace MCSM_Service.Implementations
                 var newGroup = new RetreatGroup
                 {
                     Id = Guid.NewGuid(),
-                    Name = $"Group {groupNumber}",
+                    Name = $"{retreatName} - Group {groupNumber} ({gender})",
                     RetreatId = retreatId,
                     RoomId = room.Id,
                 };
                 _retreatGroupRepository.Add(newGroup);
-                // Gán số phòng cho từng thiền sinh
+
                 foreach (var participant in currentGroup)
                 {
                     var groupMember = new RetreatGroupMember
@@ -172,8 +237,24 @@ namespace MCSM_Service.Implementations
 
                 groupNumber++;
             }
-            await _unitOfWork.SaveChanges();
+
+            return groupNumber;
         }
 
+        public async Task<RetreatGroupViewModel> AssignedMonk(CreateMonkForGroupModel model)
+        {
+            var retreatGroup = await _retreatGroupRepository.GetMany(r => r.Id == model.RetreatGroupId).FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat group not found");
+            var flag = await _accountRepository.GetMany(a => a.Id == model.MonkId).Include(r => r.Role).FirstOrDefaultAsync() ?? throw new NotFoundException("Account not found");
+            if(flag.Role.Name != AccountRole.Monk && flag.Role.Name != AccountRole.Nun)
+            {
+                throw new ConflictException("Please choose Monk/Nun");
+            }
+
+            retreatGroup.MonkId = model.MonkId;
+            _retreatGroupRepository.Update(retreatGroup);
+            var result = await _unitOfWork.SaveChanges();
+
+            return _mapper.Map<RetreatGroupViewModel>(retreatGroup);
+        }
     }
 }
