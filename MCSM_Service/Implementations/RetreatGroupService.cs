@@ -28,7 +28,8 @@ namespace MCSM_Service.Implementations
         private readonly IRetreatGroupMemberRepository _retreatGroupMemberRepository;
         private readonly IPaymentService _paymentService;
         private readonly AppSetting _appSettings;
-        public RetreatGroupService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> appSettings, IPaymentService paymentService) : base(unitOfWork, mapper)
+        private readonly ISendMailService _sendMailService;
+        public RetreatGroupService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> appSettings, IPaymentService paymentService, ISendMailService sendMailService) : base(unitOfWork, mapper)
         {
             _retreatGroupRepository = unitOfWork.RetreatGroup;
             _retreatRepository = unitOfWork.Retreat;
@@ -39,6 +40,7 @@ namespace MCSM_Service.Implementations
             _retreatGroupMemberRepository = unitOfWork.RetreatGroupMember;
             _appSettings = appSettings.Value;
             _paymentService = paymentService;
+            _sendMailService = sendMailService;
         }
 
         public async Task<ListViewModel<RetreatGroupViewModel>> GetRetreatGroups(RetreatGroupFilterModel filter, PaginationRequestModel pagination)
@@ -90,6 +92,8 @@ namespace MCSM_Service.Implementations
             var retreats = await _retreatRepository.GetMany(re => re.StartDate == now.AddDays(3))
                 .Include(re => re.RetreatGroups)
                 .Include(re => re.RetreatRegistrations)
+                    .ThenInclude(rg => rg.CreateByNavigation)
+                        .ThenInclude(a => a.Profile)
                 .ToListAsync();
 
             if(retreats != null && retreats.Count > 0)
@@ -145,6 +149,9 @@ namespace MCSM_Service.Implementations
                     if (reg.IsPaid)
                     {
                         var flag = await _paymentService.RefundPayment(reg.Id);
+                        var fullName = $"{reg.CreateByNavigation.Profile?.FirstName} {reg.CreateByNavigation.Profile?.LastName}";
+                        var totalCostFormatted = reg.TotalCost.ToString("0");
+                        await _sendMailService.SendRetreatCancellationEmail(reg.CreateByNavigation.Email, fullName, totalCostFormatted);
                     }
                 }
 
