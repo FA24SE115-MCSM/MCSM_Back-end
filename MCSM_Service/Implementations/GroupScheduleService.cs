@@ -98,11 +98,11 @@ namespace MCSM_Service.Implementations
                 throw new BadRequestException("Room is already in use at this period.");
             }
 
-            var validateRoom = await ValidateRoomType((Guid)groupSchedule.UsedRoomId);
-            if (validateRoom)
-            {
-                throw new BadRequestException("The new schedule designated room is not meant for educational activities.");
-            }
+            //var validateRoom = await ValidateRoomType((Guid)groupSchedule.UsedRoomId);
+            //if (validateRoom)
+            //{
+            //    throw new BadRequestException("The new schedule designated room is not meant for educational activities.");
+            //}
 
             _groupScheduleRepository.Add(groupSchedule);
             var result = await _unitOfWork.SaveChanges();
@@ -174,6 +174,11 @@ namespace MCSM_Service.Implementations
 
             return schedule;
         }
+
+        //public async Task<bool> CheckRoomCapacity(Guid roomId, Guid retreatScheduleId)
+        //{
+        //    var groupId = await _groupScheduleRepository.GetMany(gs => gs.UsedRoomId == roomId && gs.RetreatScheduleId == retreatScheduleId);
+        //}
 
         public async Task<bool> ValidateRoomType(Guid usedRoomId)
         {

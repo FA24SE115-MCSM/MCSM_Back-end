@@ -14,7 +14,7 @@ namespace MCSM_Data.Models.Views
         //public string GroupName { get; set; }
         public string LessonTitle { get; set; }
         public string LessonContent { get; set; }
-        public string RoomName { get; set; }
+        //public string RoomName { get; set; }
         public DateOnly LessonDate { get; set; }
         public TimeOnly LessonStart { get; set; }
         public TimeOnly LessonEnd { get; set; }

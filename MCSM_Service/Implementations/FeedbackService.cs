@@ -33,7 +33,6 @@ namespace MCSM_Service.Implementations
 
         public async Task<ListViewModel<FeedbackViewModel>> GetFeedbacks(FeedbackFilterModel filter, PaginationRequestModel pagination)
         {
-            //var query = _feedbackRepository.GetAll().Where(f => f.IsDeleted == false);
             var query = _feedbackRepository.GetAll();
 
             if (!string.IsNullOrEmpty(filter.AccountEmail))
@@ -49,6 +48,7 @@ namespace MCSM_Service.Implementations
             {
                 query = query.Where(r => r.RetreatRating == filter.RetreatRating);
             }
+
             if (!filter.IsDeleted)
             {
                 query = query.Where(r => !r.IsDeleted);
@@ -117,6 +117,11 @@ namespace MCSM_Service.Implementations
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow
             };
+            //var checkDuplicate = await _feedbackRepository.GetMany(f => f.CreatedBy == accountId && f.RetreatId == model.RetreatId).FirstOrDefaultAsync();
+            //if (checkDuplicate != null)
+            //{
+            //    throw new BadRequestException("You have already submitted a feedback for this retreat");
+            //}
             _feedbackRepository.Add(feedback);
 
             var result = await _unitOfWork.SaveChanges();

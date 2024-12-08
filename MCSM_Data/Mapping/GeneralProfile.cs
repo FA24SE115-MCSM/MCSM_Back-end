@@ -42,19 +42,15 @@ namespace MCSM_Data.Mapping
             //.ForMember(dest => dest.IsPaid, otp => otp.MapFrom(retreatReg => retreatReg.IsPaid));
             CreateMap<RetreatRegistrationParticipant, RetreatRegistrationParticipantViewModel>();
 
-            CreateMap<RetreatSchedule, RetreatScheduleViewModel>()
-                //.ForMember(dest => dest.GroupName, otp => otp.MapFrom(retreatSched => retreatSched.Group.Name))
-                .ForMember(dest => dest.LessonTitle, otp => otp.MapFrom(retreatSched => retreatSched.RetreatLesson.Lesson.Title))
-                //.ForMember(dest => dest.RoomName, otp => otp.MapFrom(retreatSched => retreatSched.UsedRoom.Name))
-                .ForMember(dest => dest.LessonContent, otp => otp.MapFrom(retreatSched => retreatSched.RetreatLesson.Lesson.Content));
-            CreateMap<Room, RetreatScheduleViewModel>().ForMember(dest => dest.RoomName, otp => otp.MapFrom(room => room.Name));
-
             CreateMap<GroupSchedule, GroupScheduleViewModel>()
                 .ForMember(dest => dest.GroupName, otp => otp.MapFrom(groupSched => groupSched.Group.Name))
                 .ForMember(dest => dest.RoomName, otp => otp.MapFrom(groupSched => groupSched.UsedRoom.Name))
                 .ForMember(dest => dest.LessonDate, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.LessonDate))
                 .ForMember(dest => dest.LessonStart, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.LessonStart))
-                .ForMember(dest => dest.LessonEnd, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.LessonEnd));
+                .ForMember(dest => dest.LessonEnd, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.LessonEnd))
+                .ForMember(dest => dest.LessonTitle, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.RetreatLesson.Lesson.Title))
+                //.ForMember(dest => dest.RoomName, otp => otp.MapFrom(retreatSched => retreatSched.UsedRoom.Name))
+                .ForMember(dest => dest.LessonContent, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.RetreatLesson.Lesson.Content));
 
             CreateMap<Retreat, ProgressTrackingViewModel>()
                 .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(progress => progress.Name))
@@ -65,14 +61,7 @@ namespace MCSM_Data.Mapping
                 .ForMember(dest => dest.LessonTitle, otp => otp.MapFrom(retreatSched => retreatSched.RetreatLesson.Lesson.Title))
                 //.ForMember(dest => dest.RoomName, otp => otp.MapFrom(retreatSched => retreatSched.UsedRoom.Name))
                 .ForMember(dest => dest.LessonContent, otp => otp.MapFrom(retreatSched => retreatSched.RetreatLesson.Lesson.Content));
-            CreateMap<Room, RetreatScheduleViewModel>().ForMember(dest => dest.RoomName, otp => otp.MapFrom(room => room.Name));
-
-            CreateMap<GroupSchedule, GroupScheduleViewModel>()
-                .ForMember(dest => dest.GroupName, otp => otp.MapFrom(groupSched => groupSched.Group.Name))
-                .ForMember(dest => dest.RoomName, otp => otp.MapFrom(groupSched => groupSched.UsedRoom.Name))
-                .ForMember(dest => dest.LessonDate, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.LessonDate))
-                .ForMember(dest => dest.LessonStart, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.LessonStart))
-                .ForMember(dest => dest.LessonEnd, otp => otp.MapFrom(groupSched => groupSched.RetreatSchedule.LessonEnd));
+            //CreateMap<Room, RetreatScheduleViewModel>().ForMember(dest => dest.RoomName, otp => otp.MapFrom(room => room.Name));
 
 
             CreateMap<Retreat, ProgressTrackingViewModel>()
@@ -108,7 +97,9 @@ namespace MCSM_Data.Mapping
             CreateMap<Payment, PaymentViewModel>()
                 .ForMember(dest => dest.RetreatName, otp => otp.MapFrom(payment => payment.RetreatReg.Retreat.Name));
             CreateMap<Refund, RefundViewModel>();
-            CreateMap<Feedback, FeedbackViewModel>();
+            CreateMap<Feedback, FeedbackViewModel>()
+                .ForMember(dest => dest.CreatedBy, otp => otp.MapFrom(feedback => feedback.CreatedByNavigation))
+                .ForMember(dest => dest.Retreat, otp => otp.MapFrom(feedback => feedback.Retreat));
 
             CreateMap<Menu, MenuViewModel>()
                 .ForMember(dest => dest.CreatedByEmail, otp => otp.MapFrom(menu => menu.CreatedByNavigation.Email))

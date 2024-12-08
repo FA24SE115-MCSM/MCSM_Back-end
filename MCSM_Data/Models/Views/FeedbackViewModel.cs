@@ -11,7 +11,8 @@ namespace MCSM_Data.Models.Views
     {
         public Guid Id { get; set; }
 
-        public Guid CreatedBy { get; set; }
+        //public Guid CreatedBy { get; set; }
+        
 
         public Guid RetreatId { get; set; }
 
@@ -32,8 +33,7 @@ namespace MCSM_Data.Models.Views
         public DateTime? UpdateAt { get; set; }
 
         public bool IsDeleted { get; set; }
-
-        public virtual AccountViewModel CreatedByNavigation { get; set; } = null!;
+        public virtual AccountViewModel CreatedBy { get; set; }
 
         public virtual RetreatViewModel Retreat { get; set; } = null!;
     }
