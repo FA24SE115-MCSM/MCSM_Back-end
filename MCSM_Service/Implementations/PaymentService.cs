@@ -266,7 +266,7 @@ namespace MCSM_Service.Implementations
                     await RemoveParticipantFormRetreat(refund.RetreatRegId, refund.ParticipantId);
 
                     refund.Status = "Success";
-                    refund.RetreatReg.IsPaid = false;
+                    refund.RetreatReg.IsPaid = refund.RetreatReg.TotalParticipants == 0 ? false : true;
                     _refundRepository.Update(refund);
                     await _unitOfWork.SaveChanges();
                     

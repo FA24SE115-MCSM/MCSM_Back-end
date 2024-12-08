@@ -7,13 +7,9 @@ using MCSM_Data.Models.Requests.Put;
 using MCSM_Data.Models.Views;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
+using MCSM_Utility.Constants;
 using MCSM_Utility.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MCSM_Service.Implementations
 {
@@ -21,11 +17,13 @@ namespace MCSM_Service.Implementations
     {
         private readonly ICommentRepository _commentRepository;
         private readonly IPostRepository _postRepository;
+        private readonly INotificationService _notificationService;
         
-        public CommentService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        public CommentService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService) : base(unitOfWork, mapper)
         {
             _commentRepository = unitOfWork.Comment;
             _postRepository = unitOfWork.Post;
+            _notificationService = notificationService;
         }
 
         public async Task<CommentViewModel> GetComment(Guid id)
@@ -37,7 +35,7 @@ namespace MCSM_Service.Implementations
 
         public async Task<CommentViewModel> CreateComment(Guid accountId, CreateCommentModel model)
         {
-            await CheckPost(model.PostId);
+            var post = await CheckPost(model.PostId);
             var commentId = Guid.NewGuid();
 
             var comment = new Comment
@@ -47,6 +45,8 @@ namespace MCSM_Service.Implementations
                 AccountId = accountId,
                 Content = model.Content,
             };
+            //send noti
+            await SendNotification(post);
 
             _commentRepository.Add(comment);
             var result = await _unitOfWork.SaveChanges();
@@ -67,6 +67,9 @@ namespace MCSM_Service.Implementations
                 Content = model.Content,
             };
 
+            //send noti
+            await SendNotification(flag);
+
             _commentRepository.Add(comment);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetComment(commentId) : null!;
@@ -84,17 +87,48 @@ namespace MCSM_Service.Implementations
             return result > 0 ? await GetComment(id) : null!;
         }
 
-        private async Task CheckPost(Guid postId)
+        private async Task<Post> CheckPost(Guid postId)
         {
-            var post = await _postRepository.GetMany(p => p.Id == postId).FirstOrDefaultAsync() ?? throw new NotFoundException("Post not found");
-
+            return await _postRepository.GetMany(p => p.Id == postId).FirstOrDefaultAsync() ?? throw new NotFoundException("Post not found");
         }
         
         private async Task<Comment> CheckComment(Guid commentId)
         {
-            return await _commentRepository.GetMany(p => p.Id == commentId).FirstOrDefaultAsync() ?? throw new NotFoundException("Comment not found");
+            return await _commentRepository.GetMany(p => p.Id == commentId).Include(src => src.Post).FirstOrDefaultAsync() ?? throw new NotFoundException("Comment not found");
 
         }
+        private async Task SendNotification(Post post)
+        {
+            var message = new CreateNotificationModel
+            {
+                Title = "Bài viết của bạn có một bình luận mới",
+                Body = $"Bài viết của bạn vừa nhận được một lượt tương tác mới. Hãy xem ngay!",
+                Data = new NotificationDataViewModel
+                {
+                    CreateAt = DateTime.Now,
+                    Type = NotificationType.PostComment,
+                    Link = post.Id.ToString()
+                }
+            };
 
+            await _notificationService.SendNotification(new List<Guid> { post.CreatedBy }, message);
+        }
+
+        private async Task SendNotification(Comment comment)
+        {
+            var message = new CreateNotificationModel
+            {
+                Title = "Bình luận của bạn có một phản hồi",
+                Body = $"Bình luận của bạn có một phản hồi tương tác mới. Hãy xem ngay!",
+                Data = new NotificationDataViewModel
+                {
+                    CreateAt = DateTime.Now,
+                    Type = NotificationType.PostReplyComment,
+                    Link = comment.PostId.ToString()
+                }
+            };
+
+            await _notificationService.SendNotification(new List<Guid> { comment.AccountId }, message);
+        }
     }
 }

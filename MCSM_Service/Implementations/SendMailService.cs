@@ -3,8 +3,6 @@ using MCSM_Service.Interfaces;
 using MCSM_Utility.Settings;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using System.Drawing;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace MCSM_Service.Implementations
 {
@@ -387,6 +385,118 @@ namespace MCSM_Service.Implementations
             }
         }
 
+
+        public async Task SendRetreatCancellationEmail(string userEmail, string userName, string refundDetails)
+        {
+            try
+            {
+                var mail = new MimeMessage();
+                mail.From.Add(new MailboxAddress(_nameApp, _emailAddress));
+                mail.Sender = new MailboxAddress(_nameApp, _emailAddress);
+                mail.To.Add(MailboxAddress.Parse(userEmail));
+
+                mail.Subject = "Retreat Cancellation Notification";
+
+                var body = new BodyBuilder
+                {
+                    HtmlBody = $@"
+            <!DOCTYPE html>
+            <html lang='en'>
+            <head>
+                <meta charset='UTF-8'>
+                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                <title>Retreat Cancellation</title>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        background-color: #f8f9fa;
+                        padding: 20px;
+                        margin: 0;
+                    }}
+                    .container {{
+                        max-width: 600px;
+                        margin: auto;
+                        background: white;
+                        padding: 20px;
+                        border: 0.5px solid #ddd;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                    }}
+                    h1 {{
+                        color: #dc3545;
+                        text-align: center;
+                    }}
+                    p {{
+                        font-size: 16px;
+                        line-height: 1.5;
+                        color: #555;
+                    }}
+                    .header {{
+                        text-align: center;
+                        background-color: #dc3545;
+                        color: white;
+                        padding: 10px 0;
+                        border-radius: 8px 8px 0 0;
+                    }}
+                    .logo {{
+                        width: 100px;
+                        height: 100px;
+                        border-radius: 50%;
+                        display: block;
+                        margin: 10px auto;
+                    }}
+                    .account-box {{
+                        font-size: 15px;
+                        font-weight: bold;
+                        color: #333;
+                        background-color: #e9ecef;
+                        padding: 10px;
+                        border-radius: 5px;
+                        text-align: left;
+                        margin-top: 15px;
+                        list-style: none;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <h1>Retreat Cancellation</h1>
+                    </div>
+                    <img class='logo' src='{logoSendMail}' alt='Logo'>
+                    <p>Dear {userName},</p>
+                    <p>We regret to inform you that due to insufficient registrations, we are unable to proceed with the upcoming retreat at <strong>{_nameApp}</strong>. We sincerely apologize for any inconvenience this may have caused.</p>
+                    <p>Please rest assured that your payment will be refunded as follows:</p>
+                    <p><strong>{refundDetails}$</strong></p>
+                    <p>If you have any concerns or questions, feel free to contact us at our support email.</p>
+                    <p>Thank you for your understanding and patience.</p>
+                    <p>Best regards,<br>{_nameApp} Team</p>
+                </div>
+            </body>
+            </html>"
+                };
+
+                mail.Body = body.ToMessageBody();
+
+                using var smtp = new MailKit.Net.Smtp.SmtpClient();
+                if (_useSSL)
+                {
+                    await smtp.ConnectAsync(_host, _port, SecureSocketOptions.SslOnConnect);
+                }
+                else if (_useStartTls)
+                {
+                    await smtp.ConnectAsync(_host, _port, SecureSocketOptions.StartTls);
+                }
+
+                await smtp.AuthenticateAsync(_username, _password);
+                await smtp.SendAsync(mail);
+                await smtp.DisconnectAsync(true);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error sending retreat cancellation email", ex);
+            }
+        }
 
 
     }
