@@ -18,6 +18,10 @@ namespace MCSM_Service.Implementations
 
         public async Task<bool> CreateDeviceToken(Guid accountId, CreateDeviceTokenModel model)
         {
+            if (string.IsNullOrEmpty(model.DeviceToken))
+            {
+                return false;
+            }
             var deviceTokens = await _deviceTokenRepository.GetMany(token => token.AccountId.Equals(accountId)).ToListAsync();
             if (deviceTokens.Any(token => token.Token!.Equals(model.DeviceToken))) return false;
             
