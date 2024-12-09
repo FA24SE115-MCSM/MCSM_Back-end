@@ -107,7 +107,7 @@ namespace MCSM_Service.Implementations
         public async Task<ListViewModel<ActiveRetreatRegistrationViewModel>> GetActiveRetreatRegistrationForUser(Guid id, PaginationRequestModel pagination)
         {
             //var query = _retreatRegistrationRepository.GetMany(r => r.CreateByNavigation.Id == id && r.Retreat.Status == "Active").ProjectTo<ActiveRetreatRegistrationViewModel>(_mapper.ConfigurationProvider);
-            var query = _retreatRegistrationRepository.GetMany(r => r.RetreatRegistrationParticipants.Any(p => p.ParticipantId == id) && r.Retreat.Status == "Active").OrderBy(q => q.Retreat.Name);
+            var query = _retreatRegistrationRepository.GetMany(r => r.RetreatRegistrationParticipants.Any(p => p.ParticipantId == id) && r.Retreat.Status != RetreatStatus.InActive.ToString()).OrderBy(q => q.Retreat.Name);
             var totalRow = await query.AsNoTracking().CountAsync();
 
             var paginatedQuery = query

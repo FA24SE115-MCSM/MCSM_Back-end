@@ -92,17 +92,17 @@ namespace MCSM_Service.Implementations
             //{
             //    throw new BadRequestException("Room is already in use at this period.");
             //}
-            var validateScheduleRoom = await CheckOverlapScheduleRoom((Guid)groupSchedule.UsedRoomId, groupSchedule.RetreatScheduleId);
-            if (validateScheduleRoom)
-            {
-                throw new BadRequestException("Room is already in use at this period.");
-            }
-
-            //var validateRoom = await ValidateRoomType((Guid)groupSchedule.UsedRoomId);
-            //if (validateRoom)
+            //var validateScheduleRoom = await CheckOverlapScheduleRoom((Guid)groupSchedule.UsedRoomId, groupSchedule.RetreatScheduleId);
+            //if (validateScheduleRoom)
             //{
-            //    throw new BadRequestException("The new schedule designated room is not meant for educational activities.");
+            //    throw new BadRequestException("Room is already in use at this period.");
             //}
+
+            var validateRoom = await ValidateRoomType((Guid)groupSchedule.UsedRoomId);
+            if (validateRoom)
+            {
+                throw new BadRequestException("The new schedule designated room is not meant for educational activities.");
+            }
 
             _groupScheduleRepository.Add(groupSchedule);
             var result = await _unitOfWork.SaveChanges();
@@ -130,11 +130,11 @@ namespace MCSM_Service.Implementations
             //    throw new BadRequestException("Updating room is already in use at this period.");
             //}
 
-            var validateScheduleRoom = await CheckOverlapScheduleRoom((Guid)existSchedule.UsedRoomId, (Guid)existSchedule.RetreatScheduleId);
-            if (validateScheduleRoom)
-            {
-                throw new BadRequestException("Updating room is already in use at this period.");
-            }
+            //var validateScheduleRoom = await CheckOverlapScheduleRoom((Guid)existSchedule.UsedRoomId, (Guid)existSchedule.RetreatScheduleId);
+            //if (validateScheduleRoom)
+            //{
+            //    throw new BadRequestException("Updating room is already in use at this period.");
+            //}
 
             var validateRoom = await ValidateRoomType((Guid)existSchedule.UsedRoomId);
             if (validateRoom)
@@ -157,16 +157,6 @@ namespace MCSM_Service.Implementations
 
             await _unitOfWork.SaveChanges();
         }
-
-        //public async Task<bool> CheckOverlapScheduleRoom(Guid roomId, DateOnly lessonDate, TimeOnly lessonStart, TimeOnly lessonEnd)
-        //{
-        //    var schedule = await _groupScheduleRepository.GetMany(gs => gs.UsedRoomId == roomId && gs.RetreatSchedule.LessonDate.Equals(lessonDate)
-        //    && ((lessonStart >= gs.RetreatSchedule.LessonStart && lessonStart < gs.RetreatSchedule.LessonEnd) || (lessonEnd > gs.RetreatSchedule.LessonStart && lessonEnd <= gs.RetreatSchedule.LessonEnd) || (lessonStart <= gs.RetreatSchedule.LessonStart && lessonEnd >= gs.RetreatSchedule.LessonEnd)))
-        //    .AsNoTracking()
-        //    .AnyAsync();
-
-        //    return schedule;
-        //}
 
         public async Task<bool> CheckOverlapScheduleRoom(Guid roomId, Guid retreatScheduleId)
         {

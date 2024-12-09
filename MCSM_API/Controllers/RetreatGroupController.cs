@@ -3,6 +3,7 @@ using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Views;
 using MCSM_Service.Interfaces;
+using MCSM_Utility.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -29,9 +30,10 @@ namespace MCSM_API.Controllers
 
         [HttpPost]
         [Route("assign-monk")]
+        [Authorize(AccountRole.Admin, AccountRole.Monk)]
         [ProducesResponseType(typeof(RetreatGroupViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Assigned monk for retreat groups.")]
-        public async Task<ActionResult<RetreatGroupViewModel>> AssignedMonk([FromBody] CreateMonkForGroupModel model)
+        public async Task<ActionResult<RetreatGroupViewModel>> AssignedMonk([FromForm] CreateMonkForGroupModel model)
         {
             return await _retreatGroupService.AssignedMonk(model);
         }

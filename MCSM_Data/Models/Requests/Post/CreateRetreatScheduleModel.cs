@@ -18,6 +18,6 @@ namespace MCSM_Data.Models.Requests.Post
         //public TimeOnly LessonEnd { get; set; }
         public string LessonStart { get; set; }
         public string LessonEnd { get; set; }
-        public DateTime CreateAt { get; set; }
+        //public DateTime CreateAt { get; set; }
     }
 }
