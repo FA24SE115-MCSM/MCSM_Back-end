@@ -82,6 +82,22 @@ namespace MCSM_Service.Implementations
             var monkAdded = await _retreatMonkRepository.GetMany(rm => rm.MonkId == model.MonkId && rm.RetreatId == model.RetreatId)
                 .FirstOrDefaultAsync() ?? throw new BadRequestException("Monk này đã được thêm vào khóa học");
 
+            var retreatStartDate = _retreatRepository.GetById(model.RetreatId).StartDate;
+            var retreatEndDate = _retreatRepository.GetById(model.RetreatId).EndDate;
+            var checkMonk = await _retreatMonkRepository.GetMany(rm => rm.MonkId == model.MonkId).ToListAsync();
+
+            foreach (RetreatMonk monk in checkMonk)
+            {
+                var overlapSchedule = await _retreatMonkRepository.GetMany(rm => rm.MonkId.Equals(monk.MonkId) &&
+                    ((rm.Retreat.StartDate >= retreatStartDate && rm.Retreat.EndDate <= retreatEndDate)
+                    || (retreatEndDate > rm.Retreat.StartDate && retreatEndDate <= rm.Retreat.EndDate)
+                    || (retreatStartDate <= rm.Retreat.StartDate && retreatEndDate >= rm.Retreat.EndDate))).AsNoTracking().AnyAsync();
+                if (overlapSchedule)
+                {
+                    throw new BadRequestException("Monk is not available for the retreat period!");   
+                }
+            }
+
             // ### pending account's status as a constant ###
             // if (existMonk.Status.Equals()) throw new Exception
             // ### NEEDS A CHECK FOR DUPLICATED MONK IN RETREAT
