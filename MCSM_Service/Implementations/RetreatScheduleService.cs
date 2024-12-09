@@ -252,8 +252,10 @@ namespace MCSM_Service.Implementations
 
         public async Task<bool> CheckOverlapScheduleRetreat(Guid retreatId, DateOnly lessonDate, TimeOnly lessonStart, TimeOnly lessonEnd)
         {
-            var schedule = await _retreatScheduleRepository.GetMany(rs => rs.RetreatId == retreatId && rs.LessonDate.Equals(lessonDate) 
-            && ((lessonStart >= rs.LessonStart && lessonStart < rs.LessonEnd) || (lessonEnd > rs.LessonStart && lessonEnd <= rs.LessonEnd) || (lessonStart <= rs.LessonStart && lessonEnd >= rs.LessonEnd)))
+            var schedule = await _retreatScheduleRepository.GetMany(rs => rs.RetreatId == retreatId && rs.LessonDate.Equals(lessonDate) && 
+            ((lessonStart >= rs.LessonStart && lessonStart < rs.LessonEnd) 
+            || (lessonEnd > rs.LessonStart && lessonEnd <= rs.LessonEnd) 
+            || (lessonStart <= rs.LessonStart && lessonEnd >= rs.LessonEnd)))
             .AsNoTracking()
             .AnyAsync();
 

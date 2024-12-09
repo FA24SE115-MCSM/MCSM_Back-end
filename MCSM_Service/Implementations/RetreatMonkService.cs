@@ -89,7 +89,7 @@ namespace MCSM_Service.Implementations
             foreach (RetreatMonk monk in checkMonk)
             {
                 var overlapSchedule = await _retreatMonkRepository.GetMany(rm => rm.MonkId.Equals(monk.MonkId) &&
-                    ((rm.Retreat.StartDate >= retreatStartDate && rm.Retreat.EndDate <= retreatEndDate)
+                    ((retreatStartDate >= rm.Retreat.StartDate && retreatStartDate <= rm.Retreat.EndDate)
                     || (retreatEndDate > rm.Retreat.StartDate && retreatEndDate <= rm.Retreat.EndDate)
                     || (retreatStartDate <= rm.Retreat.StartDate && retreatEndDate >= rm.Retreat.EndDate))).AsNoTracking().AnyAsync();
                 if (overlapSchedule)
