@@ -1,4 +1,5 @@
-﻿using MCSM_Data.Models.Requests.Filters;
+﻿using MCSM_API.Configurations.Middleware;
+using MCSM_Data.Models.Requests.Filters;
 using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Views;

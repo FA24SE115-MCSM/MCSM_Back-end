@@ -13,6 +13,7 @@ using MCSM_Data.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper.QueryableExtensions;
 using MCSM_Utility.Constants;
+using MCSM_Utility.Enums;
 
 namespace MCSM_Service.Implementations
 {
@@ -71,12 +72,15 @@ namespace MCSM_Service.Implementations
             var existRetreat = await _retreatRepository.GetMany(r => r.Id == model.RetreatId)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy retreat");
 
-            var existMonk = await _accountRepository.GetMany(a => a.Id == model.MonkId).Include(a => a.Role)
+            var existMonk = await _accountRepository.GetMany(a => a.Id == model.MonkId && a.Role.Name.Equals("Monk")).Include(a => a.Role)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy monk");
 
-            if (existMonk.Status.Equals("Inactive")) throw new NotFoundException("Tài khoản monk này đã bị khóa!");
+            if (existMonk.Status.Equals(AccountStatus.InActive.ToString())) throw new BadRequestException("Tài khoản monk này đã bị khóa!");
 
             if (!existMonk.Role.Name.Equals(AccountRole.Monk)) throw new NotFoundException("Người được thêm vào retreat không phải là monk!");
+
+            var monkAdded = await _retreatMonkRepository.GetMany(rm => rm.MonkId == model.MonkId && rm.RetreatId == model.RetreatId)
+                .FirstOrDefaultAsync() ?? throw new BadRequestException("Monk này đã được thêm vào khóa học");
 
             // ### pending account's status as a constant ###
             // if (existMonk.Status.Equals()) throw new Exception
@@ -90,6 +94,7 @@ namespace MCSM_Service.Implementations
                 MonkId = model.MonkId,
                 RetreatId = model.RetreatId
             };
+            
             _retreatMonkRepository.Add(retreatMonk);
 
             var result = await _unitOfWork.SaveChanges();
