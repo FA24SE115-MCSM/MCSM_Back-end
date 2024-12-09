@@ -64,6 +64,7 @@ namespace MCSM_Service.Implementations
             var deviceTokens = await _deviceTokenRepository.GetMany(token => accountIds.Contains(token.AccountId))
                 .Select(token => token.Token)
                 .ToListAsync();
+            deviceTokens = deviceTokens.Where(token => !string.IsNullOrWhiteSpace(token)).ToList();
             var now = DateTime.UtcNow.AddHours(7);
             foreach (var accountId in accountIds)
             {
