@@ -55,6 +55,14 @@ namespace MCSM_Service.Implementations
             {
                 query = query.Where(p => p.Status == filter.Status.Value.ToString());
             }
+            if (!string.IsNullOrEmpty(filter.CustomerEmail))
+            {
+                query = query.Where(p => p.Account.Email.Contains(filter.CustomerEmail));
+            }
+            if (!string.IsNullOrEmpty(filter.CustomerName))
+            {
+                query = query.Where(p => $"{p.Account.Profile.FirstName} {p.Account.Profile.LastName}".Contains(filter.CustomerEmail));
+            }
 
 
             return await query

@@ -6,6 +6,8 @@ namespace MCSM_Data.Models.Requests.Filters
     {
         public Guid? AccountId { get; set; }
         public Guid? RetreatRegistrationId { get; set; }
+        public string? CustomerEmail { get; set; }
+        public string? CustomerName { get; set; }
         public PaymentStatus? Status { get; set; }
     }
 }
