@@ -7,8 +7,6 @@ namespace MCSM_Data.Models.Views
         public string Id { get; set; } = null!;
 
         public string RetreatName { get; set; } = null!;
-        public string CustomerName { get; set; } = null!;
-        public string CustomerEmail { get; set; } = null!;
         public Guid RetreatRegId { get; set; }
 
         public string PaypalPaymentId { get; set; } = null!;
