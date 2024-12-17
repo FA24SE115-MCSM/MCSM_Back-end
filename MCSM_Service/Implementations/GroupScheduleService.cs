@@ -33,6 +33,11 @@ namespace MCSM_Service.Implementations
         public async Task<ListViewModel<GroupScheduleViewModel>> GetGroupSchedules(GroupScheduleFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _groupScheduleRepository.GetAll();
+
+            if (filter.RetreatScheduleId != null)
+            {
+                query = query.Where(gs => gs.RetreatScheduleId.Equals(filter.RetreatScheduleId));
+            }
             if (filter.GroupId != null)
             {
                 query = query.Where(gs => gs.GroupId.Equals(filter.GroupId));

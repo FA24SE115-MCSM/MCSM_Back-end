@@ -8,6 +8,7 @@ namespace MCSM_Data.Models.Requests.Filters
 {
     public class GroupScheduleFilterModel
     {
+        public Guid? RetreatScheduleId { get; set; }
         public Guid? GroupId { get; set; }
         public string? RoomName { get; set; }
         public DateOnly? LessionDate { get; set; }
