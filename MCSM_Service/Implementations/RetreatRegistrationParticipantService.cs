@@ -13,7 +13,9 @@ using MCSM_Utility.Enums;
 using MCSM_Utility.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using OfficeOpenXml;
+using System.Linq;
 
 namespace MCSM_Service.Implementations
 {
@@ -95,6 +97,7 @@ namespace MCSM_Service.Implementations
 
         public async Task<RetreatRegistrationViewModel> CreateRetreatRegistrationParticipants(CreateRetreatRegistrationParticipantModel model)
         {
+            var listError = new List<string>();
             var result = 0;
             var newAccounts = new List<CreateAccountModel>();
             var participants = new List<Guid>();
@@ -119,26 +122,42 @@ namespace MCSM_Service.Implementations
                 try
                 {
                     var listAccounts = await GetAccountFromFile(model.File);
-                    
+                    var accounts = await _accountRepository.GetAll().Include(acc => acc.Role).ToListAsync();
+
                     foreach (var account in listAccounts)
                     {
-                        var acc = await _accountRepository.GetMany(acc => acc.Email == account.Email).Include(acc => acc.Role).FirstOrDefaultAsync();
-                        if(acc == null)
+                        var existAccount = accounts.Where(x => x.Email == account.Email).FirstOrDefault();
+                        if (existAccount == null)
                         {
                             newAccounts.Add(account);
                             continue;
                         }
 
-                        var isAlreadyRegistered = await IsValidAccountToRegistration(acc, retreatReg.RetreatId);
+                        var isAlreadyRegistered = await IsValidAccountToRegistration(existAccount, retreatReg.RetreatId);
                         if (isAlreadyRegistered)
                         {
                             continue;
                         }
-                        participants.Add(acc.Id);
 
+                        var overlap = await CheckOverlapRetreatAsync(retreatReg.Retreat.StartDate, retreatReg.Retreat.EndDate, existAccount.Id);
+                        if (overlap)
+                        {
+                            listError.Add($"The email: {existAccount.Email} has already been used to register for another retreat during this period.");
+                        }
+                        participants.Add(existAccount.Id);
                     }
 
                     var numOfParticipants = newAccounts.Count + participants.Count;
+                    if(numOfParticipants == 0)
+                    {
+                        throw new ConflictException("The accounts listed in the file have already registered for the retreat and cannot register again.");
+                    }
+
+                    if (listError.Any())
+                    {
+                        throw new ReadExcelException(listError);
+                    }
+
                     if (numOfParticipants > retreatReg.Retreat.RemainingSlots)
                         throw new ConflictException("The number of registrants exceeded the remaining capacity of the retreat");
 
@@ -183,8 +202,24 @@ namespace MCSM_Service.Implementations
             return await CheckAlreadyRegistered(retreatId, account.Id);
         }
 
+        private async Task<bool> CheckOverlapRetreatAsync(DateOnly startDate, DateOnly endDate, Guid accountId)
+        {
+            // Lấy danh sách RetreatRegistration của tài khoản
+            var overlappingRetreats = await _retreatRegistrationRepository.GetMany(rr =>
+                rr.IsPaid == true && // Đã thanh toán
+                rr.RetreatRegistrationParticipants.Any(p => p.ParticipantId == accountId) && // Account đã tham gia
+                (
+                    // Kiểm tra điều kiện thời gian overlap
+                    (rr.Retreat.StartDate <= endDate && rr.Retreat.EndDate >= startDate)
+                )
+            ).ToListAsync();
 
-        public async Task<bool> CheckAlreadyRegistered(Guid retreatId, Guid participantId)
+            // Nếu danh sách trùng rỗng thì không bị overlap
+            return overlappingRetreats.Any();
+        }
+
+
+        private async Task<bool> CheckAlreadyRegistered(Guid retreatId, Guid participantId)
         {
             var check = await _retreatRegistrationRepository.GetMany(r => r.RetreatId == retreatId)
                 .Join(_retreatRegistrationParticipantRepository.GetAll(),
@@ -202,7 +237,8 @@ namespace MCSM_Service.Implementations
 
         private async Task<List<CreateAccountModel>> GetAccountFromFile(IFormFile file)
         {
-
+            var listError = new List<string>();
+            int emtyRow = 0;
             if (file == null || file.Length <= 0)
             {
                 throw new BadRequestException("No file uploaded");
@@ -220,17 +256,64 @@ namespace MCSM_Service.Implementations
                     var rowCount = workSheet.Dimension.Rows;
                     for (int row = 3; row <= rowCount; row++)
                     {
-                        var account = new CreateAccountModel
+                        if(emtyRow == 2) break;
+
+                        var email = workSheet.Cells[row, 2].Text.ToString().Trim();
+                        var firstName = workSheet.Cells[row, 3].Text.ToString().Trim();
+                        var lastName = workSheet.Cells[row, 4].Text.ToString().Trim();
+                        var dateOfBirth = workSheet.Cells[row, 5].Text.ToString().Trim();
+                        var phoneNumber = workSheet.Cells[row, 6].Text.ToString().Trim();
+                        var gender = workSheet.Cells[row, 7].Text.ToString().Trim();
+
+                        if(string.IsNullOrEmpty(email) && string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName) && string.IsNullOrEmpty(phoneNumber) && string.IsNullOrEmpty(gender) && string.IsNullOrEmpty(dateOfBirth))
                         {
-                            Email = workSheet.Cells[row, 2].Text,
-                            FirstName = workSheet.Cells[row, 3].Text,
-                            LastName = workSheet.Cells[row, 4].Text,
-                            DateOfBirth = DateTime.Parse(workSheet.Cells[row, 5].Text),
-                            PhoneNumber = workSheet.Cells[row, 6].Text,
-                            Gender = workSheet.Cells[row, 7].Text,
-                        };
-                        result.Add(account);
+                            emtyRow++;
+                            continue;
+                        }
+
+                        if (string.IsNullOrEmpty(email))
+                        {
+                            listError.Add($"Row {row}: Please input email");
+                        }
+                        if (string.IsNullOrEmpty(firstName))
+                        {
+                            listError.Add($"Row {row}: Please input first name");
+                        }
+                        if (string.IsNullOrEmpty(lastName))
+                        {
+                            listError.Add($"Row {row}: Please input last name");
+                        }
+                        if (string.IsNullOrEmpty(dateOfBirth))
+                        {
+                            listError.Add($"Row {row}: Please input date of birth");
+                        }
+                        if (string.IsNullOrEmpty(phoneNumber))
+                        {
+                            listError.Add($"Row {row}: Please input phone number");
+                        }
+                        if (string.IsNullOrEmpty(gender))
+                        {
+                            listError.Add($"Row {row}: Please input gender");
+                        }
+
+                        if(listError.Count == 0)
+                        {
+                            var account = new CreateAccountModel
+                            {
+                                Email = email!,
+                                FirstName = firstName!,
+                                LastName = lastName!,
+                                DateOfBirth = DateTime.Parse(dateOfBirth),
+                                PhoneNumber = phoneNumber!,
+                                Gender = gender!,
+                            };
+                            result.Add(account);
+                        }
                     }
+                }
+                if (listError.Any())
+                {
+                    throw new ReadExcelException(listError);
                 }
             }
 

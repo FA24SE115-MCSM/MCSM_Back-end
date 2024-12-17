@@ -71,23 +71,34 @@ namespace MCSM_Service.Implementations
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Tool history not found");
         }
 
-        public async Task<ToolHistoryViewModel> CreateToolHistory(CreateToolHistoryModel model)
+        public async Task<List<ToolHistoryViewModel>> GetToolHistoryByRetreat(Guid retreatId)
         {
-            await CheckTool(model.ToolId);
-            await CheckRetreat(model.RetreatId);
+            return await _toolHistoryRepository.GetMany(t => t.RetreatId == retreatId)
+                .ProjectTo<ToolHistoryViewModel>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
 
-            var toolHistoryId = Guid.NewGuid();
-            var toolHistory = new ToolHistory
+        public async Task<List<ToolHistoryViewModel>> CreateToolHistory(CreateToolHistoryModel model)
+        {
+            //await CheckTool(model.ToolId);
+            var retreat = await CheckRetreat(model.RetreatId, model.BorrowerId);
+
+            foreach(var tool in retreat.RetreatTools)
             {
-                Id = toolHistoryId,
-                CreatedBy = model.BorrowerId,
-                RetreatId = model.RetreatId,
-                ToolId = model.ToolId,
-                NumOfTool = model.NumOfTool
-            };
-            _toolHistoryRepository.Add(toolHistory);
+                var toolHistoryId = Guid.NewGuid();
+                var toolHistory = new ToolHistory
+                {
+                    Id = toolHistoryId,
+                    CreatedBy = model.BorrowerId,
+                    RetreatId = model.RetreatId,
+                    ToolId = tool.ToolId,
+                    NumOfTool = retreat.Capacity
+                };
+                _toolHistoryRepository.Add(toolHistory);
+            }
+            
             var result = await _unitOfWork.SaveChanges();
-            return result > 0 ? await GetToolHistory(toolHistoryId) : null!;
+            return result > 0 ? await GetToolHistoryByRetreat(model.RetreatId) : null!;
         }
 
         public async Task<ToolHistoryViewModel> UpdateToolHistory(Guid id, UpdateToolHistoryModel model)
@@ -112,15 +123,30 @@ namespace MCSM_Service.Implementations
                 throw new BadRequestException("The tool is currently InActive and cannot be used");
             }
         }
-        private async Task CheckRetreat(Guid retreatId)
+        private async Task<Retreat> CheckRetreat(Guid retreatId, Guid borrowerId)
         {
             var retreat = await _retreatRepository.GetMany(r => r.Id == retreatId)
+                .Include(re => re.RetreatMonks)
+                .Include(re => re.RetreatTools)
+                .Include(re => re.ToolHistories)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat not found");
 
             if (retreat.Status == RetreatStatus.InActive.ToString())
             {
                 throw new BadRequestException("The retreat is currently InActive and cannot be used.");
             }
+
+            if (retreat.RetreatMonks == null || !retreat.RetreatMonks.Any(src => src.MonkId == borrowerId))
+            {
+                throw new BadRequestException("The borrower must be the monk nun of the retreat");
+            }
+
+            if (retreat.ToolHistories.Any())
+            {
+                throw new ConflictException("Already borrowed");
+            }
+
+            return retreat;
         }
     }
 }

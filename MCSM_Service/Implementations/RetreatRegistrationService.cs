@@ -152,6 +152,11 @@ namespace MCSM_Service.Implementations
         public async Task<RetreatRegistrationViewModel> CreateRetreatRegistrationForAccount(CreateRetreatRegistrationAccountModel model, Guid accountId)
         {
             var retreat = await CheckRetreat(model.RetreatId, accountId);
+            var overlap = await CheckOverlapRetreatAsync(retreat.StartDate, retreat.EndDate, accountId);
+            if (overlap)
+            {
+                throw new ConflictException("The account has already been used to register for another retreat during this period.");
+            }
             var retreatRegistrationId = Guid.Empty;
             var result = 0;
             using (var transaction = _unitOfWork.Transaction())
@@ -210,17 +215,33 @@ namespace MCSM_Service.Implementations
             var flag = await CheckAccountIsRegisteredForRetreat(retreatId, accountId);
             if (flag)
             {
-                throw new ConflictException("This account is already registered for the retreat.");
+                throw new ConflictException("You have already successfully registered for this retreat. Please continue the payment if it has not been completed yet.");
             }
-
             return retreat;
+        }
+
+        private async Task<bool> CheckOverlapRetreatAsync(DateOnly startDate, DateOnly endDate, Guid accountId)
+        {
+            // Lấy danh sách RetreatRegistration của tài khoản
+            var overlappingRetreats = await _retreatRegistrationRepository.GetMany(rr =>
+                rr.IsPaid == true && // Đã thanh toán
+                rr.RetreatRegistrationParticipants.Any(p => p.ParticipantId == accountId) && // Account đã tham gia
+                (
+                    // Kiểm tra điều kiện thời gian overlap
+                    (rr.Retreat.StartDate <= endDate && rr.Retreat.EndDate >= startDate)
+                )
+            ).ToListAsync();
+
+            // Nếu danh sách trùng rỗng thì không bị overlap
+            return overlappingRetreats.Any();
         }
 
         private async Task<bool> CheckAccountIsRegisteredForRetreat(Guid retreatId, Guid accountId)
         {
             return await _retreatRegistrationRepository
                 .AnyAsync(retreatReg => retreatReg.RetreatId == retreatId
-                                        && retreatReg.IsPaid
+                                        //&& retreatReg.IsPaid
+                                        && retreatReg.Payments.Any(src => src.Status != PaymentStatus.Cancel.ToString())
                                         && retreatReg.RetreatRegistrationParticipants
                                             .Any(participant => participant.ParticipantId == accountId));
         }

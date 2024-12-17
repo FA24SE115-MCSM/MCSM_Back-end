@@ -183,12 +183,21 @@ namespace MCSM_Service.Implementations
         public async Task<List<Guid>> CreateNewAccountForRetreatRegistration(List<CreateAccountModel> listModel)
         {
             var result = new List<Guid>();
-            var participantId = await _roleRepository.GetMany(role => role.Name == AccountRole.Practitioner).Select(role => role.Id).FirstOrDefaultAsync();
+            var participantRoleId = await _roleRepository.GetMany(role => role.Name == AccountRole.Practitioner).Select(role => role.Id).FirstOrDefaultAsync();
+            var existAccounts = await _accountRepository.GetAll().Include(acc => acc.Profile).ToListAsync();
+            var role = await _roleRepository.GetAll().ToListAsync();
+
             foreach (var model in listModel)
             {
-                await CheckUniquePhone(model.PhoneNumber);
-                model.RoleId = participantId;
-                var gender = await CheckRoleAndGender(model.RoleId, model.Gender);
+                var existPhone = existAccounts?.Where(src => src.Profile!.PhoneNumber == model.PhoneNumber).FirstOrDefault();
+                if(existPhone != null)
+                {
+                    throw new BadRequestException($"The phone number '{model.PhoneNumber}' is already in use");
+                }
+                //await CheckUniquePhone(model.PhoneNumber, existAccounts);
+                model.RoleId = participantRoleId;
+
+                //var gender = await CheckRoleAndGender(model.RoleId, model.Gender);
                 var accountId = Guid.NewGuid();
                 model.Password = PasswordGenerator.GenerateRandomPassword();
 
@@ -199,8 +208,9 @@ namespace MCSM_Service.Implementations
                     LastName = model.LastName,
                     DateOfBirth = model.DateOfBirth,
                     PhoneNumber = model.PhoneNumber,
-                    Gender = gender,
+                    Gender = model.Gender,
                 };
+
                 _profileRepository.Add(profile);
 
                 var account = new Account
@@ -415,21 +425,15 @@ namespace MCSM_Service.Implementations
             }
         }
 
-        private async Task CheckUniquePhone(string phoneNumber)
-        {
-            var existingAccount = await _accountRepository.GetMany(account => account.Profile != null && account.Profile.PhoneNumber == phoneNumber)
-                                        .Include(account => account.Profile)
-                                        .FirstOrDefaultAsync();
+        //private async Task CheckUniquePhone(string phoneNumber, List<Account> accounts)
+        //{
+        //    var flag = accounts.Where(acc => acc.Profile!.PhoneNumber == phoneNumber);
 
-            if (existingAccount != null)
-            {
-
-                if (existingAccount.Profile?.PhoneNumber == phoneNumber)
-                {
-                    throw new BadRequestException($"The phone number '{phoneNumber}' is already in use");
-                }
-            }
-        }
+        //        if (accounts.Profile.PhoneNumber == phoneNumber)
+        //        {
+        //            throw new BadRequestException($"The phone number '{phoneNumber}' is already in use");
+        //        }
+        //}
 
 
         private string GenerateJwtToken(AuthModel auth)

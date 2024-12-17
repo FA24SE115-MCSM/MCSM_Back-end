@@ -5,9 +5,5 @@
 
         public Guid RetreatId { get; set; }
         public Guid BorrowerId { get; set; }
-
-        public Guid ToolId { get; set; }
-
-        public int NumOfTool { get; set; }
     }
 }

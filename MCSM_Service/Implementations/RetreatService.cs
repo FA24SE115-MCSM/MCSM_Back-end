@@ -21,12 +21,14 @@ namespace MCSM_Service.Implementations
     {
         private readonly IRetreatRepository _retreatRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly IRetreatToolRepository _retreatToolRepository;
         private readonly IRetreatFileRepository _retreatFileRepository;
         private readonly IRetreatLearningOutcomeRepository _retreatLearningOutcomeRepository;
         private readonly ICloudStorageService _cloudStorageService;
         public RetreatService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService) : base(unitOfWork, mapper)
         {
             _retreatRepository = unitOfWork.Retreat;
+            _retreatToolRepository = unitOfWork.RetreatTool;
             _accountRepository = unitOfWork.Account;
             _retreatFileRepository = unitOfWork.RetreatFile;
             _retreatLearningOutcomeRepository = unitOfWork.RetreatLearningOutcome;
@@ -82,16 +84,18 @@ namespace MCSM_Service.Implementations
             var result = 0;
             var retreatId = Guid.Empty;
 
-            using(var transaction = _unitOfWork.Transaction())
+            using (var transaction = _unitOfWork.Transaction())
             {
                 try
                 {
                     var endDate = GetEndDate(model.StartDate, model.Duration);
                     retreatId = Guid.NewGuid();
-                    
+
                     await UploadRetreatImage(retreatId, model.Images, false);
                     await UploadRetreatDocument(retreatId, model.Documents, false);
                     await AddLearningOutcome(retreatId, model.LearningOutcome, false);
+                    await AddRetreatTool(retreatId, model.Capacity, model.ToolIds, false);
+
                     var retreat = new Retreat
                     {
                         Id = retreatId,
@@ -120,14 +124,14 @@ namespace MCSM_Service.Implementations
             return result > 0 ? await GetRetreat(retreatId) : null!;
         }
 
-        
+
 
         public async Task<RetreatViewModel> UpdateRetreat(Guid id, UpdateRetreatModel model)
         {
             var existRetreat = await _retreatRepository.GetMany(r => r.Id == id)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat not found");
 
-            if(existRetreat.Status != RetreatStatus.Open.ToString())
+            if (existRetreat.Status != RetreatStatus.Open.ToString())
             {
                 throw new BadRequestException("This retreat is currently not open. Please check back later.");
             }
@@ -153,7 +157,7 @@ namespace MCSM_Service.Implementations
                 existRetreat.EndDate = existRetreat.StartDate.AddDays(model.Duration.Value);
             }
 
-            if(model.StartDate.HasValue)
+            if (model.StartDate.HasValue)
             {
                 existRetreat.StartDate = model.StartDate.Value;
                 existRetreat.EndDate = GetEndDate(existRetreat.StartDate, existRetreat.Duration);
@@ -164,19 +168,24 @@ namespace MCSM_Service.Implementations
             //    existRetreat.Status = GetRetreatStatus(model.Status);
             //}
 
-            if(model.Images != null && model.Images.Count > 0)
+            if (model.Images != null && model.Images.Count > 0)
             {
                 await UploadRetreatImage(id, model.Images, true);
             }
 
-            if(model.Documents != null && model.Documents.Count > 0)
+            if (model.Documents != null && model.Documents.Count > 0)
             {
                 await UploadRetreatDocument(id, model.Documents, true);
             }
 
-            if(model.LearningOutcome != null && model.LearningOutcome.Count > 0)
+            if (model.LearningOutcome != null && model.LearningOutcome.Count > 0)
             {
                 await AddLearningOutcome(id, model.LearningOutcome, true);
+            }
+
+            if(model.ToolIds != null && model.ToolIds.Count > 0)
+            {
+                await AddRetreatTool(id, existRetreat.Capacity, model.ToolIds, true);
             }
 
             _retreatRepository.Update(existRetreat);
@@ -186,6 +195,37 @@ namespace MCSM_Service.Implementations
             return result > 0 ? await GetRetreat(id) : null!;
         }
 
+        public async Task AddRetreatTool(Guid retreatId, int quantity, List<Guid> toolIds, bool isUpdate)
+        {
+            var listAdd = new List<RetreatTool>();
+            if (isUpdate)
+            {
+                var existRetreatTools = await _retreatToolRepository.GetMany(src => src.RetreatId == retreatId).ToListAsync();
+                if (existRetreatTools != null && existRetreatTools.Count > 0)
+                {
+                    _retreatToolRepository.RemoveRange(existRetreatTools);
+                }
+            }
+
+            foreach(var toolId in toolIds)
+            {
+                var retreatTool = new RetreatTool
+                {
+                    RetreatId = retreatId,
+                    ToolId = toolId,
+                    Quantity = quantity
+                };
+                listAdd.Add(retreatTool);
+            }
+
+            if (listAdd.Any())
+            {
+                _retreatToolRepository.AddRange(listAdd);
+            }
+        }
+
+
+
         private DateOnly GetEndDate(DateOnly startDate, int duration)
         {
             if (startDate < DateOnly.FromDateTime(DateTime.UtcNow.AddHours(7)))
@@ -193,7 +233,7 @@ namespace MCSM_Service.Implementations
                 throw new BadRequestException($"The start date ({startDate}) cannot be less than the current date. Please re-enter.");
             }
 
-            if(duration <= 0)
+            if (duration <= 0)
             {
                 throw new BadRequestException($"Please re-enter duration");
             }
@@ -214,7 +254,7 @@ namespace MCSM_Service.Implementations
         private async Task UploadRetreatImage(Guid retreatId, List<IFormFile> images, bool isUpdate)
         {
             CheckImage(images);
-            
+
             if (isUpdate)
             {
                 var listImage = await _retreatFileRepository.GetMany(rt => rt.RetreatId == retreatId && rt.Type == RetreatFileType.Image).ToListAsync();
@@ -274,18 +314,18 @@ namespace MCSM_Service.Implementations
             if (isUpdate)
             {
                 var flag = await _retreatLearningOutcomeRepository.GetMany(r => r.RetreatId == retreatId).ToListAsync();
-                if(flag.Count > 0)
+                if (flag.Count > 0)
                 {
                     _retreatLearningOutcomeRepository.RemoveRange(flag);
                 }
             }
 
-            foreach(var model in listModel)
+            foreach (var model in listModel)
             {
                 var retreatLearningOutcome = new RetreatLearningOutcome
                 {
                     Id = Guid.NewGuid(),
-                    RetreatId= retreatId,
+                    RetreatId = retreatId,
                     Title = model.Title,
                     SubTitle = model.SubTitle,
                     Description = model.Description,

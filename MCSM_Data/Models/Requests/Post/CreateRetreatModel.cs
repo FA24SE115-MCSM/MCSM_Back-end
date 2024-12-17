@@ -19,6 +19,6 @@ namespace MCSM_Data.Models.Requests.Post
 
         public List<IFormFile> Images { get; set; } = new List<IFormFile>();
         public List<IFormFile> Documents { get; set; } = new List<IFormFile>();
-
+        public List<Guid> ToolIds { get; set; } = new List<Guid>();
     }
 }

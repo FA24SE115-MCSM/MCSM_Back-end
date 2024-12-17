@@ -79,6 +79,8 @@ public partial class McsmDbContext : DbContext
 
     public virtual DbSet<RetreatSchedule> RetreatSchedules { get; set; }
 
+    public virtual DbSet<RetreatTool> RetreatTools { get; set; }
+
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<Room> Rooms { get; set; }
@@ -762,6 +764,23 @@ public partial class McsmDbContext : DbContext
             entity.HasOne(d => d.RetreatLesson).WithMany(p => p.RetreatSchedules)
                 .HasForeignKey(d => d.RetreatLessonId)
                 .HasConstraintName("FK__RetreatSc__Retre__7C4F7684");
+        });
+
+        modelBuilder.Entity<RetreatTool>(entity =>
+        {
+            entity.HasKey(e => new { e.RetreatId, e.ToolId }).HasName("PK__RetreatT__8C3F1AE67F171A92");
+
+            entity.ToTable("RetreatTool");
+
+            entity.HasOne(d => d.Retreat).WithMany(p => p.RetreatTools)
+                .HasForeignKey(d => d.RetreatId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__RetreatTo__Retre__531856C7");
+
+            entity.HasOne(d => d.Tool).WithMany(p => p.RetreatTools)
+                .HasForeignKey(d => d.ToolId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__RetreatTo__ToolI__540C7B00");
         });
 
         modelBuilder.Entity<Role>(entity =>

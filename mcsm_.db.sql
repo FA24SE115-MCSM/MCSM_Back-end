@@ -549,3 +549,13 @@ CREATE TABLE [Messages] (
     SendAt DATETIME DEFAULT DATEADD(HOUR, 7, GETUTCDATE())
 );
 GO
+
+DROP TABLE IF EXISTS RetreatTool 
+GO
+CREATE TABLE RetreatTool (
+    RetreatId uniqueidentifier foreign key references Retreat(Id) NOT NULL,
+    ToolId uniqueidentifier foreign key references Tool(Id) NOT NULL,
+	Quantity int NOT NULL,
+	PRIMARY KEY(RetreatId, ToolId)
+);
+GO

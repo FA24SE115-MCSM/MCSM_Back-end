@@ -40,7 +40,8 @@ builder.Services.AddCors(options =>
                           policy.WithOrigins(
                               "http://127.0.0.1:5173",
                               "https://hammer-asia.vercel.app",
-                          "https://www.thaiplumtrial.xyz");
+                          "https://www.thaiplumtrial.xyz",
+                          "http://localhost:5173");
                           policy.AllowCredentials();
                       });
 });

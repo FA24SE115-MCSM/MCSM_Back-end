@@ -46,6 +46,7 @@ namespace MCSM_Data
         private IConversationRepository _conversation = null!;
         private IConversationParticipantRepository _conversationParticipant = null!;
         private IMessageRepository _message = null!;
+        private IRetreatToolRepository _retreatTool = null!;
 
         public UnitOfWork(McsmDbContext context)
         {
@@ -224,6 +225,12 @@ namespace MCSM_Data
         {
             get { return _message ??= new MessageRepository(_context); }
         }
+
+        public IRetreatToolRepository RetreatTool
+        {
+            get { return _retreatTool ??= new RetreatToolRepository(_context); }
+        }
+
         public async Task<int> SaveChanges()
         {
             return await _context.SaveChangesAsync();

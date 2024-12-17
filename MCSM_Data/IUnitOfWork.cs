@@ -41,7 +41,7 @@ namespace MCSM_Data
         public IConversationRepository Conversation { get; }
         public IConversationParticipantRepository ConversationParticipant { get; }
         public IMessageRepository Message { get; }
-
+        public IRetreatToolRepository RetreatTool { get; }
 
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();
