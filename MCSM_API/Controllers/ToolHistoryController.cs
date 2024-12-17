@@ -47,24 +47,24 @@ namespace MCSM_API.Controllers
         [Authorize(AccountRole.Admin)]
         [ProducesResponseType(typeof(ToolHistoryViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Create tool history.")]
-        public async Task<ActionResult<ToolHistoryViewModel>> CreateToolHistory([FromBody] CreateToolHistoryModel model)
+        public async Task<ActionResult<List<ToolHistoryViewModel>>> CreateToolHistory([FromBody] CreateToolHistoryModel model)
         {
             var toolHistory = await _toolHistoryService.CreateToolHistory(model);
-            return CreatedAtAction(nameof(GetToolHistory), new { id = toolHistory.Id }, toolHistory);
+            return CreatedAtAction(nameof(GetToolHistory), new { id = toolHistory }, toolHistory);
         }
 
 
 
-        [HttpPut]
-        [Route("{id}")]
-        [Authorize(AccountRole.Admin)]
-        [ProducesResponseType(typeof(ToolHistoryViewModel), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
-        [SwaggerOperation(Summary = "Update tool history.")]
-        public async Task<ActionResult<ToolHistoryViewModel>> UpdateToolHistory([FromRoute] Guid id, [FromBody] UpdateToolHistoryModel model)
-        {
-            var toolHistory = await _toolHistoryService.UpdateToolHistory(id, model);
-            return CreatedAtAction(nameof(GetToolHistory), new { id = toolHistory.Id }, toolHistory);
-        }
+        //[HttpPut]
+        //[Route("{id}")]
+        //[Authorize(AccountRole.Admin)]
+        //[ProducesResponseType(typeof(ToolHistoryViewModel), StatusCodes.Status201Created)]
+        //[ProducesResponseType(typeof(ErrorModel), StatusCodes.Status404NotFound)]
+        //[SwaggerOperation(Summary = "Update tool history.")]
+        //public async Task<ActionResult<ToolHistoryViewModel>> UpdateToolHistory([FromRoute] Guid id, [FromBody] UpdateToolHistoryModel model)
+        //{
+        //    var toolHistory = await _toolHistoryService.UpdateToolHistory(id, model);
+        //    return CreatedAtAction(nameof(GetToolHistory), new { id = toolHistory.Id }, toolHistory);
+        //}
     }
 }

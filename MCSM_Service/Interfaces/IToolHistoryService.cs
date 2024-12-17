@@ -10,7 +10,7 @@ namespace MCSM_Service.Interfaces
     {
         Task<ListViewModel<ToolHistoryViewModel>> GetToolHistories(ToolHistoryFilterModel filter, PaginationRequestModel pagination);
         Task<ToolHistoryViewModel> GetToolHistory(Guid id);
-        Task<ToolHistoryViewModel> CreateToolHistory(CreateToolHistoryModel model);
+        Task<List<ToolHistoryViewModel>> CreateToolHistory(CreateToolHistoryModel model);
         Task<ToolHistoryViewModel> UpdateToolHistory(Guid id, UpdateToolHistoryModel model);
     }
 }

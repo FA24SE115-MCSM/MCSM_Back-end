@@ -6,6 +6,7 @@ using MCSM_Data.Models.Requests.Filters;
 using MCSM_Data.Models.Requests.Get;
 using MCSM_Data.Models.Requests.Post;
 using MCSM_Data.Models.Views;
+using MCSM_Data.Repositories.Implementations;
 using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
 using MCSM_Utility.Enums;
@@ -72,10 +73,12 @@ namespace MCSM_Service.Implementations
                 .ToListAsync();
         }
 
+        //refund lại khi không đủ sớ lượng
         public async Task<bool> RefundPayment(Guid retreatRegId)
         {
-            var payment = await _paymentRepository.GetMany(p => p.RetreatRegId == retreatRegId).Include(src => src.RetreatReg).FirstOrDefaultAsync()
-                          ?? throw new NotFoundException("Payment not found for retreat registration.");
+            var payment = await _paymentRepository.GetMany(p => p.RetreatRegId == retreatRegId)
+                .Include(src => src.RetreatReg)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Payment not found for retreat registration.");
 
             if (payment.Status != PaymentStatus.Success.ToString())
             {
@@ -219,10 +222,9 @@ namespace MCSM_Service.Implementations
         {
             decimal returnAmount = 0.8m; // 80% hoàn tiền
 
-
-
             var retreatReg = await _retreatRegistrationRepository.GetMany(reg => reg.Id == model.RetreatRegId)
                                                                 .Include(reg => reg.Retreat)
+                                                                .Include(reg => reg.Payments)
                                                                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat registration not found");
 
             if (!retreatReg.IsPaid)
@@ -231,7 +233,6 @@ namespace MCSM_Service.Implementations
             }
 
             await CheckAccountIsRegisteredForRetreat(model.RetreatRegId, accountId);
-
 
             decimal refundAmount = retreatReg.Retreat.Cost * returnAmount;
             var payout = new PayPalPayoutModel
@@ -255,13 +256,23 @@ namespace MCSM_Service.Implementations
             };
             _refundRepository.Add(refund);
 
+            foreach (var payment in retreatReg.Payments.Where(pay => pay.Status == PaymentStatus.Success.ToString()))
+            {
+                payment.Status = PaymentStatus.Refunding.ToString();
+            }
+
+            _retreatRegistrationRepository.Update(retreatReg);
+
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetRefund(refundResponse.BatchHeader.PayoutBatchId) : null!;
         }
 
         public async Task UpdateRefund(string refundId)
         {
-            var refund = await _refundRepository.GetMany(r => r.Id == refundId).Include(re => re.RetreatReg).FirstOrDefaultAsync() ?? throw new NotFoundException("Refund not found");
+            var refund = await _refundRepository.GetMany(r => r.Id == refundId)
+                .Include(re => re.RetreatReg)
+                    .ThenInclude(reg => reg.Payments)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Refund not found");
             if(refund.Status == "Success")
             {
                 return;
@@ -272,7 +283,10 @@ namespace MCSM_Service.Implementations
                 try
                 {
                     await RemoveParticipantFormRetreat(refund.RetreatRegId, refund.ParticipantId);
-
+                    foreach (var payment in refund.RetreatReg.Payments.Where(pay => pay.Status == PaymentStatus.Refunding.ToString()))
+                    {
+                        payment.Status = PaymentStatus.Refunded.ToString();
+                    }
                     refund.Status = "Success";
                     refund.RetreatReg.IsPaid = refund.RetreatReg.TotalParticipants == 0 ? false : true;
                     _refundRepository.Update(refund);

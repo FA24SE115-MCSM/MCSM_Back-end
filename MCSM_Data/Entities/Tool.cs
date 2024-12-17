@@ -17,5 +17,7 @@ public partial class Tool
 
     public DateTime CreateAt { get; set; }
 
+    public virtual ICollection<RetreatTool> RetreatTools { get; set; } = new List<RetreatTool>();
+
     public virtual ICollection<ToolHistory> ToolHistories { get; set; } = new List<ToolHistory>();
 }

@@ -19,6 +19,7 @@ namespace MCSM_Data.Models.Requests.Put
         public List<CreateRetreatLearningOutcomeModel>? LearningOutcome { get; set; } 
         public List<IFormFile>? Images { get; set; }
         public List<IFormFile>? Documents { get; set; }
+        public List<Guid>? ToolIds { get; set; }
 
     }
 }

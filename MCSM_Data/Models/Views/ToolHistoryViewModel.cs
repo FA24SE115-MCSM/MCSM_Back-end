@@ -10,7 +10,7 @@
 
         public virtual AccountViewModel Borrower { get; set; } = null!;
 
-        public virtual RetreatViewModel Retreat { get; set; } = null!;
+        //public virtual RetreatViewModel Retreat { get; set; } = null!;
 
         public virtual ToolViewModel Tool { get; set; } = null!;
     }

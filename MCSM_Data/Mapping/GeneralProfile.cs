@@ -131,6 +131,7 @@ namespace MCSM_Data.Mapping
 
             CreateMap<Comment, CommentViewModel>();
             CreateMap<Comment, ChildCommentViewModel>();
+            CreateMap<RetreatTool, RetreatToolViewModel>();
         }
     }
 }

@@ -45,6 +45,12 @@ namespace MCSM_API.Configurations.Middleware
             {
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             }
+            else if( exception is ReadExcelException readExcelEx)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                errorResponse.message = null!;
+                errorResponse.messages = readExcelEx.messages;
+            }
             else
             {
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

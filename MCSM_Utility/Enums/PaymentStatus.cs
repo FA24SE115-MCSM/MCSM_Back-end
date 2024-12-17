@@ -6,6 +6,7 @@
         Success,
         Cancel,
         Fail,
-        Refunded
+        Refunded,
+        Refunding
     }
 }

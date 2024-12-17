@@ -29,6 +29,7 @@ namespace MCSM_Data.Models.Views
 
         public virtual ICollection<RetreatMonkViewModel> RetreatMonks { get; set; } = new List<RetreatMonkViewModel>();
 
+        public virtual ICollection<RetreatToolViewModel> RetreatTools { get; set; } = new List<RetreatToolViewModel>();
         //public virtual RetreatSchedule? RetreatSchedule { get; set; }
 
         //public virtual ToolHistory? ToolHistory { get; set; }
