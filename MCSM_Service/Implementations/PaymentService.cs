@@ -209,15 +209,6 @@ namespace MCSM_Service.Implementations
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Refund not found");
         }
 
-
-        private async Task Check(Guid accountId)
-        {
-
-            var flag = await _refundRepository.GetMany(r => r.ParticipantId == accountId).OrderByDescending(r => r.CreateAt).ToListAsync();
-            var date = DateTime.UtcNow.AddHours(7).AddMonths(3);
-
-        }
-
         public async Task<RefundViewModel> RefundPayment(Guid accountId, CreateRefundModel model)
         {
             decimal returnAmount = 0.8m; // 80% hoàn tiền
@@ -230,6 +221,10 @@ namespace MCSM_Service.Implementations
             if (!retreatReg.IsPaid)
             {
                 throw new ConflictException("Retreat Registration has not been paid yet");
+            }
+            if(!retreatReg.Payments.Any(src => src.Status == PaymentStatus.Success.ToString()))
+            {
+                throw new ConflictException("Refund in progress");
             }
 
             await CheckAccountIsRegisteredForRetreat(model.RetreatRegId, accountId);

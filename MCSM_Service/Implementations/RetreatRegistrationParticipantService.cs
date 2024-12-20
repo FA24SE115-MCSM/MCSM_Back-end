@@ -13,9 +13,7 @@ using MCSM_Utility.Enums;
 using MCSM_Utility.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using OfficeOpenXml;
-using System.Linq;
 
 namespace MCSM_Service.Implementations
 {
@@ -101,7 +99,9 @@ namespace MCSM_Service.Implementations
             var result = 0;
             var newAccounts = new List<CreateAccountModel>();
             var participants = new List<Guid>();
-            var retreatReg = await _retreatRegistrationRepository.GetMany(r => r.Id == model.RetreatRegId).Include(r => r.Retreat).FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat Registration not found");
+            var retreatReg = await _retreatRegistrationRepository.GetMany(r => r.Id == model.RetreatRegId)
+                .Include(r => r.Retreat)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat Registration not found");
 
             if (retreatReg.Retreat.Status != RetreatStatus.Open.ToString())
             {
@@ -121,30 +121,41 @@ namespace MCSM_Service.Implementations
             {
                 try
                 {
+                    //read list accounts form excel file
                     var listAccounts = await GetAccountFromFile(model.File);
+                    //get list accounts in system
                     var accounts = await _accountRepository.GetAll().Include(acc => acc.Role).ToListAsync();
 
                     foreach (var account in listAccounts)
                     {
+                        //check exist account
                         var existAccount = accounts.Where(x => x.Email == account.Email).FirstOrDefault();
                         if (existAccount == null)
                         {
+                            //add new if not exist
                             newAccounts.Add(account);
                             continue;
                         }
-
+                        //check account is already register retreat
                         var isAlreadyRegistered = await IsValidAccountToRegistration(existAccount, retreatReg.RetreatId);
                         if (isAlreadyRegistered)
                         {
                             continue;
                         }
-
+                        //check overlap
                         var overlap = await CheckOverlapRetreatAsync(retreatReg.Retreat.StartDate, retreatReg.Retreat.EndDate, existAccount.Id);
                         if (overlap)
                         {
                             listError.Add($"The email: {existAccount.Email} has already been used to register for another retreat during this period.");
+                            continue;
                         }
                         participants.Add(existAccount.Id);
+                    }
+
+                    //If error -> show error and stop
+                    if (listError != null && listError.Count > 0)
+                    {
+                        throw new ReadExcelException(listError);
                     }
 
                     var numOfParticipants = newAccounts.Count + participants.Count;
@@ -153,14 +164,10 @@ namespace MCSM_Service.Implementations
                         throw new ConflictException("The accounts listed in the file have already registered for the retreat and cannot register again.");
                     }
 
-                    if (listError.Any())
-                    {
-                        throw new ReadExcelException(listError);
-                    }
-
                     if (numOfParticipants > retreatReg.Retreat.RemainingSlots)
                         throw new ConflictException("The number of registrants exceeded the remaining capacity of the retreat");
 
+                    //handle register account for email not have account in system
                     var listNewAccountId = await _accountService.CreateNewAccountForRetreatRegistration(newAccounts);
                     participants.AddRange(listNewAccountId);
                     foreach (var accountId in participants)
@@ -206,7 +213,7 @@ namespace MCSM_Service.Implementations
         {
             // Lấy danh sách RetreatRegistration của tài khoản
             var overlappingRetreats = await _retreatRegistrationRepository.GetMany(rr =>
-                rr.IsPaid == true && // Đã thanh toán
+                rr.Payments.Any(src => src.Status != PaymentStatus.Cancel.ToString()) && // Đã đăng kí
                 rr.RetreatRegistrationParticipants.Any(p => p.ParticipantId == accountId) && // Account đã tham gia
                 (
                     // Kiểm tra điều kiện thời gian overlap
@@ -238,7 +245,7 @@ namespace MCSM_Service.Implementations
         private async Task<List<CreateAccountModel>> GetAccountFromFile(IFormFile file)
         {
             var listError = new List<string>();
-            int emtyRow = 0;
+            int emptyRow = 0;
             if (file == null || file.Length <= 0)
             {
                 throw new BadRequestException("No file uploaded");
@@ -256,7 +263,6 @@ namespace MCSM_Service.Implementations
                     var rowCount = workSheet.Dimension.Rows;
                     for (int row = 3; row <= rowCount; row++)
                     {
-                        if(emtyRow == 2) break;
 
                         var email = workSheet.Cells[row, 2].Text.ToString().Trim();
                         var firstName = workSheet.Cells[row, 3].Text.ToString().Trim();
@@ -267,7 +273,8 @@ namespace MCSM_Service.Implementations
 
                         if(string.IsNullOrEmpty(email) && string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName) && string.IsNullOrEmpty(phoneNumber) && string.IsNullOrEmpty(gender) && string.IsNullOrEmpty(dateOfBirth))
                         {
-                            emtyRow++;
+                            emptyRow++;
+                            if (emptyRow == 2) break;
                             continue;
                         }
 

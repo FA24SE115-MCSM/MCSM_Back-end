@@ -151,12 +151,10 @@ namespace MCSM_Service.Implementations
         /// <returns></returns>
         public async Task<RetreatRegistrationViewModel> CreateRetreatRegistrationForAccount(CreateRetreatRegistrationAccountModel model, Guid accountId)
         {
+            //validation retreat
             var retreat = await CheckRetreat(model.RetreatId, accountId);
-            var overlap = await CheckOverlapRetreatAsync(retreat.StartDate, retreat.EndDate, accountId);
-            if (overlap)
-            {
-                throw new ConflictException("The account has already been used to register for another retreat during this period.");
-            }
+
+            //handle create retreat registration
             var retreatRegistrationId = Guid.Empty;
             var result = 0;
             using (var transaction = _unitOfWork.Transaction())
@@ -164,6 +162,8 @@ namespace MCSM_Service.Implementations
                 try
                 {
                     retreatRegistrationId = Guid.NewGuid();
+
+                    //add participant
                     var newParticipant = new RetreatRegistrationParticipant
                     {
                         Id = Guid.NewGuid(),
@@ -172,6 +172,7 @@ namespace MCSM_Service.Implementations
                     };
                     _retreatRegistrationParticipantRepository.Add(newParticipant);
 
+                    //create retreat registration
                     var newRetreatRegistration = new RetreatRegistration
                     {
                         Id = retreatRegistrationId,
@@ -183,8 +184,11 @@ namespace MCSM_Service.Implementations
                         IsPaid = false
                     };
                     _retreatRegistrationRepository.Add(newRetreatRegistration);
+
+                    //subtract remaining slot
                     retreat.RemainingSlots -= 1;
                     _retreatRepository.Update(retreat);
+
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }
@@ -198,25 +202,32 @@ namespace MCSM_Service.Implementations
         }
 
 
-        
-
         private async Task<Retreat> CheckRetreat(Guid retreatId, Guid accountId)
         {
             var retreat = await _retreatRepository.GetMany(retreat => retreat.Id == retreatId).FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat not found");
+            //check status of retreat
             if (retreat.Status != RetreatStatus.Open.ToString())
             {
                 throw new BadRequestException("This retreat is currently not open. Please check back later.");
             }
-
+            //Check remaining slot
             if (retreat.RemainingSlots == 0)
             {
                 throw new BadRequestException("No available slots for this retreat. Please select a different retreat.");
             }
-            var flag = await CheckAccountIsRegisteredForRetreat(retreatId, accountId);
-            if (flag)
+            //Check account register
+            var isRegistered = await CheckAccountIsRegisteredForRetreat(retreatId, accountId);
+            if (isRegistered)
             {
                 throw new ConflictException("You have already successfully registered for this retreat. Please continue the payment if it has not been completed yet.");
             }
+            //Check overlap
+            var isOverlap = await CheckOverlapRetreatAsync(retreat.StartDate, retreat.EndDate, accountId);
+            if (isOverlap)
+            {
+                throw new ConflictException("The account has already been used to register for another retreat during this period.");
+            }
+
             return retreat;
         }
 
@@ -224,7 +235,7 @@ namespace MCSM_Service.Implementations
         {
             // Lấy danh sách RetreatRegistration của tài khoản
             var overlappingRetreats = await _retreatRegistrationRepository.GetMany(rr =>
-                rr.IsPaid == true && // Đã thanh toán
+                rr.Payments.Any(src => src.Status != PaymentStatus.Cancel.ToString()) && // Đã đăng kí
                 rr.RetreatRegistrationParticipants.Any(p => p.ParticipantId == accountId) && // Account đã tham gia
                 (
                     // Kiểm tra điều kiện thời gian overlap

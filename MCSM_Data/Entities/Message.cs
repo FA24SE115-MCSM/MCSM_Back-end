@@ -12,6 +12,7 @@ public partial class Message
     public Guid SenderId { get; set; }
 
     public string Content { get; set; } = null!;
+    public bool IsRead { get; set; }
 
     public DateTime? SendAt { get; set; }
 
