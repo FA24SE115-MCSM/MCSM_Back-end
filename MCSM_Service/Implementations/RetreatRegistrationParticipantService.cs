@@ -14,6 +14,7 @@ using MCSM_Utility.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MCSM_Service.Implementations
 {
@@ -267,7 +268,7 @@ namespace MCSM_Service.Implementations
                         var email = workSheet.Cells[row, 2].Text.ToString().Trim();
                         var firstName = workSheet.Cells[row, 3].Text.ToString().Trim();
                         var lastName = workSheet.Cells[row, 4].Text.ToString().Trim();
-                        var dateOfBirth = workSheet.Cells[row, 5].Text.ToString().Trim();
+                        var dateOfBirth = workSheet.Cells[row, 5].Value.ToString()?.Trim();
                         var phoneNumber = workSheet.Cells[row, 6].Text.ToString().Trim();
                         var gender = workSheet.Cells[row, 7].Text.ToString().Trim();
 
@@ -293,6 +294,14 @@ namespace MCSM_Service.Implementations
                         if (string.IsNullOrEmpty(dateOfBirth))
                         {
                             listError.Add($"Row {row}: Please input date of birth");
+
+                        }
+                        else
+                        {
+                            if (!double.TryParse(dateOfBirth, out var date))
+                            {
+                                listError.Add($"Row {row}: Please input with format 'dd/MM/yyyy'");
+                            }
                         }
                         if (string.IsNullOrEmpty(phoneNumber))
                         {
@@ -310,7 +319,7 @@ namespace MCSM_Service.Implementations
                                 Email = email!,
                                 FirstName = firstName!,
                                 LastName = lastName!,
-                                DateOfBirth = DateTime.Parse(dateOfBirth),
+                                DateOfBirth = DateTime.FromOADate(double.Parse(dateOfBirth)),
                                 PhoneNumber = phoneNumber!,
                                 Gender = gender!,
                             };
