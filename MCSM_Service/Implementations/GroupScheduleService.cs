@@ -103,6 +103,12 @@ namespace MCSM_Service.Implementations
             //    throw new BadRequestException("Room is already in use at this period.");
             //}
 
+            var validateSchedule = await CheckOverlapScheduleGroup((Guid)groupSchedule.GroupId, groupSchedule.RetreatScheduleId);
+            if (validateSchedule)
+            {
+                throw new BadRequestException("The new schedule overlaps with another one of the group.");
+            }
+
             var validateRoom = await ValidateRoomType((Guid)groupSchedule.UsedRoomId);
             if (validateRoom)
             {
@@ -122,6 +128,10 @@ namespace MCSM_Service.Implementations
             {
                 existSchedule.RetreatScheduleId = model.RetreatScheduleId.Value;
             }
+            else
+            {
+                throw new NotFoundException("You must enter a schedule to update.");
+            }
 
             //if (!string.IsNullOrWhiteSpace(model.RoomName))
             //{
@@ -140,6 +150,12 @@ namespace MCSM_Service.Implementations
             //{
             //    throw new BadRequestException("Updating room is already in use at this period.");
             //}
+
+            var validateSchedule = await CheckOverlapScheduleGroup((Guid)existSchedule.GroupId, (Guid)model.RetreatScheduleId);
+            if (validateSchedule)
+            {
+                throw new BadRequestException("The new schedule overlaps with another one of the group.");
+            }
 
             var validateRoom = await ValidateRoomType((Guid)existSchedule.UsedRoomId);
             if (validateRoom)
@@ -182,6 +198,15 @@ namespace MCSM_Service.Implementations
                 .AnyAsync();
 
             return room;
+        }
+
+        public async Task<bool> CheckOverlapScheduleGroup(Guid groupId, Guid retreatScheduleId)
+        {
+            var schedule = await _groupScheduleRepository.GetMany(gs => gs.GroupId == groupId && gs.RetreatScheduleId == retreatScheduleId)
+                .AsNoTracking()
+                .AnyAsync();
+
+            return schedule;
         }
     }
 }
