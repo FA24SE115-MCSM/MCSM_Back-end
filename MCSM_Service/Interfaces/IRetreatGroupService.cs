@@ -8,7 +8,7 @@ namespace MCSM_Service.Interfaces
     public interface IRetreatGroupService
     {
         Task<ListViewModel<RetreatGroupViewModel>> GetRetreatGroups(RetreatGroupFilterModel filter, PaginationRequestModel pagination);
-        Task DivideGroup();
+        Task HangFireDivideGroup();
         Task<RetreatGroupViewModel> AssignedMonk(CreateMonkForGroupModel model);
     }
 }

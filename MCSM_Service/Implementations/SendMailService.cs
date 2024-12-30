@@ -498,6 +498,118 @@ namespace MCSM_Service.Implementations
             }
         }
 
+        public async Task SendPaymentSuccessEmail(string email, string fullName, string retreatName, DateOnly startDate, DateOnly endDate, string paymentAmount)
+        {
+            try
+            {
+                var mail = new MimeMessage();
+                mail.From.Add(new MailboxAddress(_nameApp, _emailAddress));
+                mail.Sender = new MailboxAddress(_nameApp, _emailAddress);
+                mail.To.Add(MailboxAddress.Parse(email));
 
+                var body = new BodyBuilder();
+                mail.Subject = "Payment Successful";
+
+                body.HtmlBody = $@"
+            <!DOCTYPE html>
+            <html lang='en'>
+            <head>
+                <meta charset='UTF-8'>
+                <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                <title>Payment Successful</title>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        background-color: #f7f7f7;
+                        padding: 20px;
+                        margin: 0;
+                    }}
+                    .container {{
+                        max-width: 600px;
+                        margin: auto;
+                        background: white;
+                        padding: 20px;
+                        border: 0.5px solid #ddd;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                    }}
+                    h1 {{
+                        color: black; 
+                        text-align: center;
+                    }}
+                    p {{
+                        font-size: 16px;
+                        line-height: 1.5;
+                        color: #555;
+                    }}
+                    .info-box {{
+                        font-size: 15px;
+                        font-weight: bold;
+                        color: #333;
+                        background-color: #e9ecef;
+                        padding: 10px;
+                        border-radius: 5px;
+                        text-align: left;
+                        margin-top: 15px;
+                        list-style: none;
+                    }}
+                    .header {{
+                        text-align: center;
+                        background-color: #007BFF;
+                        color: white;
+                        padding: 10px 0;
+                        border-radius: 8px 8px 0 0;
+                    }}
+                    .logo {{
+                        width: 100px;
+                        height: 100px;
+                        border-radius: 50%;
+                        display: block;
+                        margin: 10px auto;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class='container'>
+                    <div class='header'>
+                        <h1>Payment Successful</h1>
+                    </div>
+                    <img class='logo' src='{logoSendMail}' alt='Logo'>
+                    <p>Dear {fullName},</p>
+                    <p>We are truly honored to welcome you to our Plum Village community. Your payment for the upcoming retreat has been successfully processed. Below are the details of your registration:</p>
+                    <ul class='info-box'>
+                        <li><strong>Retreat Name:</strong> {retreatName}</li>
+                        <li><strong>Start Date:</strong> {startDate:dd/MM/yyyy}</li>
+                        <li><strong>End Date:</strong> {endDate:dd/MM/yyyy}</li>
+                        <li><strong>Payment Amount:</strong> {paymentAmount}</li>
+                    </ul>
+                    <p>This retreat is an opportunity to pause, breathe, and reconnect with the beauty of life. Please take this time to nourish your mind, body, and soul in the peaceful environment of Plum Village.</p>
+                    <p>If you have any questions or need further assistance, please don’t hesitate to reach out to us.</p>
+                    <p>With warmth and gratitude,<br>The Plum Village Team</p>
+                </div>
+            </body>
+            </html>";
+
+                mail.Body = body.ToMessageBody();
+                using var smtp = new MailKit.Net.Smtp.SmtpClient();
+
+                if (_useSSL)
+                {
+                    await smtp.ConnectAsync(_host, _port, SecureSocketOptions.SslOnConnect);
+                }
+                else if (_useStartTls)
+                {
+                    await smtp.ConnectAsync(_host, _port, SecureSocketOptions.StartTls);
+                }
+
+                await smtp.AuthenticateAsync(_username, _password);
+                await smtp.SendAsync(mail);
+                await smtp.DisconnectAsync(true);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error sending retreat cancellation email", ex);
+            }
+        }
     }
 }

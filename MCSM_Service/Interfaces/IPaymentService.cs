@@ -15,6 +15,7 @@ namespace MCSM_Service.Interfaces
         Task<PaymentViewModel> PayPalPaymentCancel(PayPalCancelModel model);
         Task<RefundViewModel> RefundPayment(Guid accountId, CreateRefundModel model);
         Task UpdateRefund(string refundId);
+        Task HangFireProcessStalePayments();
 
         //----------------------------------------------------------------
         Task<ListViewModel<PaymentViewModel>> ViewCustomerPaymentHistory(Guid customerId, PaginationRequestModel pagination);
