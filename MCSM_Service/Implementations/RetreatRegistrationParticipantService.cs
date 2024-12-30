@@ -268,7 +268,7 @@ namespace MCSM_Service.Implementations
                         var email = workSheet.Cells[row, 2].Text.ToString().Trim();
                         var firstName = workSheet.Cells[row, 3].Text.ToString().Trim();
                         var lastName = workSheet.Cells[row, 4].Text.ToString().Trim();
-                        var dateOfBirth = workSheet.Cells[row, 5].Value.ToString()?.Trim();
+                        var dateOfBirth = workSheet.Cells[row, 5].Value?.ToString()?.Trim();
                         var phoneNumber = workSheet.Cells[row, 6].Text.ToString().Trim();
                         var gender = workSheet.Cells[row, 7].Text.ToString().Trim();
 
