@@ -7,5 +7,7 @@
         public Guid SenderId { get; set; }
 
         public string Content { get; set; } = null!;
+        public Guid ReceiverId { get; set; }
+        public bool IsRead { get; set; } = false;
     }
 }

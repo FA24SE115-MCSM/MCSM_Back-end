@@ -96,5 +96,6 @@ app.MapControllers();
 
 app.MapHub<ChatHub>("/chat-hub");
 app.MapHub<AccountHub>("/list-user");
+app.MapHub<ConversationHub>("/conversation");
 
 app.Run();

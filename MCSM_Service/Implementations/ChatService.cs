@@ -92,6 +92,20 @@ namespace MCSM_Service.Implementations
                 conversation = newConversation;
             }
 
+            var messageToUpdate = await _messageRepository.GetMany(m => m.ConversationId == conversation.Id &&
+                                                                    m.SenderId == receiverId &&
+                                                                    m.IsRead == false).ToListAsync();
+            if (messageToUpdate.Any())
+            {
+                foreach (var message in messageToUpdate)
+                {
+                    message.IsRead = true;
+                }
+
+                _messageRepository.UpdateRange(messageToUpdate);
+                await _unitOfWork.SaveChanges();
+            }
+
             return await GetConversation(conversation.Id);
         }
 
@@ -103,7 +117,8 @@ namespace MCSM_Service.Implementations
                 Id = Guid.NewGuid(),
                 ConversationId = model.ConversationId,
                 SenderId = model.SenderId,
-                Content = model.Content
+                Content = model.Content,
+                IsRead = model.IsRead,
             };
             _messageRepository.Add(message);
             await _unitOfWork.SaveChanges();
@@ -123,5 +138,13 @@ namespace MCSM_Service.Implementations
             await Task.CompletedTask;
         }
 
+        public async Task<List<Guid>> GetUnReadMessage(Guid accountId)
+        {
+            var unReadSenderIds = await _messageRepository.GetMany(m => !m.IsRead && m.SenderId != accountId && m.Conversation.ConversationParticipants.Any(cp => cp.AccountId == accountId))
+                .Select(m => m.SenderId)
+                .Distinct()
+                .ToListAsync();
+            return unReadSenderIds;
+        }
     }
 }

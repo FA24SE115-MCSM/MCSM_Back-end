@@ -7,11 +7,10 @@ namespace MCSM_Service.Interfaces
     {
         Task<List<AccountViewModel>> GetAccounts();
         Task IsAccountOnline(Guid accountId, bool isOnline);
-
         Task<ConversationViewModel> GetConversation(Guid conversationId);
         Task<ConversationViewModel> GetConversation(Guid senderId, Guid receiverId);
-
         Task CreateMessage(CreateMessageModel model);
         Task DeleteMessage(Guid messageId, Guid userId);
+        Task<List<Guid>> GetUnReadMessage(Guid accountId);
     }
 }
