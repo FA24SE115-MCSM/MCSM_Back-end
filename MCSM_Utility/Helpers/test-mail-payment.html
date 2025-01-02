@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border: 0.5px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: black; 
+            text-align: center;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #555;
+        }
+        .info-box {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            margin-top: 15px;
+            list-style: none;
+        }
+        a.button {
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+        a.button:hover {
+            background-color: #218838;
+        }
+        .header {
+            text-align: center;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 0;
+            border-radius: 8px 8px 0 0;
+        }
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Payment Successful</h1>
+        </div>
+        <img class="logo" src="{logoSendMail}" alt="Logo">
+        <p>Dear {userName},</p>
+        <p>We are truly honored to welcome you to our Plum Village community. Your payment for the upcoming retreat has been successfully processed, and we are excited to support you on this journey of mindfulness and self-discovery. Below are the details of your registration:</p>
+        <ul class="info-box">
+            <li><strong>Retreat Name:</strong> {retreatName}</li>
+            <li><strong>Start Date:</strong> {startDate}</li>
+            <li><strong>End Date:</strong> {endDate}</li>
+            <li><strong>Payment Amount:</strong> {paymentAmount}</li>
+        </ul>
+        <p>This retreat is an opportunity to pause, breathe, and reconnect with the beauty of life. Please take this time to nourish your mind, body, and soul in the peaceful environment of Plum Village.</p>
+        <p>If you have any questions or need further assistance, please don’t hesitate to reach out to us. Our team is here to ensure your experience is as meaningful and enriching as possible.</p>
+        <p>We are deeply grateful for your trust in Plum Village and look forward to sharing this transformative journey with you.</p>
+        <p>With warmth and gratitude,<br>The Plum Village Team</p>
+    </div>
+</body>
+</html>

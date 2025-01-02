@@ -149,8 +149,14 @@ namespace MCSM_API.Configurations
         public static void AddHangfireJobs(this IServiceProvider serviceProvider, IRecurringJobManager recurringJobManager)
         {
             recurringJobManager.AddOrUpdate(
-                "DivideGroupOfRetreat",
-                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IRetreatGroupService>().DivideGroup(),
+                "DivideGroupsOrRefundForRetreats",
+                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IRetreatGroupService>().HangFireDivideGroup(),
+                "0 17 * * *"
+            );
+
+            recurringJobManager.AddOrUpdate(
+                "ProcessStalePayments",
+                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IPaymentService>().HangFireProcessStalePayments(),
                 "0 17 * * *"
             );
 

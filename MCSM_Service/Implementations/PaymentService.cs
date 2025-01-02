@@ -27,13 +27,16 @@ namespace MCSM_Service.Implementations
         private readonly IRetreatRegistrationRepository _retreatRegistrationRepository;
         private readonly IRefundRepository _refundRepository;
         private readonly IRetreatRegistrationParticipantRepository _retreatRegistrationParticipantRepository;
-        public PaymentService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> appSettings) : base(unitOfWork, mapper)
+
+        private readonly ISendMailService _sendMailService;
+        public PaymentService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> appSettings, ISendMailService sendMailService) : base(unitOfWork, mapper)
         {
             _appSettings = appSettings.Value;
             _retreatRegistrationRepository = unitOfWork.RetreatRegistration;
             _paymentRepository = unitOfWork.Payment;
             _refundRepository = unitOfWork.Refund;
             _retreatRegistrationParticipantRepository = unitOfWork.RetreatRegistrationParticipant;
+            _sendMailService = sendMailService;
         }
 
 
@@ -159,7 +162,12 @@ namespace MCSM_Service.Implementations
         {
             var executeResult = await PayPalHelper.ExecutePaymentAsync(model.PayPalPaymentId, model.PayerId, _appSettings);
 
-            var payment = await _paymentRepository.GetMany(p => p.PaypalPaymentId == model.PayPalPaymentId).Include(p => p.RetreatReg).FirstOrDefaultAsync() ?? throw new NotFoundException("Payment not found");
+            var payment = await _paymentRepository.GetMany(p => p.PaypalPaymentId == model.PayPalPaymentId)
+                .Include(p => p.RetreatReg)
+                    .ThenInclude(r => r.Retreat)
+                .Include(p => p.Account)
+                    .ThenInclude(a => a.Profile)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Payment not found");
 
             payment.Status = status.ToString();
             payment.RetreatReg.IsPaid = true;
@@ -168,6 +176,15 @@ namespace MCSM_Service.Implementations
             var result = await _unitOfWork.SaveChanges();
             if(result > 0)
             {
+                //send successful mail to user
+                var email = payment.Account.Email;
+                var fullName = $"{payment.Account.Profile?.FirstName} {payment.Account.Profile?.LastName}";
+                var retreatName = payment.RetreatReg.Retreat.Name;
+                var startDate = payment.RetreatReg.Retreat.StartDate;
+                var endDate = payment.RetreatReg.Retreat.EndDate;
+                var totalAmount = payment.Amount.ToString();
+                await _sendMailService.SendPaymentSuccessEmail(email, fullName, retreatName, startDate, endDate, totalAmount);
+                //return view model
                 var returnPayment = _mapper.Map<PaymentViewModel>(payment);
                 return returnPayment;
             }
@@ -322,11 +339,27 @@ namespace MCSM_Service.Implementations
             await _unitOfWork.SaveChanges();
         }
 
+        /// <summary>
+        /// Cancels pending payments older than 5 days.
+        /// </summary>
+        /// <returns></returns>
+        public async Task HangFireProcessStalePayments()
+        {
+            //get UTC time and change to Vietnam time (GMT+7)
+            var now = DateTime.UtcNow.AddHours(7);
+            var listCancelPayments = await _paymentRepository.GetMany(pay => pay.Status == PaymentStatus.Pending.ToString() &&
+                                                                            pay.CreateAt.AddDays(5).Date == now.Date).ToListAsync();
+            if(listCancelPayments != null && listCancelPayments.Count > 0)
+            {
+                foreach( var payment in listCancelPayments)
+                {
+                    payment.Status = PaymentStatus.Cancel.ToString();
+                }
+                _paymentRepository.UpdateRange(listCancelPayments);
+                await _unitOfWork.SaveChanges();
+            }
 
-
-
-
-
+        }
 
         //-----------------------------------------------------
 

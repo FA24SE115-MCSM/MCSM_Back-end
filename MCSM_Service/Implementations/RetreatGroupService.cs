@@ -86,7 +86,7 @@ namespace MCSM_Service.Implementations
         }
 
 
-        public async Task DivideGroup()
+        public async Task HangFireDivideGroup()
         {
             var now = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(7));
             var retreats = await _retreatRepository.GetMany(re => re.StartDate == now.AddDays(3))
