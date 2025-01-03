@@ -79,8 +79,14 @@ namespace MCSM_Service.Implementations
 
             if (!existMonk.Role.Name.Equals(AccountRole.Monk)) throw new NotFoundException("Người được thêm vào retreat không phải là monk!");
 
+            //var monkAdded = await _retreatMonkRepository.GetMany(rm => rm.MonkId == model.MonkId && rm.RetreatId == model.RetreatId)
+            //    .FirstOrDefaultAsync() ?? throw new BadRequestException("Monk này đã được thêm vào khóa học");
             var monkAdded = await _retreatMonkRepository.GetMany(rm => rm.MonkId == model.MonkId && rm.RetreatId == model.RetreatId)
-                .FirstOrDefaultAsync() ?? throw new BadRequestException("Monk này đã được thêm vào khóa học");
+                .FirstOrDefaultAsync();
+            if(monkAdded != null)
+            {
+                throw new BadRequestException("Monk này đã được thêm vào khóa học");
+            }
 
             var retreatStartDate = _retreatRepository.GetById(model.RetreatId).StartDate;
             var retreatEndDate = _retreatRepository.GetById(model.RetreatId).EndDate;
