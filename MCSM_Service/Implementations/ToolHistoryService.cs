@@ -12,7 +12,9 @@ using MCSM_Data.Repositories.Interfaces;
 using MCSM_Service.Interfaces;
 using MCSM_Utility.Enums;
 using MCSM_Utility.Exceptions;
+using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.EntityFrameworkCore;
+using System.Net.WebSockets;
 
 namespace MCSM_Service.Implementations
 {
@@ -82,21 +84,46 @@ namespace MCSM_Service.Implementations
         {
             //await CheckTool(model.ToolId);
             var retreat = await CheckRetreat(model.RetreatId, model.BorrowerId);
+            // Lấy danh sách ToolId từ retreat.RetreatTools
+            var toolIds = retreat.RetreatTools.Select(rt => rt.ToolId).ToList();
 
-            foreach(var tool in retreat.RetreatTools)
+            var listTools = await _toolRepository.GetMany(src => toolIds.Contains(src.Id)).ToListAsync();
+            var listError = new List<string>();
+            var listAdd = new List<ToolHistory>();
+            foreach (var tool in listTools)
             {
+                if (tool.Status == ToolStatus.InActive.ToString())
+                {
+                    listError.Add($"Tool {tool.Name} is currently InActive.");
+                    continue;
+                }
+
+                // Check if sufficient quantity is available
+                if (tool.TotalTool < retreat.Capacity)
+                {
+                    listError.Add($"Tool {tool.Name} only has {tool.TotalTool} left, insufficient for {retreat.Capacity} required.");
+                    continue;
+                }
+
                 var toolHistoryId = Guid.NewGuid();
                 var toolHistory = new ToolHistory
                 {
                     Id = toolHistoryId,
                     CreatedBy = model.BorrowerId,
                     RetreatId = model.RetreatId,
-                    ToolId = tool.ToolId,
+                    ToolId = tool.Id,
                     NumOfTool = retreat.Capacity
                 };
-                _toolHistoryRepository.Add(toolHistory);
+                listAdd.Add(toolHistory);
+                tool.TotalTool -= retreat.Capacity;
+                
             }
-            
+            if(listError != null && listError.Count > 0)
+            {
+                throw new ReadExcelException(listError);
+            }
+            _toolRepository.UpdateRange(listTools);
+            _toolHistoryRepository.AddRange(listAdd);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetToolHistoryByRetreat(model.RetreatId) : null!;
         }
