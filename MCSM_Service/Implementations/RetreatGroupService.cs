@@ -154,11 +154,10 @@ namespace MCSM_Service.Implementations
                         await _sendMailService.SendRetreatCancellationEmail(reg.CreateByNavigation.Email, fullName, totalCostFormatted);
                     }
                 }
-
-                retreat.Status = RetreatStatus.Close.ToString();
-                _retreatRepository.Update(retreat);
-                await _unitOfWork.SaveChanges();
             }
+            retreat.Status = RetreatStatus.InActive.ToString();
+            _retreatRepository.Update(retreat);
+            await _unitOfWork.SaveChanges();
         }
 
         private async Task CreateDharmaNamePrefix(Retreat retreat)

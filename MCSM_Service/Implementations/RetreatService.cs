@@ -162,12 +162,12 @@ namespace MCSM_Service.Implementations
             if (!string.IsNullOrEmpty(model.Status))
             {
                 existRetreat.Status = GetRetreatStatus(model.Status);
-                if (existRetreat.Status == RetreatStatus.Active.ToString() && existRetreat.StartDate != now)
+                if (existRetreat.Status == RetreatStatus.Active.ToString() && existRetreat.StartDate < now)
                 {
                     throw new ConflictException("Cannot set the retreat status to 'Active' because the start date is not up to date.");
                 }
 
-                if (existRetreat.Status == RetreatStatus.InActive.ToString() && existRetreat.EndDate != now)
+                if (existRetreat.Status == RetreatStatus.InActive.ToString() && existRetreat.EndDate < now)
                 {
                     throw new ConflictException("Cannot set the retreat status to 'InActive' because the end date is not up to date.");
                 }
