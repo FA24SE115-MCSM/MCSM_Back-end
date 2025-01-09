@@ -15,7 +15,7 @@ namespace MCSM_Data.Models.Requests.Put
 
         public DateOnly? StartDate { get; set; }
 
-        //public string? Status { get; set; }
+        public string? Status { get; set; }
         public List<CreateRetreatLearningOutcomeModel>? LearningOutcome { get; set; } 
         public List<IFormFile>? Images { get; set; }
         public List<IFormFile>? Documents { get; set; }

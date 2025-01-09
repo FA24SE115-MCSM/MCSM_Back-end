@@ -128,13 +128,9 @@ namespace MCSM_Service.Implementations
 
         public async Task<RetreatViewModel> UpdateRetreat(Guid id, UpdateRetreatModel model)
         {
+            var now = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(7));
             var existRetreat = await _retreatRepository.GetMany(r => r.Id == id)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Retreat not found");
-
-            if (existRetreat.Status != RetreatStatus.Open.ToString())
-            {
-                throw new BadRequestException("This retreat is currently not open. Please check back later.");
-            }
 
             existRetreat.Name = model.Name ?? existRetreat.Name;
             existRetreat.Cost = model.Cost ?? existRetreat.Cost;
@@ -163,10 +159,20 @@ namespace MCSM_Service.Implementations
                 existRetreat.EndDate = GetEndDate(existRetreat.StartDate, existRetreat.Duration);
             }
 
-            //if (!string.IsNullOrEmpty(model.Status))
-            //{
-            //    existRetreat.Status = GetRetreatStatus(model.Status);
-            //}
+            if (!string.IsNullOrEmpty(model.Status))
+            {
+                existRetreat.Status = GetRetreatStatus(model.Status);
+                if (existRetreat.Status == RetreatStatus.Active.ToString() && existRetreat.StartDate != now)
+                {
+                    throw new ConflictException("Cannot set the retreat status to 'Active' because the start date is not up to date.");
+                }
+
+                if (existRetreat.Status == RetreatStatus.InActive.ToString() && existRetreat.EndDate != now)
+                {
+                    throw new ConflictException("Cannot set the retreat status to 'InActive' because the end date is not up to date.");
+                }
+            }
+
 
             if (model.Images != null && model.Images.Count > 0)
             {
@@ -243,9 +249,9 @@ namespace MCSM_Service.Implementations
 
         private string GetRetreatStatus(string status)
         {
-            if (status != RetreatStatus.Active.ToString() && status != RetreatStatus.InActive.ToString())
+            if (status != RetreatStatus.Active.ToString() && status != RetreatStatus.InActive.ToString() && status != RetreatStatus.Open.ToString() && status != RetreatStatus.Close.ToString())
             {
-                throw new BadRequestException("Invalid status. Please provide either 'Active' or 'InActive'.");
+                throw new BadRequestException("Invalid status. Please provide either 'Active', 'InActive', 'Open', or 'Close'.");
             }
 
             return status;
