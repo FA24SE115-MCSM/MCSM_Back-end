@@ -9,7 +9,7 @@
 
         //open
         //close
-        //dang diễn ra
+        //đang diễn ra
         //đã kết thúc
     }
 }
