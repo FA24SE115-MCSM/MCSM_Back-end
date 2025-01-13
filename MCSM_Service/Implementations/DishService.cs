@@ -157,7 +157,7 @@ namespace MCSM_Service.Implementations
 
         private async Task<bool> CheckDuplicatedName(string dishName)
         {
-            var dish = await _dishRepository.GetMany(d => d.Name.ToLowerInvariant() == dishName.ToLowerInvariant()).AsNoTracking().AnyAsync();
+            var dish = await _dishRepository.GetMany(d => d.Name.ToLower() == dishName.ToLower()).AsNoTracking().AnyAsync();
             return dish;
         }
     }
