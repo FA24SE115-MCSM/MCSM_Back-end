@@ -8,7 +8,7 @@ namespace MCSM_Service.Implementations
 {
     public class SendMailService : ISendMailService
     {
-        private readonly string logoSendMail = "https://firebasestorage.googleapis.com/v0/b/mcsm-fa24se115.appspot.com/o/images%2Fe0142447-aabc-48d7-82f9-0b0fdb043489?alt=media";
+        private readonly string logoSendMail = "https://firebasestorage.googleapis.com/v0/b/mcsm-fa24se115.appspot.com/o/images%2Flogo.png?alt=media";
         private readonly string _sendUrl;
         private readonly string _nameApp;
         private readonly string _emailAddress;
@@ -104,6 +104,13 @@ namespace MCSM_Service.Implementations
                                     display: block; 
                                     margin: 10px auto; 
                                 }}
+                                .link {{
+                                    word-wrap: break-word;
+                                    font-size: 14px;
+                                    color: #007BFF;
+                                    text-align: left;
+                                    margin-top: 10px;
+                                }}
                             </style>
                         </head>
                         <body>
@@ -115,6 +122,11 @@ namespace MCSM_Service.Implementations
                                 <p>Hi there!</p>
                                 <p>Please verify your email address by clicking the button below:</p>
                                 <a href='{verificationLink}'>Verify Email</a>
+                                <p>Or copy and paste this link into your browser:</p>
+                                <hr/>
+                                <p class='link'>{verificationLink}</p>
+                                <hr/>
+
                                 <p>If you did not create an account, you can safely ignore this email.</p>
                                 <p>Thank you!</p>
                                 <p>Best regards,<br>{_nameApp}</p>
