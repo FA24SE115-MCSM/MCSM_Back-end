@@ -102,6 +102,23 @@ namespace MCSM_Service.Implementations
 
         public async Task<FeedbackViewModel> CreateFeedback(Guid accountId, CreateFeedbackModel model)
         {
+            var existFeedback = await _feedbackRepository.GetMany(f => f.CreatedBy == accountId && f.RetreatId == model.RetreatId).FirstOrDefaultAsync();
+            if (existFeedback != null)
+            {
+                existFeedback.RetreatRating = model.RetreatRating;
+                existFeedback.MonkRating = model.MonkRating;
+                existFeedback.RoomRating = model.RoomRating;
+                existFeedback.FoodRating = model.FoodRating;
+                existFeedback.YourExperience = model.YourExperience;
+                existFeedback.Suggestion = model.Suggestion;
+                existFeedback.UpdateAt = DateTime.UtcNow;
+
+                _feedbackRepository.Update(existFeedback);
+                var result = await _unitOfWork.SaveChanges();
+                return result > 0 ? await GetFeedback(existFeedback.Id) : null!;
+            }
+            else 
+            { 
             var feedbackId = Guid.NewGuid();
             var feedback = new Feedback
             {
@@ -117,16 +134,17 @@ namespace MCSM_Service.Implementations
                 CreateAt = DateTime.UtcNow,
                 UpdateAt = DateTime.UtcNow
             };
+
             //var checkDuplicate = await _feedbackRepository.GetMany(f => f.CreatedBy == accountId && f.RetreatId == model.RetreatId).FirstOrDefaultAsync();
             //if (checkDuplicate != null)
             //{
             //    throw new BadRequestException("You have already submitted a feedback for this retreat");
             //}
-            _feedbackRepository.Add(feedback);
+                _feedbackRepository.Add(feedback);
+                var result = await _unitOfWork.SaveChanges();
+                return result > 0 ? await GetFeedback(feedbackId) : null!;
+            }
 
-            var result = await _unitOfWork.SaveChanges();
-
-            return result > 0 ? await GetFeedback(feedbackId) : null!;
         }
 
         public async Task<FeedbackViewModel> UpdateFeedback(Guid feedbackId, UpdateFeedbackModel model)
